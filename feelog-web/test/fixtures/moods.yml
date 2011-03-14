@@ -1,0 +1,19 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  mood: 1
+  user_id: 1
+  desc: MyString
+  lat: 1.5
+  lon: 1.5
+  report_time: 2011-02-19 20:08:22
+  url: MyString
+
+two:
+  mood: 1
+  user_id: 1
+  desc: MyString
+  lat: 1.5
+  lon: 1.5
+  report_time: 2011-02-19 20:08:22
+  url: MyString

@@ -1,0 +1,20 @@
+<h1>Listing moods for user <%= @user.email %> </h1>
+<table>
+  <tr>
+    <th>Mood</th>
+    <th>Desc</th>
+    <th>Lat</th>
+    <th>Lon</th>
+    <th>Report time</th>
+    <th>Url</th>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+</table>
+<div id="moods">
+  <%= render @moods %>
+</div>
+<br />
+
+<%= link_to 'Home', new_user_mood_path %>

@@ -1,0 +1,122 @@
+require 'google_visualr'
+
+class MoodsController < ApplicationController
+  before_filter :authorize
+  # GET /moods
+  # GET /moods.xml
+  def index
+    user_id = params[:user_id]
+    @moods = User.find(user_id).moods.order("report_time DESC")
+    @user = User.find(params[:user_id])
+
+    respond_to do |format|
+      format.html # index.html.erb
+      format.js # index.js.erb
+      format.json  { render :json => @moods }
+    end
+  end
+
+  # GET /moods/1
+  # GET /moods/1.xml
+  def show
+    @mood = Mood.find(params[:id])
+    @user = User.find(params[:user_id])
+
+    respond_to do |format|
+      format.html # show.html.erb
+      format.xml  { render :xml => @mood }
+    end
+  end
+
+  # GET /moods/new
+  # GET /moods/new.xml
+  def new
+    @mood = Mood.new
+    @user = User.find(params[:user_id])
+    respond_to do |format|
+      format.html # new.html.erb
+      format.xml  { render :xml => @mood }
+    end
+  end
+
+  # GET /moods/1/edit
+  def edit
+    @mood = Mood.find(params[:id])
+    @user = User.find(params[:user_id])
+  end
+
+  # POST /moods
+  # POST /moods.xml
+  def create
+    @mood = Mood.new(params[:mood])
+    @user = User.find(params[:user_id])
+    @mood.user_id = params[:user_id]
+    @mood.report_time = Time.now
+      
+    respond_to do |format|
+      if @mood.save
+        format.html { redirect_to(user_moods_url, :notice => 'Mood was successfully created.') }
+        format.xml  { render :xml => @mood, :status => :created, :location => @mood }
+        format.js # index.js.erb
+      else
+        format.html { render :action => "new" }
+        format.xml  { render :xml => @mood.errors, :status => :unprocessable_entity }
+        format.js   { render 'fail_create.js.erb' }
+      end
+    end
+  end
+
+  # PUT /moods/1
+  # PUT /moods/1.xml
+  def update
+    @mood = Mood.find(params[:id])
+    @user = User.find(params[:user_id])
+
+    respond_to do |format|
+      if @mood.update_attributes(params[:mood])
+        format.html { redirect_to(user_moods_url, :notice => 'Mood was successfully updated.') }
+        format.xml  { head :ok }
+      else
+        format.html { render :action => "edit" }
+        format.xml  { render :xml => @mood.errors, :status => :unprocessable_entity }
+      end
+    end
+  end
+
+  # DELETE /moods/1
+  # DELETE /moods/1.xml
+  def destroy
+    @mood = Mood.find(params[:id])
+    @mood.destroy
+
+    respond_to do |format|
+      format.html { redirect_to(user_moods_url) }
+      format.xml  { head :ok }
+    end
+  end
+  
+  def graph
+    user_id = params[:user_id]
+    @user = User.find(user_id)
+    @moods = @user.moods.order("report_time ASC")
+
+    # Create DataTable
+    data = GoogleVisualr::DataTable::DataTable.new
+  
+    # Add Column Headers
+    data.add_column('string', 'DateTime' )
+    data.add_column('number', 'Mood')
+
+    i = 0;
+    data.add_rows(@moods.length)
+    @moods.each{|mood|
+      data.set_value(i, 0, mood.report_time.to_s())
+      data.set_value(i, 1, mood.mood)
+      i=i+1
+    }
+  
+    # Initialize a visualization (area chart) and pass options and the DataTable
+    @chart = GoogleVisualr::Visualizations::AreaChart.new({ :width => 400, :height => 240 }, data )
+
+  end
+end

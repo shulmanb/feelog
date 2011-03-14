@@ -1,0 +1,49 @@
+<% content_for :head do %>
+    <script src='http://www.google.com/jsapi'></script>
+    <%= javascript_include_tag 'moods-graph' %>
+
+    <script type="text/javascript">
+        function renderMoods(){
+          var moods_arr = [];
+          $.get('<%= user_moods_path(@user)+".json" %>',function(data){
+            var i = 0;
+            if(data.length == 0){
+                 google.setOnLoadCallback(drawChart(moods_arr));
+            }
+            $.each(data, function(key, value) {
+                var mood = {"id":i,"val":value.mood.mood,"desc":value.mood.desc,"time":value.mood.report_time};
+                moods_arr.push(mood);
+                i++;
+                $("#moods").append(
+                  '<div class="stream-item" id="mood'+i+'>'+
+                    '<div class="stream-item-content mood">'+
+                      '<div class="mood-icon">'+getMoodImageLink(value.mood.mood)+'</div>'+
+                        '<div class="mood-content">'+
+                           '<div class="mood-row"><div class="mood-text">'+value.mood.desc+'</div></div>'+
+                           '<div class="mood-row"><div class="mood-time">'+value.mood.report_time+'</div></div>'+
+                        '</div>'+
+                      '<div>'+
+                   '</div>'
+                 );
+                 google.setOnLoadCallback(drawChart(moods_arr));
+            });
+          });
+        }
+
+        $(document).ready(function() {
+            prepareMoodIcons();
+            renderMoods();
+        });
+
+    </script>
+<% end %>
+<div class="home-header">
+  <%= render 'form' %>
+</div>
+
+<div id="moods-graph" class="moods-graph" style='width: 548px; height: 300px;'>
+</div>
+
+<div id="moods" class="stream">
+</div>
+

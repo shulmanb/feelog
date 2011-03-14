@@ -1,0 +1,50 @@
+<div class="main-content" style="min-height: 312px; ">
+  <div class="home-header">
+    <div class="main-mood-box">
+      <div class="mood-box condensed">
+        <div class="mood-box-title">
+          <h2>How do you feel?</h2>
+        </div>
+        <div class="moods-icons-choice">
+            <div id="mood1" class="mood-icon-choice">
+              <img src='/images/mood-angry.jpg'></img>
+            </div>
+            <div id="mood2" class="mood-icon-choice">
+              <img src='/images/mood-very_sad.jpg'></img>
+            </div>
+            <div id="mood3"class="mood-icon-choice">
+              <img src='/images/mood-sad.jpg'></img>
+            </div>
+            <div id="mood4" class="mood-icon-choice">
+              <img src='/images/mood-ok.jpg'></img>
+            </div>
+            <div id="mood5" class="mood-icon-choice">
+              <img src='/images/mood-twink.jpg'></img>
+            </div>
+            <div id="mood6" class="mood-icon-choice">
+              <img src='/images/mood-happy.jpg'></img>
+            </div>
+            <div id="mood7" class="mood-icon-choice">
+              <img src='/images/mood-very_happy.jpg'></img>
+            </div>
+        </div>
+
+         <%= form_for([ @user, @mood ],:remote => true) do |f| %>
+          <div class="field">
+            <input id="mood_mood" name="mood[mood]" type="hidden"></input>
+          </div>
+          <div class="mood-text-label">
+            <%= f.label :Why %>
+          </div>
+          <div class="text-area">
+            <%= f.text_area :desc,"rows" => 5, "cols" => 50 %>
+          </div>
+          <div class="actions">
+            <%= f.submit %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
+

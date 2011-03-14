@@ -1,0 +1,3 @@
+$('#moods').prepend("<%= escape_javascript(render(@mood)) %>");
+$('#new_mood')[0].reset();
+$(".mood-icon-choice-selected").toggleClass("mood-icon-choice-selected");

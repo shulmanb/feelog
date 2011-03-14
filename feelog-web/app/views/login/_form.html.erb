@@ -1,0 +1,11 @@
+<%= form_tag(login_path) do %>
+	<p>
+	<%= label_tag(:user, "Username:") %>
+	<%= text_field_tag(:user) %>
+	</p>
+	<p>
+	<%= label_tag(:passwd, "Password:") %>
+	<%= password_field_tag(:passwd) %>
+	</p>
+ 	<%= submit_tag("Login") %>
+ <% end %>
