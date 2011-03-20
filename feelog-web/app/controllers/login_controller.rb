@@ -18,6 +18,14 @@ class LoginController < ApplicationController
     end
   end
 
+  def logout
+    session[:user_id] = nil
+    respond_to do |format|
+      format.html { redirect_to(login_path) }
+      format.xml  { head :ok }
+    end
+  end
+  
   def create
     auth = request.env['rack.auth']
     unless @auth = Authorization.find_from_hash(auth)
