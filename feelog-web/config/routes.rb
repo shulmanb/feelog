@@ -3,6 +3,7 @@ Mooderator::Application.routes.draw do
   resources :users do
     resources :moods
   end
+  match '/users/:user_id/moods/limit/:limit' => "moods#index", :via=>:get
   match '/login' => "login#index", :via=>:get
   match '/logout' => "login#logout", :via=>:get
   match '/login' => "login#login", :via=>:post

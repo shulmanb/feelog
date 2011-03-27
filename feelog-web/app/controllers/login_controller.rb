@@ -2,7 +2,6 @@ class LoginController < ApplicationController
   layout "login"
   
   def index
-    @login = Login.new
     respond_to do |format|
           format.html # index.html.erb
     end

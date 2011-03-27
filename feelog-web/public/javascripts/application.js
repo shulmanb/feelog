@@ -1,49 +1,75 @@
-    function toggle(moodid){
-	$(".mood-icon-choice-selected").toggleClass("mood-icon-choice-selected");
-        $("#mood_mood").val(moodid);
-        $('#'+'mood'+moodid).toggleClass("mood-icon-choice-selected");
-    }
+var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    function getMoodImageLink(moodid){
-      switch(moodid){
+function submitMood(){
+    var val = $("#mood_val").val();
+    var how = $("#how").val();
+    var fb = $("#fbshare").is(':checked');
+    var tw = $("#twshare").is(':checked');
+    if (val != ''){
+       $('#new_mood').submit();
+       $(".smiley-selected").toggleClass("smiley-selected");
+       $("#mood_val").val('');
+       //$("#how").val("why?");
+    }
+}
+
+
+
+function toggle(moodid){
+    $(".smiley-selected").toggleClass("smiley-selected");
+    $("#mood_val").val(moodid);
+    $('#'+'s'+moodid).toggleClass("smiley-selected");
+    $("#how").val("");
+    $("#how").focus();
+}
+
+function getMoodImageLink(moodid){
+    switch(moodid){
         case 1:
-          return '<img src="/images/mood-angry.jpg">';
+            return '<img src="/images/mood-angry.png">';
         case 2:
-          return '<img src="/images/mood-very_sad.jpg">';
+            return '<img src="/images/mood-very_sad.png">';
         case 3:
-          return '<img src="/images/mood-sad.jpg">';
+            return '<img src="/images/mood-sad.png">';
         case 4:
-          return '<img src="/images/mood-ok.jpg">';
+            return '<img src="/images/mood-ok.png">';
         case 5:
-          return '<img src="/images/mood-twink.jpg">';
+            return '<img src="/images/mood-twink.png">';
         case 6:
-          return '<img src="/images/mood-happy.jpg">';
+            return '<img src="/images/mood-happy.png">';
         case 7:
-          return '<img src="/images/mood-very_happy.jpg">';
-      }
-
+            return '<img src="/images/mood-very_happy.png">';
     }
 
-    function prepareMoodIcons(){
-      $("#mood1").click(function() {
+}
+
+function prepareMoodIcons(){
+    $("#s1").click(function() {
         toggle(1);
-      });
-      $("#mood2").click(function() {
+    });
+    $("#s2").click(function() {
         toggle(2);
-      });
-      $("#mood3").click(function() {
+    });
+    $("#s3").click(function() {
         toggle(3);
-      });
-      $("#mood4").click(function() {
+    });
+    $("#s4").click(function() {
         toggle(4);
-      });
-      $("#mood5").click(function() {
+    });
+    $("#s5").click(function() {
         toggle(5);
-      });
-      $("#mood6").click(function() {
+    });
+    $("#s6").click(function() {
         toggle(6);
-      });
-      $("#mood7").click(function() {
+    });
+    $("#s7").click(function() {
         toggle(7);
-      });
-    }
+    });
+    $("#feel-submit").click(function(){
+        submitMood();
+    });
+//    $('#new_mood').submit(function() {
+//      alert('Mood Submitted to server');
+//      return false;
+//    });
+}

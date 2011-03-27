@@ -1,49 +1,100 @@
 <% content_for :head do %>
-    <script src='http://www.google.com/jsapi'></script>
-    <%= javascript_include_tag 'moods-graph' %>
+    <!--script src='http://www.google.com/jsapi'></script-->
+    <%= javascript_include_tag 'graph' %>
+    <%= javascript_include_tag 'highcharts' %>
 
     <script type="text/javascript">
+        var chart;
         function renderMoods(){
           var moods_arr = [];
-          $.get('<%= user_moods_path(@user)+".json" %>',function(data){
+          $.get('<%= user_moods_path(@user)+"/limit/10.json" %>',function(data){
             var i = 0;
             if(data.length == 0){
-                 google.setOnLoadCallback(drawChart(moods_arr));
+                 //google.setOnLoadCallback(drawChart(moods_arr));
             }
             $.each(data, function(key, value) {
-                var mood = {"id":i,"val":value.mood.mood,"desc":value.mood.desc,"time":value.mood.report_time};
-                moods_arr.push(mood);
-                i++;
-                $("#moods").append(
-                  '<div class="stream-item" id="mood'+i+'>'+
-                    '<div class="stream-item-content mood">'+
-                      '<div class="mood-icon">'+getMoodImageLink(value.mood.mood)+'</div>'+
-                        '<div class="mood-content">'+
-                           '<div class="mood-row"><div class="mood-text">'+value.mood.desc+'</div></div>'+
-                           '<div class="mood-row"><div class="mood-time">'+value.mood.report_time+'</div></div>'+
-                        '</div>'+
-                      '<div>'+
-                   '</div>'
-                 );
-                 google.setOnLoadCallback(drawChart(moods_arr));
+                if(i < 10){
+                  var ts = new Date(value.mood.report_time);
+                  var mood = {"id":i,"val":value.mood.mood,"desc":value.mood.desc,"time":month[ts.getMonth()]+" "+ts.getDate(),"date":value.mood.report_time};
+                  moods_arr.push(mood);
+                  i++;
+                }else{
+                  return false;
+                }
             });
+            drawChart(moods_arr.reverse());
           });
         }
 
         $(document).ready(function() {
             prepareMoodIcons();
             renderMoods();
-        });
-
+            // Setup the ajax indicator
+              $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
+              // Ajax activity indicator bound to ajax start/stop document events
+              $(document).ajaxStart(function(){
+                $('#ajax-busy').show();
+              }).ajaxStop(function(){
+                $('#ajax-busy').hide();
+              });
+      });
     </script>
 <% end %>
-<div class="home-header">
-  <%= render 'form' %>
-</div>
+        <div class="content">
+          <div class="left-side">
+            <div class="feelog-input">
+                <%= render 'report' %>
+            </div>
+            <div id="moods-graph" class="moods-graph" style='width: 375px; height: 208px;'>
+            </div>
+            <div>
+              <div class="hf">did you know?</div>
+              <div class="dyk">
+                <ul>
+                  <li>You are usually happy on Wednesdays<br/>
+                    <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+                  <li>When you are sad, Dana is usually happy<br/>
+                    <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+                  <li>You are usually cheerful in Tel Aviv<br/>
+                    <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+                  <li>Work affects your mood negatively 65% of the time<br/>
+                    <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+                  <li>You are likely to be edgy tomorrow<br/>
+                    <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="right-side">
+            <div class="mys">
+              <div class="fl2"><img src="/images/oded-pic.png"/></div>
+              <div><b>Oded Israeli</b> is <b>happy</b>: great day at work with Boris</div>
+            </div>
+            <div class="sl">
+              <div class="slt">
+                  Treat yourself to dinner and movie at Cinema City. Only $29.95! <a href="">Click here</a>
+              </div>
+            </div>
 
-<div id="moods-graph" class="moods-graph" style='width: 548px; height: 300px;'>
-</div>
+            <div class="act">warm up with <span class="happy">Happy</span> friends</div>
+            <div><img src="/images/ppl1.png"/></div>
 
-<div id="moods" class="stream">
-</div>
+            <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
+            <div><img src="/images/ppl2.png"/></div>
+
+            <div class="act">my <span class="happy">Happy</span> Tags</div>
+            <div class="happy">
+              <span style="font-size:19px">Jonathan</span>
+              <span style="font-size:12px">Hot</span>
+              <span style="font-size:19px">Meeting</span>
+              <span style="font-size:18px">Friends</span>
+              <span style="font-size:15px">Delicious</span>
+              <span style="font-size:13px">Love</span>
+              <span style="font-size:21px">Funny</span>
+              <span style="font-size:16px">Great</span>
+
+            </div>
+          </div>
+        </div>
+
 

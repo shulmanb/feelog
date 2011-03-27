@@ -1,20 +1,32 @@
-<h1>Listing moods for user <%= @user.email %> </h1>
-<table>
-  <tr>
-    <th>Mood</th>
-    <th>Desc</th>
-    <th>Lat</th>
-    <th>Lon</th>
-    <th>Report time</th>
-    <th>Url</th>
-    <th></th>
-    <th></th>
-    <th></th>
-  </tr>
-</table>
-<div id="moods">
-  <%= render @moods %>
-</div>
-<br />
+<% content_for :head do %>
+    <script type="text/javascript">
+        function renderMoods(){
+          $.get('<%= user_moods_path(@user)+".json" %>',function(data){
+            var i = 0;
+            $.each(data, function(key, value) {
+                $("#moods").append(
+                  '<div class="stream-item" id="mood'+i+'>'+
+                    '<div class="stream-item-content mood">'+
+                      '<div class="mood-icon">'+getMoodImageLink(value.mood.mood)+'</div>'+
+                        '<div class="mood-content">'+
+                           '<div class="mood-row"><div class="mood-text">'+value.mood.desc+'</div></div>'+
+                           '<div class="mood-row"><div class="mood-time">'+month[new Date(value.mood.report_time).getMonth()]+" "+new Date(value.mood.report_time).getDate()+" "+new Date(value.mood.report_time).getFullYear()+'</div></div>'+
+                        '</div>'+
+                      '<div>'+
+                   '</div>'
+                 );
+                 i++;
+            });
+          });
+        }
 
-<%= link_to 'Home', new_user_mood_path %>
+        $(document).ready(function() {
+            renderMoods();
+          }
+        );
+    </script>
+<% end %>
+<div class="content">
+    <div id="moods" class="stream"></div>
+</div>
+  

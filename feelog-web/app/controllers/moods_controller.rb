@@ -6,7 +6,11 @@ class MoodsController < ApplicationController
   # GET /moods.xml
   def index
     user_id = params[:user_id]
-    @moods = User.find(user_id).moods.order("report_time DESC")
+    if(params[:limit] == nil)
+        @moods = User.find(user_id).moods.order("report_time DESC")
+    else
+        @moods = User.find(user_id).moods.order("report_time DESC").limit(params[:limit].to_i)
+    end
     @user = User.find(params[:user_id])
 
     respond_to do |format|
@@ -48,16 +52,20 @@ class MoodsController < ApplicationController
   # POST /moods
   # POST /moods.xml
   def create
+    #client scale 1-very happy 7-angry, lets revers it, later on we will add mor complex
     @mood = Mood.new(params[:mood])
+    @mood.mood = (8-@mood.mood)
     @user = User.find(params[:user_id])
     @mood.user_id = params[:user_id]
     @mood.report_time = Time.now
-      
+    fbshare = params[:fbshare]
+    twshare = params[:twshare]
+    @mood_desc = @mood.desc
     respond_to do |format|
       if @mood.save
         format.html { redirect_to(user_moods_url, :notice => 'Mood was successfully created.') }
         format.xml  { render :xml => @mood, :status => :created, :location => @mood }
-        format.js # index.js.erb
+        format.js # create.js.erb
       else
         format.html { render :action => "new" }
         format.xml  { render :xml => @mood.errors, :status => :unprocessable_entity }

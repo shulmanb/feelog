@@ -39,7 +39,7 @@ module Mooderator
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
 
-    config.autoload_paths << File.join(Rails.root, "app", "classes")
-    config.eager_load_paths << File.join(Rails.root, "app", "classes")
+    #config.autoload_paths << File.join(Rails.root, "app", "classes")
+    #config.eager_load_paths << File.join(Rails.root, "app", "classes")
   end
 end
