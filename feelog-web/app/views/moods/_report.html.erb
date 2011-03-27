@@ -1,0 +1,36 @@
+<div class="hf">how do you feel?</div>
+<div class="smiles">
+  <div id="s1" class="smiley">
+      <img src="/images/mood-very_happy.png" />
+  </div>
+  <div id="s2" class="smiley">
+      <img src="/images/mood-twink.png" />
+  </div>
+  <div id="s3" class="smiley">
+      <img src="/images/mood-happy.png" />
+  </div>
+  <div id="s4" class="smiley">
+      <img src="/images/mood-ok.png" />
+  </div>
+  <div id="s5" class="smiley">
+      <img src="/images/mood-sad.png" />
+  </div>
+  <div id="s6" class="smiley">
+      <img src="/images/mood-very_sad.png" />
+  </div>
+  <div id="s7" class="smiley">
+      <img src="/images/mood-angry.png" />
+  </div>
+</div>
+<%= form_for([ @user, @mood ],:remote => true) do |f| %>
+  <div class="ta">
+    <input type="text" class="i1" name="mood[desc]" id="how" value="why?" /><br/>
+    <input id="mood_val" name="mood[mood]" type="hidden"/>
+  </div>
+  <div class="actions">
+    <div class="fl"><input id="fbshare" name="fbshare]" type="checkbox" checked/> Facebook</div>
+    <div class="fl"><input id="twshare" name="twshare]" type="checkbox" checked/> Twitter</div>
+    <div class="fl"><input id="imshare" type="checkbox" checked/> IM</div>
+    <div id="feel-submit" class="fl"><img src="/images/btnLog.png"/></div>
+  </div>
+<%end%>
