@@ -2,13 +2,14 @@ var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 
 function submitMood(){
     var val = $("#mood_val").val();
-    var how = $("#how").val();
-    var fb = $("#fbshare").is(':checked');
-    var tw = $("#twshare").is(':checked');
+//    var how = $("#how").val();
+//    var fb = $("#fbshare").is(':checked');
+//    var tw = $("#twshare").is(':checked');
     if (val != ''){
        $('#new_mood').submit();
-       $(".smiley-selected").toggleClass("smiley-selected");
-       $("#mood_val").val('');
+//       the clearingpart willbedoneby response js
+//       $(".smiley-selected").toggleClass("smiley-selected");
+//      $("#mood_val").val('');
        //$("#how").val("why?");
     }
 }
@@ -42,6 +43,27 @@ function getMoodImageLink(moodid){
     }
 
 }
+
+function getMoodStr(mood){
+    switch(mood){
+        case 1:
+            return 'angry';
+        case 2:
+            return 'very sad';
+        case 3:
+            return 'sad';
+        case 4:
+            return 'ok';
+        case 5:
+            return 'twinky';
+        case 6:
+            return 'happy';
+        case 7:
+            return 'very happy';
+    }
+
+}
+
 
 function prepareMoodIcons(){
     $("#s1").click(function() {

@@ -1,10 +1,13 @@
 $("#how").val("why?");
 $("#mood_val").val('');
 $(".smiley-selected").toggleClass("smiley-selected");
-var series = chart.series[0];
-var shift = series.data.length > 9;
 var ts = new Date("<%=@mood.report_time%>");
 var mood = {"val":<%=@mood.mood%>,"desc":"<%=@mood.desc%>","time":month[ts.getMonth()]+" "+ts.getDate(),"date":ts.toString()};
+var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
+var status = name +' is '+moodStr+' : '+mood.desc;
+$("#usr-status").html(status);
+var series = chart.series[0];
+var shift = series.data.length > 9;
 var p = {"name":mood.desc,"y":mood.val};
 series.addPoint(p,false,shift);
 var categories = chart.xAxis[0].categories;
@@ -14,4 +17,3 @@ if(shift){
 }
 chart.xAxis[0].setCategories(categories, false);
 chart.redraw();
-

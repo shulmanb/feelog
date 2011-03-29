@@ -1,5 +1,3 @@
-require 'google_visualr'
-
 class MoodsController < ApplicationController
   before_filter :authorize
   # GET /moods
@@ -15,7 +13,6 @@ class MoodsController < ApplicationController
 
     respond_to do |format|
       format.html # index.html.erb
-      format.js # index.js.erb
       format.json  { render :json => @moods }
     end
   end
@@ -37,6 +34,7 @@ class MoodsController < ApplicationController
   def new
     @mood = Mood.new
     @user = User.find(params[:user_id])
+    @picture = session[:picture]
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @mood }
@@ -101,30 +99,5 @@ class MoodsController < ApplicationController
       format.html { redirect_to(user_moods_url) }
       format.xml  { head :ok }
     end
-  end
-  
-  def graph
-    user_id = params[:user_id]
-    @user = User.find(user_id)
-    @moods = @user.moods.order("report_time ASC")
-
-    # Create DataTable
-    data = GoogleVisualr::DataTable::DataTable.new
-  
-    # Add Column Headers
-    data.add_column('string', 'DateTime' )
-    data.add_column('number', 'Mood')
-
-    i = 0;
-    data.add_rows(@moods.length)
-    @moods.each{|mood|
-      data.set_value(i, 0, mood.report_time.to_s())
-      data.set_value(i, 1, mood.mood)
-      i=i+1
-    }
-  
-    # Initialize a visualization (area chart) and pass options and the DataTable
-    @chart = GoogleVisualr::Visualizations::AreaChart.new({ :width => 400, :height => 240 }, data )
-
   end
 end

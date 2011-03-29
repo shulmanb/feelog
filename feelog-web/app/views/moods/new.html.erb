@@ -1,21 +1,27 @@
 <% content_for :head do %>
-    <!--script src='http://www.google.com/jsapi'></script-->
     <%= javascript_include_tag 'graph' %>
     <%= javascript_include_tag 'highcharts' %>
 
     <script type="text/javascript">
         var chart;
+        var name = '<b><%=@user.username%></b>';
         function renderMoods(){
           var moods_arr = [];
           $.get('<%= user_moods_path(@user)+"/limit/10.json" %>',function(data){
             var i = 0;
             if(data.length == 0){
-                 //google.setOnLoadCallback(drawChart(moods_arr));
+                      alert("Hello No Data");
             }
             $.each(data, function(key, value) {
                 if(i < 10){
                   var ts = new Date(value.mood.report_time);
                   var mood = {"id":i,"val":value.mood.mood,"desc":value.mood.desc,"time":month[ts.getMonth()]+" "+ts.getDate(),"date":value.mood.report_time};
+                  if(i==0){
+                    //latest mood
+                    var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
+                    var status = name +' is '+moodStr+' : '+mood.desc;
+                    $("#usr-status").html(status);
+                  }
                   moods_arr.push(mood);
                   i++;
                 }else{
@@ -27,6 +33,7 @@
         }
 
         $(document).ready(function() {
+
             prepareMoodIcons();
             renderMoods();
             // Setup the ajax indicator
@@ -67,8 +74,8 @@
           </div>
           <div class="right-side">
             <div class="mys">
-              <div class="fl2"><img src="/images/oded-pic.png"/></div>
-              <div><b>Oded Israeli</b> is <b>happy</b>: great day at work with Boris</div>
+              <div class="fl2"><img src=<%= "'"+ @picture +"'"%>/></div>
+              <div id="usr-status"></div>
             </div>
             <div class="sl">
               <div class="slt">

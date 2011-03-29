@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-  before_filter :signed_in?
+  before_filter :authorize
+
 
   # GET /users
   # GET /users.xml
