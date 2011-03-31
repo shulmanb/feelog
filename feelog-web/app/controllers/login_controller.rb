@@ -1,12 +1,6 @@
 class LoginController < ApplicationController
   layout "login"
-  
-  def index
-    respond_to do |format|
-          format.html # index.html.erb
-    end
-  end
-  
+  protect_from_forgery :except => :login
   def login
     @user = User.find(3)
     self.current_user = @user
@@ -20,7 +14,7 @@ class LoginController < ApplicationController
   def logout
     session[:user_id] = nil
     respond_to do |format|
-      format.html { redirect_to(login_path) }
+      format.html { redirect_to("/") }
       format.xml  { head :ok }
     end
   end

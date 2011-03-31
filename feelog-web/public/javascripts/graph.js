@@ -1,6 +1,6 @@
 
 function drawChart(moods) {
-    var moodLabels = ["","angry", "very sad", "sad", "ok", "happy","twinky", "very happy"];
+    var moodLabels = ["","", "", "", "", "","", ""];
     var options = {
       chart: {
          renderTo: 'moods-graph',

@@ -12,7 +12,7 @@ header, nav, article, section, dialog, figure, aside, footer,fieldset {
 body{
 	background-color: #e5e2d3;
 	font-family: "Helvetica";
-        background-image:url("../images/bg.png");
+        /* background-image:url("../images/bg.png");*/
         background-repeat: no-repeat;
 }
 
