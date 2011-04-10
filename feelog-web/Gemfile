@@ -1,9 +1,6 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.0.0'
-
-# Bundle edge Rails instead:
-# gem 'rails', :git => 'git://github.com/rails/rails.git'
+gem 'rails', '3.0.6'
 
 # gem 'mysql2'
 
@@ -17,13 +14,23 @@ gem 'rails', '3.0.0'
 # gem 'ruby-debug'
 
 # Bundle the extra gems:
-# gem 'bj'
 # gem 'nokogiri'
-gem 'sqlite3-ruby', :require => 'sqlite3'
-gem 'oa-oauth', :require => 'omniauth/oauth'
+#if defined?(JRUBY_VERSOIN)
+   gem 'jdbc-sqlite3'
+   gem 'activerecord-jdbc-adapter'
+   gem 'activerecord-jdbcsqlite3-adapter'
+   gem 'jruby-openssl'
+   gem 'jruby-rack'
+   gem 'warbler'
+#else
+#
+#   gem 'sqlite3-ruby', :require => 'sqlite3'
+#end
+gem 'oa-oauth','=0.1.6', :require => 'omniauth/oauth'
 gem 'jquery-rails', '>= 0.2.6'
-gem 'fb_graph'
-#gem 'ruby-debug'
+gem 'fb_graph', '=1.6.2'
+gem 'resque'
+#gem 'SystemTimer'
 
 # gem 'aws-s3', :require => 'aws/s3'
 

@@ -34,6 +34,7 @@ class LoginController < ApplicationController
     # Log the authorizing user in.
     self.current_user = @auth.user
     @user = @auth.user
+#    Resque.enqueue(FBFriendsReader,auth['credentials']['token'],@user.id)
 
     respond_to do |format|
       format.html { redirect_to(new_user_mood_path(@user)) }

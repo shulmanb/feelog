@@ -2,15 +2,8 @@ var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','
 
 function submitMood(){
     var val = $("#mood_val").val();
-//    var how = $("#how").val();
-//    var fb = $("#fbshare").is(':checked');
-//    var tw = $("#twshare").is(':checked');
     if (val != ''){
        $('#new_mood').submit();
-//       the clearingpart willbedoneby response js
-//       $(".smiley-selected").toggleClass("smiley-selected");
-//      $("#mood_val").val('');
-       //$("#how").val("why?");
     }
 }
 
@@ -20,7 +13,9 @@ function toggle(moodid){
     $(".smiley-selected").toggleClass("smiley-selected");
     $("#mood_val").val(moodid);
     $('#'+'s'+moodid).toggleClass("smiley-selected");
-    $("#how").val("");
+    if($("#how").val()=="why?"){
+       $("#how").val("");
+    }
     $("#how").focus();
 }
 
@@ -35,9 +30,9 @@ function getMoodImageLink(moodid){
         case 4:
             return '<img src="/images/mood-ok.png">';
         case 5:
-            return '<img src="/images/mood-twink.png">';
-        case 6:
             return '<img src="/images/mood-happy.png">';
+        case 6:
+            return '<img src="/images/mood-twink.png">';
         case 7:
             return '<img src="/images/mood-very_happy.png">';
     }
@@ -55,9 +50,9 @@ function getMoodStr(mood){
         case 4:
             return 'ok';
         case 5:
-            return 'twinky';
-        case 6:
             return 'happy';
+        case 6:
+            return 'twinky';
         case 7:
             return 'very happy';
     }
@@ -90,8 +85,32 @@ function prepareMoodIcons(){
     $("#feel-submit").click(function(){
         submitMood();
     });
-//    $('#new_mood').submit(function() {
-//      alert('Mood Submitted to server');
-//      return false;
-//    });
+}
+//this function called by the server rendered js, create.js.erb
+function returnFromCreateMood(report_time,mood_val,desc){
+    $("#how").val("why?");
+    $("#mood_val").val('');
+    $(".smiley-selected").toggleClass("smiley-selected");
+    var ts = new Date(report_time);
+    var mood = {"val":mood_val,"desc":desc,"time":month[ts.getMonth()]+" "+ts.getDate(),"date":ts.toString()};
+    var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
+    var status = name +' is '+moodStr+' : '+mood.desc;
+    $("#usr-status").html(status);
+    var series = chart.series[0];
+    //shift on more then 10 elements in the graph
+    var shift = series.data.length > 11;
+    var d = new Date(report_time).getTime();
+    var p = {"name":mood.desc,"y":mood.val,"x":d};
+    series.addPoint(p,false,shift);
+//    var categories = chart.xAxis[0].categories;
+//    alert(categories);
+/*    if(shift){
+      categories.shift();
+    }
+    alert(mood.time);
+*/
+//    categories.push(mood.time);
+//    alert(categories);
+    //chart.xAxis[0].setCategories(categories, false);
+    chart.redraw();
 }
