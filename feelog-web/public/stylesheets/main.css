@@ -129,6 +129,30 @@ img{
         margin-top: 100px;
 }
 
+.login-left-name{
+        color: white;
+        font-family: Calibri;
+        font-size: 48px;
+        font-weight: bold;
+}
+
+.login-left-moto{
+        position: absolute;
+        color: white;
+        font-family: Calibri;
+        font-size: 28px;
+        font-style: italic;
+        margin-left: 40px;
+        margin-top: -12px;
+}
+
+.login-left-expl{
+        color:#cccccc;
+        font-family: Calibri;
+        font-size: 20px;
+        margin-top: 60px;
+}
+
 .toc{
 	position: absolute;
 	top: 0;
