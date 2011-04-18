@@ -27,6 +27,8 @@ class LoginController < ApplicationController
       # whether there is already a user signed in.
       @auth = Authorization.create_from_hash(auth, current_user)
     end
+
+    #add caching here, set the expiration here
     @fb_user = FbGraph::User.me(auth['credentials']['token']).fetch
     @picture = @fb_user.picture
     session[:picture] = @picture

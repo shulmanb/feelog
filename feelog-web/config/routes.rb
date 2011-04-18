@@ -1,7 +1,7 @@
 Mooderator::Application.routes.draw do
-#scope "/fl" do
   resources :users do
     resources :moods
+    resources :friends
   end
   match '/users/:user_id/moods/limit/:limit' => "moods#index", :via=>:get
   match '/login' => "login#index", :via=>:get
@@ -10,5 +10,5 @@ Mooderator::Application.routes.draw do
   match '/users/:user_id/moodsgraph/' => "moods#graph", :via=>:get
   match '/auth/:provider/callback', :to => 'login#create'
   match '/auth/failure', :to => 'login#failure'
-#end
+
 end
