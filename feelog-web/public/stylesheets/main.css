@@ -29,6 +29,11 @@ img{
 	float: left;
 	margin-right: 5px;
 }
+
+
+.frl{
+    margin: 100px;
+}
 .wrapper{
 
 }
@@ -401,3 +406,40 @@ img{
     line-height: 15px;
     padding-top: 10px;
 }
+
+.friend-icon{
+    float: left;
+    padding-right: 1px;
+}
+
+.friends-action{
+    height: 96px;
+    width:  285px;
+    color: #948a54;
+    font-size: 16pt;
+
+}
+
+.no-data{
+    padding-top: 42px;
+    padding-left: 50px;
+}
+/* MODAL FRIENDS DIALOG*/
+.friend-icon:hover{
+    cursor:pointer;
+}
+
+.modal-content{
+    display: none;
+    
+}
+/* Overlay */
+#simplemodal-overlay {background-color:grey; cursor:wait;}
+
+/* Container */
+#simplemodal-container {height:300px; width:500px; color:grey; background-color:white; border:4px solid #444; padding:12px;}
+#simplemodal-container .simplemodal-data {padding:8px;}
+#simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; font-size:12px; margin-bottom:12px; padding:4px 6px 6px;}
+#simplemodal-container a {color:#ddd;}
+#simplemodal-container a.modalCloseImg {background:url(/images/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
+#simplemodal-container h3 {color:#84b8d9;}

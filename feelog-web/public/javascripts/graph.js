@@ -1,7 +1,40 @@
+function format_label(value){
+    var ts = new Date(value)
+    var min = "";
+    if(ts.getMinutes()<10){
+        min = "0";
+    }
+    min = min+ts.getMinutes();
+    return ts.getHours()+":"+min+"<br> "+month[ts.getMonth()]+" "+ts.getDate();
+}
 
-function drawChart(moods) {
+function format_tooltip(point){
+
+    var ts;
+    if(point.t){
+       ts = new Date(point.t);
+    }else{
+       ts = new Date(point.x);
+    }
+    var min = "";
+    if(ts.getMinutes()<10){
+        min = "0";
+    }
+    min = min+ts.getMinutes();
+    var tooltip = point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth()]+" "+ts.getDate();
+    return tooltip;
+}
+
+function onClick(){
+   $.modal("Test");
+}
+function drawChart(moods,norm) {
+    if(!norm){
+        var norm = 0;
+    }
     var moodLabels = ["","", "", "", "", "","", ""];
-    var options = {
+    
+    var unnormalized_options = {
         chart: {
             renderTo: 'moods-graph',
             defaultSeriesType: 'spline'
@@ -10,17 +43,11 @@ function drawChart(moods) {
             text: 'My Happiness'
         },
         xAxis: {
-            type: "datetime",
-            maxZoom: 3600 * 1000,
+            type: "linear",
+            categories:[],
             labels: {
                 formatter: function() {
-                    var ts = new Date(this.value)
-                    var min = "";
-                    if(ts.getMinutes()<10){
-                        min = "0";
-                    }
-                    min = min+ts.getMinutes();
-                    return ts.getHours()+":"+min+"<br> "+month[ts.getMonth()]+" "+ts.getDate();
+                    return format_label(this.value);
                 }
             }
         },
@@ -41,14 +68,7 @@ function drawChart(moods) {
             crosshairs: true,
             shared: false,
             formatter: function() {
-                var ts = new Date(this.point.x);
-                var min = "";
-                if(ts.getMinutes()<10){
-                    min = "0";
-                }
-                min = min+ts.getMinutes();
-                var tooltip = this.point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth()]+" "+ts.getDate();
-                return tooltip;
+                return format_tooltip(this.point);
             }
         },
         plotOptions: {
@@ -57,7 +77,79 @@ function drawChart(moods) {
                 point: {
                     events: {
                         click: function() {
-                            alert("Test");
+                            onClick();
+                        }
+                    }
+                }
+            },
+            spline: {
+                marker: {
+                    radius: 4,
+                    lineColor: '#666666',
+                    lineWidth: 1
+                }
+            }
+        },
+        series: [{
+            name: 'Happiness',
+            marker: {
+                symbol: 'circle'
+            },
+            data:[]
+        }],
+        credites:{
+            enabled: false
+        },
+        legend:{
+            enabled: false
+        }
+    };
+
+    
+    var normalized_options = {
+        chart: {
+            renderTo: 'moods-graph',
+            defaultSeriesType: 'spline'
+        },
+        title: {
+            text: 'My Happiness'
+        },
+        xAxis: {
+            type: "datetime",
+            maxZoom: 3600 * 1000,
+            labels: {
+                formatter: function() {
+                    return format_label(this.value);
+                }
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Mood'
+            },
+            max: 8,
+            min: 0,
+            tickInterval: 1,
+            labels: {
+                formatter: function() {
+                    return moodLabels[this.value];
+                }
+            }
+        },
+        tooltip: {
+            crosshairs: true,
+            shared: false,
+            formatter: function() {
+                return format_tooltip(this.point);
+            }
+        },
+        plotOptions: {
+            series:{
+                cursor: 'pointer',
+                point: {
+                    events: {
+                        click: function() {
+                            onClick();
                         }
                     }
                 }
@@ -86,13 +178,31 @@ function drawChart(moods) {
     };
     for(var i=0;i<moods.length;i++){
         var d = new Date(moods[i].date).getTime();
-        var p = {
-            name:moods[i].desc,
-            y:moods[i].val,
-            x:d
-        };
-        options.series[0].data.push(p);
-    //      options.xAxis.categories.push(moods[i].time);
+        var p;
+        if(norm == 1){
+            p = {
+                name:moods[i].desc,
+                y:moods[i].val,
+                x:d
+            };
+            normalized_options.series[0].data.push(p);
+        }else{
+            p = {
+                name:moods[i].desc,
+                y:moods[i].val,
+                t:d
+            };
+            /*needed for unnormalized graph*/
+            unnormalized_options.series[0].data.push(p);
+            unnormalized_options.xAxis.categories.push(d);
+            /*needed for unnormalized graph*/
+        }
+    }
+    var options;
+    if(norm == 1){
+        options =  normalized_options;
+    }else{
+        options = unnormalized_options;
     }
     chart = new Highcharts.Chart(options);
 }

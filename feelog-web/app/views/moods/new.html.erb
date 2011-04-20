@@ -1,37 +1,20 @@
 <% content_for :head do %>
   <%= javascript_include_tag 'graph' %>
   <%= javascript_include_tag 'highcharts' %>
-
+  <%= javascript_include_tag 'jqcloud-0.1.8.min.js' %>
+  <%= stylesheet_link_tag "jqcloud.css" %>
   <script type="text/javascript">
     var chart;
     var name = '<b><%=@user.username%></b>';
-    function renderMoods(){
-      var moods_arr = [];
-      $.get('<%= user_moods_path(@user)+"/limit/10.json" %>',function(data){
-        var i = 0;
-        if(data.length == 0){
-          alert("Hello No Data");
-        }
-        $.each(data, function(key, value) {
-          var ts = new Date(value.mood.report_time);
-          var mood = {"id":i,"val":value.mood.mood,"desc":value.mood.desc,"time":month[ts.getMonth()]+" "+ts.getDate(),"date":value.mood.report_time};
-          if(i==0){
-            //latest mood
-            var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-            var status = name +' is '+moodStr+' : '+mood.desc;
-            $("#usr-status").html(status);
-          }
-          moods_arr.push(mood);
-          i++;
-        });
-        drawChart(moods_arr.reverse());
-      });
-    }
 
     $(document).ready(function() {
-
+      $('body').data('norm',1);
       prepareMoodIcons();
-      renderMoods();
+      $('body').data('userid', <%= @user.id.to_s %>);
+      $('body').data('moods_path','<%= user_moods_path(@user)%>');
+      renderMoods('<%= user_moods_path(@user)%>');
+      renderFriends('<%= '/users/'+@user.id.to_s+'/friends' %>');
+      renderCloud();
       // Setup the ajax indicator
       $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
       // Ajax activity indicator bound to ajax start/stop document events
@@ -80,22 +63,17 @@
     </div>
 
     <div class="act">warm up with <span class="happy">Happy</span> friends</div>
-    <div><img src="/images/ppl1.png"/></div>
+    <div id="happy-friends" class="friends-action">
+        <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+    </div>
 
     <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
-    <div><img src="/images/ppl2.png"/></div>
+    <div id="gloomy-friends" class="friends-action">
+        <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+    </div>
 
     <div class="act">my <span class="happy">Happy</span> Tags</div>
-    <div class="happy">
-      <span style="font-size:19px">Jonathan</span>
-      <span style="font-size:12px">Hot</span>
-      <span style="font-size:19px">Meeting</span>
-      <span style="font-size:18px">Friends</span>
-      <span style="font-size:15px">Delicious</span>
-      <span style="font-size:13px">Love</span>
-      <span style="font-size:21px">Funny</span>
-      <span style="font-size:16px">Great</span>
-
+    <div id="tag-cloud" style="width: 285px; height: 125px;position:relative">
     </div>
   </div>
 </div>

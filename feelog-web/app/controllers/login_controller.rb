@@ -1,6 +1,8 @@
 class LoginController < ApplicationController
   layout "login"
   protect_from_forgery :except => :login
+  @@redis = Redis.new
+
   def login
     @user = User.find(3)
     self.current_user = @user
@@ -12,7 +14,7 @@ class LoginController < ApplicationController
   end
 
   def logout
-    session[:user_id] = nil
+    reset_session
     respond_to do |format|
       format.html { redirect_to("/") }
       format.xml  { head :ok }
@@ -26,18 +28,36 @@ class LoginController < ApplicationController
       # Create a new user or add an auth to existing user, depending on
       # whether there is already a user signed in.
       @auth = Authorization.create_from_hash(auth, current_user)
+      Resque.enqueue(FBFriendsReader,auth['credentials']['token'],@user.id)
     end
-
-    #add caching here, set the expiration here
-    @fb_user = FbGraph::User.me(auth['credentials']['token']).fetch
-    @picture = @fb_user.picture
-    session[:picture] = @picture
-    session[:email] = @fb_user.email
-    # Log the authorizing user in.
     self.current_user = @auth.user
     @user = @auth.user
+
+    #add caching here, set the expiration here
+    if @@redis.exists @user.id
+      puts "GETTING PICTURE FROM CACHE"
+      @picture = @@redis.hget(@user.id, 'pic')
+      @email = @@redis.hget(@user.id, 'email')
+    elsif
+      puts "GETTING PICTURE FROM FB"
+      @fb_user = FbGraph::User.me(auth['credentials']['token']).fetch
+      @picture = @fb_user.picture
+      @@redis.hset(@user.id, 'pic', @picture)
+      @@redis.hset(@user.id, 'email', @fb_user.email)
+      @email = @fb_user.email
+    end
+    @@redis.expire(@user.id, 60*60*24)
+    @@redis.expire(@user.id.to_s+"friends", 60*60*24)
+
+    session[:picture] = @picture
+    session[:email] = @email
+    #add logic not to expire for every request, 
+    #but retrieve updated time and test if it is older than x hours
+    #and only than queue resque command
+    @@redis.hset(@user.id, 'updated', false)
     Resque.enqueue(FBFriendsReader,auth['credentials']['token'],@user.id)
 
+    # Log the authorizing user in.
     respond_to do |format|
       format.html { redirect_to(new_user_mood_path(@user)) }
       format.xml  { head :ok }

@@ -1,5 +1,5 @@
 class MoodsController < ApplicationController
-  before_filter :authorize
+  #before_filter :authorize
   # GET /moods
   # GET /moods.xml
   def index

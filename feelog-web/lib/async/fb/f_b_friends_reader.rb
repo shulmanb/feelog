@@ -2,7 +2,7 @@ require 'emotions/emotions_parser'
 
 class FBFriendsReader
   @queue = :friends
-  @redis = Redis.new
+  @@redis = Redis.new
   @paser = EmotionsParser.new
   
   def self.parse_response(response)
@@ -69,7 +69,7 @@ class FBFriendsReader
         post = msg['msg']
         mood = @paser.pars_post(post)
         if mood > 0
-          moods.update({key=>{'m'=>mood,'p'=>post,'t'=>msg['time']}})
+          moods.update({key=>{:m=>mood,:p=>post,:t=>msg['time'],:n=>val['name']}})
           break
         end
       end
@@ -81,9 +81,12 @@ class FBFriendsReader
     puts "MOODS "+moody_friends.to_xml
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
     moody_friends.each() { |id,mood_obj|
-      redis.hset(userid, id, JSON.generate(mood_obj))
+      puts "ADDING TO REDIS for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
+      @@redis.hset(userid.to_s+':friends', id, JSON.generate(mood_obj))
     }
-    redis.hset(userid, 'updated', true)
-    redis.hset(userid, 'update_ts', Time.now)
+    @@redis.hset(userid, 'updated', true)
+    @@redis.hset(userid, 'update_ts', Time.now)
+    @@redis.expire(userid.to_s+'friends', 60*60*24)
+    @@redis.expire(userid, 60*60*24)
   end
 end
