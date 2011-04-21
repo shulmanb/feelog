@@ -34,6 +34,11 @@ img{
 .frl{
     margin: 100px;
 }
+
+.mdl{
+    margin: 150px;
+}
+
 .wrapper{
 
 }
@@ -423,6 +428,7 @@ img{
 .no-data{
     padding-top: 42px;
     padding-left: 50px;
+    background-color:white;
 }
 /* MODAL FRIENDS DIALOG*/
 .friend-icon:hover{

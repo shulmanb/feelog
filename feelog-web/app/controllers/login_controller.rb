@@ -1,8 +1,7 @@
 class LoginController < ApplicationController
   layout "login"
   protect_from_forgery :except => :login
-  @@redis = Redis.new
-
+  before_filter :check_redis_connection
   def login
     @user = User.find(3)
     self.current_user = @user
@@ -28,18 +27,25 @@ class LoginController < ApplicationController
       # Create a new user or add an auth to existing user, depending on
       # whether there is already a user signed in.
       @auth = Authorization.create_from_hash(auth, current_user)
-      Resque.enqueue(FBFriendsReader,auth['credentials']['token'],@user.id)
+      Resque.enqueue(FBOwnReader,auth['credentials']['token'],@auth.user.id)
+      session[:initializing]=true
+      puts "INITIALIZING NEW USER"
     end
+
+#    Resque.enqueue(FBOwnReader,auth['credentials']['token'],@auth.user.id)
+#    session[:initializing]=true
+
+
+
+
     self.current_user = @auth.user
     @user = @auth.user
 
     #add caching here, set the expiration here
     if @@redis.exists @user.id
-      puts "GETTING PICTURE FROM CACHE"
       @picture = @@redis.hget(@user.id, 'pic')
       @email = @@redis.hget(@user.id, 'email')
     elsif
-      puts "GETTING PICTURE FROM FB"
       @fb_user = FbGraph::User.me(auth['credentials']['token']).fetch
       @picture = @fb_user.picture
       @@redis.hset(@user.id, 'pic', @picture)
@@ -54,7 +60,7 @@ class LoginController < ApplicationController
     #add logic not to expire for every request, 
     #but retrieve updated time and test if it is older than x hours
     #and only than queue resque command
-    @@redis.hset(@user.id, 'updated', false)
+    @@redis.hdel(@user.id, 'fr_updated')
     Resque.enqueue(FBFriendsReader,auth['credentials']['token'],@user.id)
 
     # Log the authorizing user in.

@@ -1,5 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
+  @@redis = Redis.new
+
   protected
   
     def current_user
@@ -9,7 +11,11 @@ class ApplicationController < ActionController::Base
     def signed_in?
       !!current_user
     end
-
+    def check_redis_connection
+      if @@redis.client.connected? != true
+        @@redis.client.connect
+      end
+    end
     def authorize
       user_id = params[:user_id]
       if !(signed_in?) or (user_id.to_i != self.current_user.id)

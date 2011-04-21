@@ -1,9 +1,32 @@
 class MoodsController < ApplicationController
-  #before_filter :authorize
+  before_filter :authorize, :check_redis_connection
   # GET /moods
   # GET /moods.xml
   def index
     user_id = params[:user_id]
+    unless session[:initializing] == nil
+      retry_cnt = session[:init_retry]
+      if retry_cnt == nil
+        retry_cnt = 0
+        session[:init_retry] = 1
+      else
+        retry_cnt = retry_cnt +1
+        session[:init_retry] = retry_cnt
+      end
+      init = @@redis.hget(user_id,"initialized")
+      if init != nil
+        session.delete(:initializing)
+      end
+      #stop trying after 10 retries
+      if init == nil and retry_cnt.to_i < 10
+        respond_to do |format|
+          format.json  { render :json => {:retry=>5000,:retry_cnt=>retry_cnt} }
+        end
+        return
+      end
+    end
+    session.delete(:init_retry)
+
     if(params[:limit] == nil)
         @moods = User.find(user_id).moods.order("report_time DESC")
     else

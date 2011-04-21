@@ -1,33 +1,12 @@
-require 'emotions/emotions_parser'
-
-class FBFriendsReader
+require 'async/fb/f_b_reader'
+class FBFriendsReader < FBReader
   @queue = :friends
-  @@redis = Redis.new
-  @paser = EmotionsParser.new
-  
-  def self.parse_response(response)
-    parsed = JSON.parse(response)
-    hash={}
-    for resp in parsed
-      body = JSON.parse(resp['body'])
-      data = body['data']
-      for d in data
-        id = d['from']['id']
-        name = d['from']['name']
-        message = d['message']
-        time = d['updated_time']
-        curr = hash[id]
-        if curr == nil
-          curr={'name'=>name,'msgs'=>[]}
-        end
-        curr['msgs'].push({'msg'=>message,'time'=>time})
-        hash[id]=curr
-      end
-    end
-    return hash
-  end
 
   def self.perform(accesskey, userid)
+    if @@redis.client.connected? != true
+      @@redis.client.connect
+    end
+
     response = RestClient.post("https://graph.facebook.com",
       :access_token=>accesskey,
       :batch=>'[{"method":"GET","relative_url":"me/friends"}]')
@@ -62,21 +41,6 @@ class FBFriendsReader
     update_cache(userid,moody_friends)
   end
 
-  def self.prepare_moods(messages_hash)
-    moods={} #hash of id==>mood
-    messages_hash.each {|key, val|
-      for msg in val['msgs'] do
-        post = msg['msg']
-        mood = @paser.pars_post(post)
-        if mood > 0
-          moods.update({key=>{:m=>mood,:p=>post,:t=>msg['time'],:n=>val['name']}})
-          break
-        end
-      end
-    }
-    return moods
-  end
-
   def self.update_cache(userid, moody_friends)
     puts "MOODS "+moody_friends.to_xml
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
@@ -84,9 +48,8 @@ class FBFriendsReader
       puts "ADDING TO REDIS for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
       @@redis.hset(userid.to_s+':friends', id, JSON.generate(mood_obj))
     }
-    @@redis.hset(userid, 'updated', true)
-    @@redis.hset(userid, 'update_ts', Time.now)
+    @@redis.hset(userid, 'fr_updated', true)
+    @@redis.hset(userid, 'fr_update_ts', Time.now)
     @@redis.expire(userid.to_s+'friends', 60*60*24)
-    @@redis.expire(userid, 60*60*24)
   end
 end
