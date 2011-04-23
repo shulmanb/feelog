@@ -1,6 +1,7 @@
 class ApplicationController < ActionController::Base
   protect_from_forgery
   @@redis = Redis.new
+  Resque.redis = @@redis
 
   protected
   

@@ -1,7 +1,6 @@
 require 'async/fb/f_b_reader'
 class FBFriendsReader < FBReader
   @queue = :friends
-
   def self.perform(accesskey, userid)
     if @@redis.client.connected? != true
       @@redis.client.connect

@@ -3,6 +3,7 @@ require 'emotions/emotions_parser'
 class FBReader
   @@redis = Redis.new
   @@paser = EmotionsParser.new
+  Resque.redis = @@redis
 
   def self.parse_response(response)
     parsed = JSON.parse(response)

@@ -84,12 +84,10 @@ class MoodsController < ApplicationController
     @mood_desc = @mood.desc
     respond_to do |format|
       if @mood.save
-        format.html { redirect_to(user_moods_url, :notice => 'Mood was successfully created.') }
-        format.xml  { render :xml => @mood, :status => :created, :location => @mood }
+        format.json  { render :json => {:report_time=>@mood.report_time,:val=>@mood.mood,:desc=>@mood.desc}, :status => :created}
         format.js # create.js.erb
       else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @mood.errors, :status => :unprocessable_entity }
+        format.json  { render :json => @mood.errors, :status => :unprocessable_entity }
         format.js   { render 'fail_create.js.erb' }
       end
     end

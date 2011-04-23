@@ -6,9 +6,6 @@ function submitMood(){
         $('#new_mood').submit();
     }
 }
-
-
-
 function toggle(moodid){
     $(".smiley-selected").toggleClass("smiley-selected");
     $("#mood_val").val(moodid);
@@ -18,7 +15,6 @@ function toggle(moodid){
     }
     $("#how").focus();
 }
-
 function getMoodImageLink(moodid){
     switch(moodid){
         case 1:
@@ -38,7 +34,6 @@ function getMoodImageLink(moodid){
     }
 
 }
-
 function getMoodStr(mood){
     switch(mood){
         case 1:
@@ -58,8 +53,6 @@ function getMoodStr(mood){
     }
 
 }
-
-
 function prepareMoodIcons(){
     $("#s1").click(function() {
         toggle(1);
@@ -129,7 +122,6 @@ function returnFromCreateMood(report_time,mood_val,desc){
     }
     chart.redraw();
 }
-
 function renderMoods(path){
     var moods_arr = [];
     var initializing = false;
@@ -185,7 +177,6 @@ function set_init_data(tag){
     $(tag).append("<img src='/images/initializing.gif'/>");
     $(tag).css('background-color','white');
 }
-
 function renderFriends(path){
     var happy = new Array();
     var gloomy = new Array();
@@ -274,11 +265,9 @@ function renderFriendIcon(id,mood_json){
                 <img src='"+picLink+"' title='"+post+"' onclick='overFriendPic("+id+")'/>";
     return [happy,html];
 }
-
 function overFriendPic(id){
     $("#"+id+"modal").modal();
 }
-
 function renderCloud(){
     var word_list = [
     {
