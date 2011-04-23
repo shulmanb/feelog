@@ -1,0 +1,369 @@
+/* Subsection 1: CSS Reset */
+body,
+h1, h2, h3,
+p, ul, li, form, input,
+table, tr, td,
+header, nav, article, section, dialog, figure, aside, footer,fieldset {
+	border:0;
+	margin:0;
+	padding:0;
+	font-size:100%;
+}
+body{
+	background-color: #e5e2d3;
+	font-family: "Helvetica";
+}
+
+img{
+	border: 0 none;
+}
+
+.fl{
+	float: left;
+	margin-right: 10px;
+}
+
+.fl2{
+	float: left;
+	margin-right: 5px;
+}
+
+
+.frl{
+    margin: 100px;
+}
+
+.mdl{
+    margin: 150px;
+}
+
+.mt{
+	font-family: "Helvetica";
+	font-size: 16pt;
+	color: #fff;
+	font-weight: bold;
+	padding-right: 10px;
+}
+
+.st{
+	font-family: "Helvetica";
+	font-size: 14pt;
+	font-style: italic;
+	color: #fff;
+}
+
+.ta{
+	font-family: "Helvetica";
+	font-size: 10pt;
+	color: #949494;
+}
+
+
+.login-container{
+	margin: 0 auto;
+    width: 300px;
+}
+
+.login{
+	position: relative;
+    display: block;
+    margin: 10px auto 0px;
+    height: 400px;
+    border-radius:10px;
+    background-color:#403152;
+}
+
+.login-top{
+    position:relative;
+    left: 10px;
+    top: 10px;
+    width: 270px;
+    margin: 10px auto 0px;
+}
+
+.login-top-name{
+    color: white;
+    font-family: Calibri;
+    font-size: 34px;
+    font-weight: bold;
+}
+
+.login-top-moto{
+    color: white;
+    font-family: Calibri;
+    font-size: 24px;
+    font-style: italic;
+    margin-left: 50px;
+}
+
+.login-top-expl{
+    color:#cccccc;
+    font-family: Calibri;
+    font-size: 16px;
+    margin-top: 5px;
+}
+
+
+.login-bottom{
+    position:relative;
+    top: 50px;
+    width: 270px;
+    margin: 0px auto;
+}
+.login-bottom-fb{
+}
+
+.fb-login-img{
+    position:relative;
+    margin-top:20px;
+    margin-left:100px;
+}
+.fb-login-img:hover{
+    cursor:pointer;
+}
+
+.fb-login-txt{
+    color: white;
+    font-family: Calibri;
+    font-size: 24px;
+    font-style: italic;
+}
+
+.fb-login-txt-top{
+    position:relative;
+    float: left;
+}
+
+.fb-login-txt-bottom{
+    position:relative;
+    float:none;
+    margin-left:50px;
+}
+
+.login-bottom-logo{
+    margin-top:30px;
+    margin-left: 28px;
+}
+#login-wrapper{
+
+}
+#wrapper{
+   display:none;
+}
+/* start top part*/
+.top{
+	position: relative;
+	height: 40px;
+	background-color:#403152;
+}
+.logo{
+	padding: 6px 10px;
+}
+
+/* start middle part*/
+
+.container{
+	width: 300px;
+	margin: 0 auto;
+}
+
+.content{
+	position: relative;
+	background-color: #fff;
+	height: 300px;
+    width: 250px;
+    border-radius: 30px;
+    margin: 0px auto 15px;
+}
+
+.widget{
+	position: relative;
+	top: 10px;
+}
+
+.hf{
+    position:relative;
+    left:10px;
+	font-size: 18pt;
+	color: #948a54;
+	margin-bottom: 10px;
+    margin-top: 40px;
+}
+
+.smileys-top{
+    height:55px;
+    position:relative;
+    left:15px;
+}
+.smileys-down{
+    position:relative;
+    height:55px;
+    left:40px;
+}
+
+.i1{
+    position:relative;
+    left:5px;
+	width: 220px;
+	height: 55px;
+	border: 1px solid #948a54;
+	color: #948a54;
+	padding: 0 10px;
+}
+
+.actions{
+    position:relative;
+    left: 8px;
+	text-align: right;
+	margin-top: 5px;
+	height: 30px;
+	color: #948a54;
+	font-size: 10pt;
+}
+
+
+.boxes{
+    position:relative;
+    left:3px;
+}
+
+.box{
+    border-top-left-radius:50px 25px;
+    border-top-right-radius:50px 25px;
+    width: 92px;
+    height: 40px;
+    float:left;
+    background-color:#403152;
+    margin:2px;
+}
+.smiley{
+    position:relative;
+    float: left;
+	margin-right: 5px;
+}
+
+.smiley-selected{
+    background:red;
+    border-top:1px solid #EBEBEB;
+    margin-top:-1px;
+}
+
+.smiley:hover{
+    cursor:pointer;
+    background:red;
+    border-top:1px solid #EBEBEB;
+    margin-top:-1px;
+}
+
+
+.dyk{
+	color: #948a54;
+	font-family: "Arial";
+	font-size: 10pt;
+}
+
+.dyk UL{
+	margin-left: 15px;
+	list-style: square;
+}
+
+.dyk LI{
+	margin-bottom: 7px;
+}
+
+.mys{
+	color: #948a54;
+	font-size: 10pt;
+	height: 60px;
+}
+
+.sl{
+	margin-top: 24px;
+	width: 265px;
+	height: 85px;
+	background: url("sl-bg.png");
+}
+
+.slt{
+	padding: 30px 10px 10px 10px;
+	color: #949494;
+	font-weight: bold;
+	font-size: 10pt;
+}
+
+.act{
+	margin-top: 20px;
+	margin-bottom: 5px;
+	color: #948a54;
+	font-size: 16pt;
+}
+
+.happy{
+	color: #c0504d;
+}
+
+.gloomy{
+	color: #17375e;
+}
+
+.credit{
+	text-align: center;
+	margin-top: 10px;
+	color: #948a54;
+	font-size: 10pt;
+}
+
+.credit a{
+ text-decoration: none;
+}
+
+.credit a:hover{
+	text-decoration: underline	 ;
+}
+
+.moods-graph{
+    margin-top: 10px;
+}
+
+#ajax-busy{
+    display: none;
+}
+
+
+.friend-icon{
+    float: left;
+    padding-right: 1px;
+}
+
+.friends-action{
+    height: 96px;
+    width:  285px;
+    color: #948a54;
+    font-size: 16pt;
+
+}
+
+.no-data{
+    padding-top: 42px;
+    padding-left: 50px;
+    background-color:white;
+}
+/* MODAL FRIENDS DIALOG*/
+.friend-icon:hover{
+    cursor:pointer;
+}
+
+.modal-content{
+    display: none;
+
+}
+/* Overlay */
+#simplemodal-overlay {background-color:gray; cursor:wait;}
+
+/* Container */
+#simplemodal-container {height:300px; width:500px; color:gray; background-color:white; border:4px solid #444; padding:12px;}
+#simplemodal-container .simplemodal-data {padding:8px;}
+#simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; font-size:12px; margin-bottom:12px; padding:4px 6px 6px;}
+#simplemodal-container a {color:#ddd;}
+#simplemodal-container a.modalCloseImg {background:url(x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
+#simplemodal-container h3 {color:#84b8d9;}

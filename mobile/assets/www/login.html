@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Feelog</title>
+    <meta name="viewport" content="width=device-width, user-scalable=no" />
+    <link href="main.css" media="screen" rel="stylesheet" type="text/css"/>
+    <script src="jquery.min.js" type="text/javascript"></script>
+    <script src="phonegap.0.9.4.js" type="text/javascript"></script>
+    <script src="login.js" type="text/javascript"></script>
+    <script src="facebook.js" type="text/javascript"></script>
+    <script language="JavaScript">
+        $(document).ready(function() {
+            $(".bg").css({width: $(window).width() + "px", height: $(window).height() + "px", overflow:"hidden"});
+            $("#bg").css({width: $(window).width() + "px"});
+        });
+    </script>
+
+</head>
+<body>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <div class="login">
+                <div class="login-top">
+                    <div class="login-top-name">
+                        Feelog
+                    </div>
+                    <div class="login-top-moto">
+                        makes you happy!
+                    </div>
+                    <!--div class="login-top-expl">
+                           Understand what makes you <br>
+                           and your friends tick<br>
+                           and take action<br>
+                           to make your life better...
+                    </div-->
+                </div>
+                <div class="login-bottom">
+                    <div class="login-bottom-fb">
+                        <div class="fb-login-txt fb-login-txt-top">
+                            Login with your
+                        </div>
+                        <div class="fb-login-txt fb-login-txt-bottom">
+                            Facebook account
+                        </div>
+                        <div class="fb-login-img">
+                                <img src='fb_login_button.png' onclick="fblogin()"/>
+                        </div>
+                    </div>
+
+                    <div class="login-bottom-logo">
+                        <img src="moods-logo.png" width="230" height="100"/>
+                    </div>
+                </div>
+            </div>
+           </div>
+    </div>
+    <div class="credit">
+           Feelog &copy; 2011
+       </div>
+
+</body>
+</html>
