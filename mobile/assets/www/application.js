@@ -76,6 +76,7 @@ function prepareMoodIcons(){
 }
 //this function called by the server rendered js, create.js.erb
 function returnFromCreateMood(report_time,mood_val,desc){
+    alert('mood created '+mood_val+' '+desc);
     $('#ajax-busy').hide();
     var norm = $('body').data('norm');
     if(!norm) norm = 0;
@@ -117,16 +118,15 @@ function returnFromCreateMood(report_time,mood_val,desc){
     }
     chart.redraw();
 }
-function renderMoods(path){
+function renderMoods(path,name){
     var moods_arr = [];
     var initializing = false;
     var first_init = true;
-    $.ajax(path+"/limit/10.json").success(function(data){
+    $.ajax(path+"/limit/7.json").success(function(data){
         var i = 0;
         if(data.length == 0){
         //set empty data notification
         }
-
         $.each(data, function(key, value) {
             if (key == 'retry'){
                 setTimeout(function(){renderMoods(path)},value);
@@ -145,24 +145,36 @@ function renderMoods(path){
                 if(i==0){
                     //latest mood
                     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-                    var status = name +' is '+moodStr+' : '+mood.desc;
+                    var status = name +' is '+moodStr+' : <br>'+mood.desc;
                     $("#usr-status").html(status);
                 }
                 moods_arr.push(mood);
                 i++;
             }
         });
-        if(initializing != true){
-            $("#moods-graph").empty();
-            var norm = $('body').data('norm');
-            if(!norm) norm = 0;
-            drawChart(moods_arr.reverse(),norm);
-        }else if(first_init == true){
-            $("#moods-graph").empty();
-            set_init_data("#moods-graph")
-        }
+        $('body').data('moods',moods_arr);
+        $('body').data('init',initializing);
+        $('body').data('f_init',first_init);
     });
 }
+/*
+should be called after render moods return
+ */
+function initChart(){
+    var moods_arr = $('body').data('moods');
+    var initializing = $('body').data('init');
+    var first_init = $('body').data('f_init');
+    if(initializing != true){
+        $("#moods-graph").empty();
+        var norm = $('body').data('norm');
+        if(!norm) norm = 0;
+        drawChart(moods_arr.reverse(),norm);
+    }else if(first_init == true){
+        set_init_data("#moods-graph")
+        setTimeout(function(){initChart()},10000);
+    }
+}
+
 function set_no_data(tag){
     $(tag).append("<div class='no-data'>No Data Found</div>");
     $(tag).css('background-color','white');
@@ -311,8 +323,20 @@ function renderCloud(){
 
 //new functions
 function showGraph(){
-    alert('show graph clicked');
+    $("#report-widget").hide();
+    $("#personal-widget").show();
+    $("box-text").text('back');
+    $("#b3").attr('onclick', '').click("showReport()");
+    setTimeout(function(){initChart()},100);
 }
+function showReport(){
+    $("#personal-widget").hide();
+    $("#report-widget").show();
+    $("box-text").text('back');
+    $("#b3").attr('onclick', '').click("showGraph()");
+}
+
+
 //changed to ajax
 function submitMood(){
     var val = $("#mood_val").val();

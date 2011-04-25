@@ -1,4 +1,5 @@
 function doLogin(token){
+    $.modal("Loading...");
     //call server to validate the token with user account
     $.ajax({
       url: "http://192.168.123.117:3000/login_mobile",
@@ -6,10 +7,19 @@ function doLogin(token){
       data:{'token':token},
       success: function(data){
           var id = $.parseJSON(data).id;
-          $('body').data('user_id',id);
+          var pic = $.parseJSON(data).pic;
+          var name = $.parseJSON(data).name;
+          $('#user-pic').attr('src',pic);
+          $('body').data('userid',id);
+          $('#feel-submit-img').attr('onclick', '').click("$('#ajax-busy').show()");
+          $('body').data('moods_path',"http://192.168.123.117:3000/users/"+id+"/moods");
+          renderMoods("http://192.168.123.117:3000/users/"+id+"/moods",name);
+          //renderFriends("http://192.168.123.117:3000/users/"+id+"/friends");
+          $.modal.close();
           //hide the login div and show the report div and bottom div
           $("#login-wrapper").hide();
           $("#wrapper").show();
+          $("#report-widget").show();
       }
     });
 }

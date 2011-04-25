@@ -173,10 +173,11 @@ img{
 	height: 300px;
     width: 250px;
     border-radius: 30px;
-    margin: 0px auto 15px;
+    margin: 10px auto 15px;
 }
 
 .widget{
+    display:none;
 	position: relative;
 	top: 10px;
 }
@@ -236,6 +237,16 @@ img{
     background-color:#403152;
     margin:2px;
 }
+
+.box-text{
+    font-size: 16pt;
+	color: #fff;
+    position:relative;
+    top: 10px;
+    left: 10px;
+
+}
+
 .smiley{
     position:relative;
     float: left;
@@ -275,6 +286,9 @@ img{
 	color: #948a54;
 	font-size: 10pt;
 	height: 60px;
+    position:relative;
+    top: 10px;
+    left:10px;
 }
 
 .sl{
@@ -322,7 +336,6 @@ img{
 }
 
 .moods-graph{
-    margin-top: 10px;
 }
 
 #ajax-busy{
@@ -361,7 +374,7 @@ img{
 #simplemodal-overlay {background-color:gray; cursor:wait;}
 
 /* Container */
-#simplemodal-container {height:300px; width:500px; color:gray; background-color:white; border:4px solid #444; padding:12px;}
+#simplemodal-container {height:200px; width:300px; color:gray; background-color:white; border:4px solid #444; padding:12px;}
 #simplemodal-container .simplemodal-data {padding:8px;}
 #simplemodal-container code {background:#141414; border-left:3px solid #65B43D; color:#bbb; display:block; font-size:12px; margin-bottom:12px; padding:4px 6px 6px;}
 #simplemodal-container a {color:#ddd;}

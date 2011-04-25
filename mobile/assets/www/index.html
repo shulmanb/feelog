@@ -7,19 +7,24 @@
     <link href="main.css" media="screen" rel="stylesheet" type="text/css"/>
     <script src="jquery.min.js" type="text/javascript"></script>
     <script src="jquery.mobile-1.0a4.1.min.js" type="text/javascript"></script>
-    <script src="graph.js" type="text/javascript"></script>
-    <script src="highcharts.js" type="text/javascript"></script>
+    <script src="highcharts-android.js" type="text/javascript"></script>
+    <script src="canvg.js" type="text/javascript"></script>
     <script src="phonegap.0.9.4.js" type="text/javascript"></script>
     <script src="jquery.simplemodal.1.4.1.min.js" type="text/javascript"></script>
-    <script src="login.js" type="text/javascript"></script>
-    <script src="application.js" type="text/javascript"></script>
     <script src="facebook.js" type="text/javascript"></script>
+    <script src="application.js" type="text/javascript"></script>
+    <script src="login.js" type="text/javascript"></script>
+    <script src="graph.js" type="text/javascript"></script>
 
     <script language="JavaScript">
         $(document).ready(function() {
             $(".bg").css({width: $(window).width() + "px", height: $(window).height() + "px", overflow:"hidden"});
             $("#bg").css({width: $(window).width() + "px"});
+            $('body').data('norm',0);
             prepareMoodIcons();
+            // Setup the ajax indicator
+            $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
+
         });
     </script>
 </head>
@@ -69,7 +74,7 @@
     </div>
     <div class="container">
         <div class="content">
-            <div class="widget">
+            <div id="report-widget" class="widget">
                 <div class="feelog-input">
                     <div class="hf">how do you feel?</div>
                     <div class="smileys-top">
@@ -108,10 +113,21 @@
                         <div class="actions">
                             <div class="fl"><input id="fbshare" name="fbshare" type="checkbox" checked/> Facebook</div>
                             <div class="fl"><input id="twshare" name="twshare" type="checkbox" checked/> Twitter</div>
-                            <div id="feel-submit" class="fl"><img src="btnLog.png" onclick="$('#ajax-busy').show()"/>
+                            <div id="feel-submit" class="fl"><img src="btnLog.png" id="feel-submit-img" />
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+            <div id="personal-widget" class="widget">
+                <div class="mys">
+                  <div class="fl2">
+                      <img id="user-pic" src="">
+                  </div>
+                  <div id="usr-status">
+                  </div>
+                </div>
+                <div id="moods-graph" class="moods-graph" style='width: 230px; height: 208px;'>
                 </div>
             </div>
         </div>
@@ -121,7 +137,9 @@
             <div id="b2" class="box">
             </div>
             <div id="b3" class="box" onclick="showGraph()">
+                <div class="box-text">
                 more..
+                </div>
             </div>
         </div>
     </div>
