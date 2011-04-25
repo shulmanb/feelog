@@ -57,7 +57,7 @@ class LoginController < ApplicationController
        #and only than queue resque command
        @@redis.hdel(user.id, 'fr_updated')
        Resque.enqueue(FBFriendsReader,token,user.id)
-       @resp = {:id=>user.id}
+       @resp = {:id=>user.id,:pic=>picture,:name=>fb_user.name}
        #try and generate the token here
 
       # Log the authorizing user in.
