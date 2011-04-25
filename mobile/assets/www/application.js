@@ -323,17 +323,19 @@ function renderCloud(){
 
 //new functions
 function showGraph(){
+    alert('show graph clicked');
     $("#report-widget").hide();
     $("#personal-widget").show();
-    $("box-text").text('back');
-    $("#b3").attr('onclick', '').click("showReport()");
+    $("#b3").addClass('box-hidden');
+    $("#b4").removeClass('box-hidden');
     setTimeout(function(){initChart()},100);
 }
 function showReport(){
+    alert('personal clicked');
     $("#personal-widget").hide();
     $("#report-widget").show();
-    $("box-text").text('back');
-    $("#b3").attr('onclick', '').click("showGraph()");
+    $("#b4").addClass('box-hidden');
+    $("#b3").removeClass('box-hidden');
 }
 
 

@@ -177,7 +177,9 @@ function drawChart(moods,norm) {
         }
     };
     for(var i=0;i<moods.length;i++){
-        var d = new Date(moods[i].date).getTime();
+        var date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\Z/;
+        var date_array = date_pattern.exec(moods[i].date);
+        var d = new Date(date_array[1],date_array[2],date_array[3],date_array[4],date_array[5]).getTime();
         var p;
         if(norm == 1){
             p = {

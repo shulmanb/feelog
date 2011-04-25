@@ -238,6 +238,9 @@ img{
     margin:2px;
 }
 
+.box-hidden{
+    display:none;
+}
 .box-text{
     font-size: 16pt;
 	color: #fff;
