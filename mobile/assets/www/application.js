@@ -408,7 +408,7 @@ function showReport(){
 function showHappyFriends(){
     var happy_cnt = $('#happy-box-val').text();
     //alert('happy cnt '+happy_cnt);
-    if(happy_cnt == 0 || activeWidget()==2){
+    if(happy_cnt == 0 || activeWidget()=='#happy-friends-widget'){
         return;
     }
     var curr = $('body').data('current-view');
@@ -430,7 +430,7 @@ function showHappyFriends(){
 function showGloomyFriends(){
     var sad_cnt = $('#sad-box-val').text();
     //alert('sad cnt '+sad_cnt);
-    if(sad_cnt == 0 ||activeWidget()==3){
+    if(sad_cnt == 0 ||activeWidget()=='#sad-friends-widget'){
         return;
     }
     var curr = $('body').data('current-view');
