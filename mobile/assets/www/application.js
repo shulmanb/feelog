@@ -1,5 +1,5 @@
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-
+var chart = null;
 
 function toggle(moodid){
     $(".smiley-selected").toggleClass("smiley-selected");
@@ -76,47 +76,81 @@ function prepareMoodIcons(){
 }
 //this function called by the server rendered js, create.js.erb
 function returnFromCreateMood(report_time,mood_val,desc){
-    alert('mood created '+mood_val+' '+desc);
-    $('#ajax-busy').hide();
-    var norm = $('body').data('norm');
-    if(!norm) norm = 0;
     $("#how").val("why?");
     $("#mood_val").val('');
     $(".smiley-selected").toggleClass("smiley-selected");
-    var ts = new Date(report_time);
+    var moods_arr = $('body').data('moods');
     var mood = {
+        "id":moods_arr.length,
         "val":mood_val,
         "desc":desc,
-        "date":ts.toString()
+        "date":report_time //something that can be parsed as a string
     };
     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
     var status = name +' is '+moodStr+' : '+mood.desc;
     $("#usr-status").html(status);
+    moods_arr.push(mood);
+    if(moods_arr.length == 8){
+        moods_arr.shift();
+    }
+    $('body').data('moods',moods_arr);
+
+    if(chart != undefined && chart != null) {
+        //alert('updating chart');
+        var update_arr = $('body').data('update_moods');
+        if (update_arr == null || update_arr == 'undefined') {
+            update_arr = new Array();
+        }
+        update_arr.push(mood);
+        $('body').data('update_moods', update_arr);
+    }
+    $("#ajax-busy").hide();
+    $("#feel-submit").show();
+    //alert('mood created');
+}
+
+function updateChart(mood_arr){
+    if(mood_arr == null || mood_arr == undefined){
+        return;
+    }
+
+    //alert('update called');
+    var norm = $('body').data('norm');
+    if(!norm) norm = 0;
+
     var series = chart.series[0];
-    //shift on more then 10 elements in the graph
-    var shift = series.data.length >= 10;
-    var d = new Date(report_time).getTime();
-    var p;
-    if(norm == 1){
-        p = {
-            "name":mood.desc,
-            "y":mood.val,
-            "x":d
-        };
-    }else{
-        p = {
-            "name":mood.desc,
-            "y":mood.val,
-            "t":d
-        };
+    //shift on more then 7 elements in the graph
+    var shift = series.data.length >= 7;
+    for(i = 0;i < mood_arr.length;i++){
+        var mood = mood_arr[i];
+        var date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\Z/;
+        var date_array = date_pattern.exec(mood.date);
+        var d = new Date(date_array[1],date_array[2],date_array[3],date_array[4],date_array[5]).getTime();
+        var p;
+        if(norm == 1){
+            p = {
+                "name":mood.desc,
+                "y":mood.val,
+                "x":d
+            };
+        }else{
+            p = {
+                "name":mood.desc,
+                "y":mood.val,
+                "t":d
+            };
+        }
+        series.addPoint(p,false,shift);
+        if(norm == 0){
+            var categories = chart.xAxis[0].categories;
+            categories.push(d);
+            chart.xAxis[0].setCategories(categories, false);
+        }
     }
-    series.addPoint(p,false,shift);
-    if(norm == 0){
-        var categories = chart.xAxis[0].categories;
-        categories.push(d);
-        chart.xAxis[0].setCategories(categories, false);
-    }
+    //alert('update redraw called');
     chart.redraw();
+    //alert('update redraw done');
+
 }
 function renderMoods(path,name){
     var moods_arr = [];
@@ -162,6 +196,15 @@ should be called after render moods return
  */
 function initChart(){
     var moods_arr = $('body').data('moods');
+    var update_arr = $('body').data('update_moods');
+    if(update_arr != null && update_arr != 'undefind'){
+        for(i = 0;i < update_arr.length;i++){
+            moods_arr.push(update_arr[i]);
+            if(moods_arr.length > 7){
+                moods_arr.shift();
+            }
+        }
+    }
     var initializing = $('body').data('init');
     var first_init = $('body').data('f_init');
     if(initializing != true){
@@ -169,9 +212,11 @@ function initChart(){
         var norm = $('body').data('norm');
         if(!norm) norm = 0;
         drawChart(moods_arr.reverse(),norm);
+
     }else if(first_init == true){
         set_init_data("#moods-graph")
-        setTimeout(function(){initChart()},10000);
+        //alert('first init setting t/o');
+        setTimeout(function(){initChart()},5000);
     }
 }
 
@@ -206,12 +251,15 @@ function renderFriends(path){
                 }
             }
         });
+        $('#happy-box-val').text(happy.length);
+        $('#sad-box-val').text(gloomy.length);
         if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
     });
 }
 function redraw_friends_widgets(happy, gloomy){
+    //alert('redraw friends widget called '+happy.length+' '+gloomy.length);
     $("#happy-friends").empty();
     $("#gloomy-friends").empty();
 
@@ -244,6 +292,7 @@ function redraw_friends_widgets(happy, gloomy){
     }
 }
 function renderFriendIcon(id,mood_json){
+    //alert('render friend action');
     var picLink = 'https://graph.facebook.com/'+id+'/picture';
     var mood = mood_json.m;
     var post = mood_json.p;
@@ -273,70 +322,10 @@ function renderFriendIcon(id,mood_json){
     return [happy,html];
 }
 function overFriendPic(id){
-    $("#"+id+"modal").modal();
+    $("#"+id+"modal").modal({'containerId':'friends-modal-container','overlayId':'friends-modal-overlay'});
 }
-function renderCloud(){
-    var word_list = [
-    {
-        text: "Jonathan",
-        weight: 9
-    },
-
-    {
-        text: "Hot",
-        weight: 2
-    },
-
-    {
-        text: "Meeting",
-        weight: 9
-    },
-
-    {
-        text: "Friends",
-        weight: 8
-    },
-
-    {
-        text: "Delicious",
-        weight: 5
-    },
-
-    {
-        text: "Love",
-        weight: 3
-    },
-
-    {
-        text: "Funny",
-        weight: 11
-    },
-
-    {
-        text: "Great",
-        weight: 6
-    }
-    ];
-    $("#tag-cloud").jQCloud(word_list);
-}
-
 
 //new functions
-function showGraph(){
-    alert('show graph clicked');
-    $("#report-widget").hide();
-    $("#personal-widget").show();
-    $("#b3").addClass('box-hidden');
-    $("#b4").removeClass('box-hidden');
-    setTimeout(function(){initChart()},100);
-}
-function showReport(){
-    alert('personal clicked');
-    $("#personal-widget").hide();
-    $("#report-widget").show();
-    $("#b4").addClass('box-hidden');
-    $("#b3").removeClass('box-hidden');
-}
 
 
 //changed to ajax
@@ -348,14 +337,115 @@ function submitMood(){
 
     if (val != ''){
         var userid = $('body').data('user_id');
+        $("#feel-submit").hide();
+        $("#ajax-busy").show();
+
         $.ajax({
-          url: "http://192.168.123.117:3000/users/"+userid+"/moods.json",
+          url: my_url+"/users/"+userid+"/moods.json",
           type:"POST",
           data:{"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare},
           success: function(data){
-            var obj = $.parseJSON(data);
-            returnFromCreateMood(obj.report_time,obj.val,obj.desc);
+//            alert('resp received '+data);
+            //var obj = $.parseJSON(data);
+            //alert('resp parsed '+data.val+' '+data.desc+' '+data.report_time);
+            returnFromCreateMood(data.report_time,data.val,data.desc);
           }
         });
     }
 }
+function activeWidget(){
+    var curr = $('body').data('current-view');
+    if(curr == 0){
+        return '#report-widget';
+    }else if(curr == 1){
+        return '#personal-widget';
+    }else if(curr == 2){
+        return '#happy-friends-widget';
+    }else if(curr == 3){
+        return '#sad-friends-widget';
+    }
+    return '';
+}
+
+function activeBox(){
+    var curr = $('body').data('current-box');
+    if(curr == 0){
+        return '#b3';
+    }else if(curr == 1){
+        return '#b4';
+    }else if(curr == 2){
+        return '#b5';
+    }
+    return '';
+}
+
+function showGraph(){
+    $(activeWidget()).hide();
+    $("#personal-widget").show();
+    $('body').data('current-view',1);
+    $(activeBox()).addClass('box-hidden');
+    $("#b4").removeClass('box-hidden');
+    $('body').data('current-box',1);
+    if(chart == null){
+        //initiate the graph for the firts time
+        //('setting for initChart');
+        setTimeout(function(){initChart()},100);
+    }else{
+        updateChart($('body').data('update_moods'));
+        $('body').removeData('update_moods');
+    }
+}
+function showReport(){
+    var curr = $('body').data('current-view');
+    $(activeWidget()).hide();
+    $("#report-widget").show();
+    $(activeBox()).addClass('box-hidden');
+    $("#b3").removeClass('box-hidden');
+    $('body').data('current-view',0);
+    $('body').data('current-box',0);
+}
+
+function showHappyFriends(){
+    var happy_cnt = $('#happy-box-val').text();
+    //alert('happy cnt '+happy_cnt);
+    if(happy_cnt == 0 || activeWidget()==2){
+        return;
+    }
+    var curr = $('body').data('current-view');
+    $(activeWidget()).hide();
+    $(activeBox()).addClass('box-hidden');
+    if(curr == 0){
+        //current view is report
+        $("#b4").removeClass('box-hidden');
+        $('body').data('current-box',1);
+    }else if(curr == 1){
+        //current view is graph
+        $("#b5").removeClass('box-hidden');
+        $('body').data('current-box',2);
+    }
+    $('body').data('current-view',2);
+    $('#happy-friends-widget').show();
+}
+
+function showGloomyFriends(){
+    var sad_cnt = $('#sad-box-val').text();
+    //alert('sad cnt '+sad_cnt);
+    if(sad_cnt == 0 ||activeWidget()==3){
+        return;
+    }
+    var curr = $('body').data('current-view');
+    if(curr == 0){
+        //current view is report
+        $("#report-widget").hide();
+        $("#b3").addClass('box-hidden');
+        $("#b4").removeClass('box-hidden');
+    }else if(curr == 1){
+        //current view is graph
+        $("#personal-widget").hide();
+        $("#b4").addClass('box-hidden');
+        $("#b5").removeClass('box-hidden');
+    }
+    $('body').data('current-view',3);
+}
+
+

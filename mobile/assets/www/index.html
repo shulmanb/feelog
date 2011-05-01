@@ -21,91 +21,97 @@
             $(".bg").css({width: $(window).width() + "px", height: $(window).height() + "px", overflow:"hidden"});
             $("#bg").css({width: $(window).width() + "px"});
             $('body').data('norm',0);
+            $('body').data('current-view',0);
+            $('body').data('current-box',0);
             prepareMoodIcons();
-            // Setup the ajax indicator
-            $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
 
         });
     </script>
 </head>
 <body>
-<div id="login-wrapper">
-    <div class="login-container">
-    <div class="login">
-        <div class="login-top">
-            <div class="login-top-name">
-                Feelog
-            </div>
-            <div class="login-top-moto">
-                makes you happy!
-            </div>
-            <!--div class="login-top-expl">
-                   Understand what makes you <br>
-                   and your friends tick<br>
-                   and take action<br>
-                   to make your life better...
-            </div-->
+    <div id="login-wrapper">
+        <div id="login-modal-content">
+            Loading...
         </div>
-        <div class="login-bottom">
-            <div class="login-bottom-fb">
-                <div class="fb-login-txt fb-login-txt-top">
-                    Login with your
+        <div class="login-container">
+        <div class="login">
+            <div class="login-top">
+                <div class="login-top-name">
+                    Feelogg
                 </div>
-                <div class="fb-login-txt fb-login-txt-bottom">
-                    Facebook account
+                <div class="login-top-moto">
+                    makes you happy!
                 </div>
-                <div class="fb-login-img">
-                        <img src='fb_login_button.png' onclick="fblogin()"/>
-                </div>
+                <!--div class="login-top-expl">
+                       Understand what makes you <br>
+                       and your friends tick<br>
+                       and take action<br>
+                       to make your life better...
+                </div-->
             </div>
+            <div class="login-bottom">
+                <div class="login-bottom-fb">
+                    <div class="fb-login-txt fb-login-txt-top">
+                        Login with your
+                    </div>
+                    <div class="fb-login-txt fb-login-txt-bottom">
+                        Facebook account
+                    </div>
+                    <div class="fb-login-img">
+                            <img src='fb_login_button.png' onclick="fblogin()"/>
+                    </div>
+                </div>
 
-            <div class="login-bottom-logo">
-                <img src="moods-logo.png" width="230" height="100"/>
+                <div class="login-bottom-logo">
+                    <img src="moods-logo.png" width="230" height="100"/>
+                </div>
             </div>
         </div>
     </div>
-</div>
-</div>
-<div id="wrapper">
-    <div class="top">
-        <div class="logo">
-            <span class="mt">Feelog</span> <span class="st">makes you happy</span>
-        </div>
     </div>
-    <div class="container">
-        <div class="content">
-            <div id="report-widget" class="widget">
-                <div class="feelog-input">
-                    <div class="hf">how do you feel?</div>
-                    <div class="smileys-top">
-                        <div id="s1" class="smiley">
-                            <img src="mood-very_happy.png"/>
+    <div id="wrapper">
+        <div class="top">
+            <div class="logo">
+                <span class="mt">Feelogg</span> <span class="st">makes you happy</span>
+            </div>
+        </div>
+        <div class="container">
+            <div class="mys">
+                  <div class="fl2">
+                      <img id="user-pic" src="pic.gif">
+                  </div>
+                  <div id="usr-status" class="usr-status">
+                  </div>
+            </div>
+            <div id="report-widget" class="widget" onswipeleft="showGraph()">
+                  <div class="content">
+                        <div class="feelog-input">
+                        <div class="hf">how do you feel?</div>
+                        <div class="smileys-top">
+                            <div id="s1" class="smiley">
+                                <img src="mood-very_happy.png"/>
+                            </div>
+                            <div id="s2" class="smiley">
+                                <img src="mood-twink.png"/>
+                            </div>
+                            <div id="s3" class="smiley">
+                                <img src="mood-happy.png"/>
+                            </div>
+                            <div id="s4" class="smiley">
+                                <img src="mood-ok.png"/>
+                            </div>
                         </div>
-                        <div id="s2" class="smiley">
-                            <img src="mood-twink.png"/>
+                        <div class="smileys-down">
+                            <div id="s5" class="smiley">
+                                <img src="mood-sad.png"/>
+                            </div>
+                            <div id="s6" class="smiley">
+                                <img src="mood-very_sad.png"/>
+                            </div>
+                            <div id="s7" class="smiley">
+                                <img src="mood-angry.png"/>
+                            </div>
                         </div>
-                        <div id="s3" class="smiley">
-                            <img src="mood-happy.png"/>
-                        </div>
-                        <div id="s4" class="smiley">
-                            <img src="mood-ok.png"/>
-                        </div>
-                    </div>
-                    <div class="smileys-down">
-                        <div id="s5" class="smiley">
-                            <img src="mood-sad.png"/>
-                        </div>
-                        <div id="s6" class="smiley">
-                            <img src="mood-very_sad.png"/>
-                        </div>
-                        <div id="s7" class="smiley">
-                            <img src="mood-angry.png"/>
-                        </div>
-                    </div>
-
-                    <form accept-charset="UTF-8" action="/users/7/moods" data-remote="true"
-                          id="new_mood"
-                          method="post">
                         <div class="ta">
                             <input type="text" class="i1" name="mood[desc]" id="how" value="why?"/><br/>
                             <input id="mood_val" name="mood[mood]" type="hidden"/>
@@ -113,37 +119,49 @@
                         <div class="actions">
                             <div class="fl"><input id="fbshare" name="fbshare" type="checkbox" checked/> Facebook</div>
                             <div class="fl"><input id="twshare" name="twshare" type="checkbox" checked/> Twitter</div>
-                            <div id="feel-submit" class="fl"><img src="btnLog.png" id="feel-submit-img" />
-                            </div>
+                            <div class="fl" id="feel-submit" ><img src="btnLog.png" id="feel-submit-img" /></div>
+                            <div class="fl" id="ajax-busy"><img src="ajax-loader.gif"></div>
                         </div>
-                    </form>
-                </div>
-            </div>
-            <div id="personal-widget" class="widget">
-                <div class="mys">
-                  <div class="fl2">
-                      <img id="user-pic" src="">
-                  </div>
-                  <div id="usr-status">
+                    </div>
                   </div>
                 </div>
-                <div id="moods-graph" class="moods-graph" style='width: 230px; height: 208px;'>
+            <div id="personal-widget" class="widget" onswiperight="showReport()" onswipeleft="showHappyFriends()">
+                    <div class="content">
+                        <div id="moods-graph" class="moods-graph" style='width: 230px; height: 215px;'>
+                        </div>
+                    </div>
+                </div>
+            <div id="happy-friends-widget" class="widget" onswiperight="showGraph()" onswipeleft="showGloomyFriends()">
+                <div class="content">
+                    <div class="act">warm up with <span class="happy">Happy</span> friends</div>
+                    <div id="happy-friends" class="friends-action">
+                        <div class="frl"><img src="ajax-loader.gif"/></div>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="boxes">
-            <div id="b1" class="box">
+            <div id="sad-friends-widget" class="widget" onswiperight="showHappyFriends()">
+                <div class="content">
+                    <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
+                    <div id="gloomy-friends" class="friends-action">
+                        <div class="frl"><img src="ajax-loader.gif"/></div>
+                    </div>
+                </div>
             </div>
-            <div id="b2" class="box">
+            <div class="boxes">
+                <div id="b1" class="box happy-box" onclick="showHappyFriends()">
+                    <div id='happy-box-val' class="box-val">0</div>
+                </div>
+                <div id="b2" class="box sad-box" onclick="showGloomyFriends()">
+                    <div id='sad-box-val' class="box-val">0</div>
+                </div>
+                <div id="b3" class="box" onclick="showGraph()"><div class="box-text">more</div></div>
+                <div id="b4" class="box box-hidden" onclick="showReport()"><div class="box-text">back</div></div>
+                <div id="b5" class="box box-hidden" onclick="showGraph()"><div class="box-text">back</div></div>
             </div>
-            <div id="b3" class="box" onclick="showGraph()"><div class="box-text">more..</div></div>
-            <div id="b4" class="box box-hidden" onclick="showReport()"><div class="box-text">back</div></div>
         </div>
     </div>
-</div>
-<div class="credit">
-    Feelog &copy; 2011
-</div>
-
+    <div class="credit">
+        Feelog &copy; 2011
+    </div>
 </body>
 </html>

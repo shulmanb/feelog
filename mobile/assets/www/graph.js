@@ -6,7 +6,8 @@ function format_label(value){
     }
     min = min+ts.getMinutes();
     //ts.getHours()+":"+min+"<br> "+ - was removed
-    var dstr = month[ts.getMonth()]+" "+ts.getDate();
+    var dstr = month[ts.getMonth()-1]+' '+ts.getDate();
+
     return dstr;
 }
 
@@ -23,7 +24,7 @@ function format_tooltip(point){
         min = "0";
     }
     min = min+ts.getMinutes();
-    var tooltip = point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth()]+" "+ts.getDate();
+    var tooltip = point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth()-1]+" "+ts.getDate();
     return tooltip;
 }
 
@@ -31,6 +32,7 @@ function onClick(){
    $.modal("Test");
 }
 function drawChart(moods,norm) {
+    //alert('draw chart called');
     if(!norm){
         var norm = 0;
     }
@@ -178,7 +180,9 @@ function drawChart(moods,norm) {
             enabled: false
         }
     };
+    //alert('draw chart for '+moods.length+' moods');
     for(var i=0;i<moods.length;i++){
+        //alert('adding mood '+i+' '+moods[i].date);
         var date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\Z/;
         var date_array = date_pattern.exec(moods[i].date);
         var d = new Date(date_array[1],date_array[2],date_array[3],date_array[4],date_array[5]).getTime();
@@ -201,6 +205,7 @@ function drawChart(moods,norm) {
             unnormalized_options.xAxis.categories.push(d);
             /*needed for unnormalized graph*/
         }
+        //alert('added mood '+i);
     }
     var options;
     if(norm == 1){
@@ -208,5 +213,8 @@ function drawChart(moods,norm) {
     }else{
         options = unnormalized_options;
     }
+    //alert('perfoming draw');
     chart = new Highcharts.Chart(options);
+    //alert('draw chart ended');
+
 }

@@ -5,7 +5,7 @@ function format_label(value){
         min = "0";
     }
     min = min+ts.getMinutes();
-    return ts.getHours()+":"+min+"<br> "+month[ts.getMonth()]+" "+ts.getDate();
+    return month[ts.getMonth() - 1]+" "+ts.getDate();
 }
 
 function format_tooltip(point){
@@ -21,7 +21,7 @@ function format_tooltip(point){
         min = "0";
     }
     min = min+ts.getMinutes();
-    var tooltip = point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth()]+" "+ts.getDate();
+    var tooltip = point.name+"<br>"+ts.getHours()+":"+min+" "+month[ts.getMonth() -1]+" "+ts.getDate();
     return tooltip;
 }
 
