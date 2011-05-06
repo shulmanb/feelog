@@ -1,10 +1,5 @@
 function format_label(value){
     var ts = new Date(value)
-    var min = "";
-    if(ts.getMinutes()<10){
-        min = "0";
-    }
-    min = min+ts.getMinutes();
     return month[ts.getMonth() - 1]+" "+ts.getDate();
 }
 
@@ -25,8 +20,28 @@ function format_tooltip(point){
     return tooltip;
 }
 
-function onClick(){
-   $.modal("Test");
+function onClick(point){
+    var ts;
+    if(point.t){
+       ts = new Date(point.t);
+    }else{
+       ts = new Date(point.x);
+    }
+    var min = "";
+    if(ts.getMinutes()<10){
+        min = "0";
+    }
+    min = min+ts.getMinutes();
+
+    html = "<div class='modal-content'> \
+               <div>getMoodImageLink(point.y)</div>\
+               <div>edit</div>\
+               <div>point.name</div>\
+               <div>edit</div>\
+               <div>ts.getHours()+\":\"+min+\" \"+month[ts.getMonth() -1]+\" \"+ts.getDate();</div>\
+               <div><button type=\"button\">Update Post</button></div>\
+            </div>";
+   $.modal(html);
 }
 function drawChart(moods,norm) {
     if(!norm){
@@ -77,7 +92,7 @@ function drawChart(moods,norm) {
                 point: {
                     events: {
                         click: function() {
-                            onClick();
+                            onClick(this.point);
                         }
                     }
                 }

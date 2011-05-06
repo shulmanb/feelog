@@ -16,7 +16,7 @@ class UsersControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test "should create user" do
+  test "should redirect_fb user" do
     assert_difference('User.count') do
       post :create, :user => @user.attributes
     end

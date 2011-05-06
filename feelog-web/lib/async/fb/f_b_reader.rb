@@ -1,10 +1,9 @@
 require 'emotions/emotions_parser'
-
 class FBReader
   @@redis = Redis.new
   @@paser = EmotionsParser.new
   Resque.redis = @@redis
-
+  @@coder = HTMLEntities.new
   def self.parse_response(response)
     parsed = JSON.parse(response)
     hash={}
@@ -34,7 +33,7 @@ class FBReader
         post = msg['msg']
         mood = @@paser.pars_post(post)
         if mood > 0
-          moods.update({key=>{:m=>mood,:p=>post,:t=>msg['time'],:n=>val['name']}})
+          moods.update({key=>{:m=>mood,:p=>coder.encode(post),:t=>msg['time'],:n=>val['name']}})
           break
         end
       end

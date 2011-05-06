@@ -6,7 +6,7 @@ function format_label(value){
     }
     min = min+ts.getMinutes();
     //ts.getHours()+":"+min+"<br> "+ - was removed
-    var dstr = month[ts.getMonth()-1]+' '+ts.getDate();
+    var dstr = month[ts.getMonth()-1]+' '+ts.getDate()+' ';
 
     return dstr;
 }
@@ -28,9 +28,6 @@ function format_tooltip(point){
     return tooltip;
 }
 
-function onClick(){
-   $.modal("Test");
-}
 function drawChart(moods,norm) {
     //alert('draw chart called');
     if(!norm){
@@ -80,9 +77,9 @@ function drawChart(moods,norm) {
                 cursor: 'pointer',
                 point: {
                     events: {
-                        click: function() {
-                            onClick();
-                        }
+                        //click: function() {
+                        //    onClick();
+                        //}
                     }
                 }
             },

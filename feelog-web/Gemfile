@@ -33,6 +33,7 @@ gem 'resque'
 gem 'engtagger'
 gem 'redis'
 gem 'redis-namespace'
+gem 'htmlentities'
 #gem 'SystemTimer'
 
 # gem 'aws-s3', :require => 'aws/s3'

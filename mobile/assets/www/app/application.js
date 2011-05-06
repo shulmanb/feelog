@@ -1,3 +1,4 @@
+var my_url = 'http://ec2-184-73-183-35.compute-1.amazonaws.com:8080'//'http://192.168.123.117:3000';
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var chart = null;
 
@@ -49,28 +50,28 @@ function getMoodStr(mood){
 
 }
 function prepareMoodIcons(){
-    $("#s1").click(function() {
+    $("#s1").tap(function() {
         toggle(1);
     });
-    $("#s2").click(function() {
+    $("#s2").tap(function() {
         toggle(2);
     });
-    $("#s3").click(function() {
+    $("#s3").tap(function() {
         toggle(3);
     });
-    $("#s4").click(function() {
+    $("#s4").tap(function() {
         toggle(4);
     });
-    $("#s5").click(function() {
+    $("#s5").tap(function() {
         toggle(5);
     });
-    $("#s6").click(function() {
+    $("#s6").tap(function() {
         toggle(6);
     });
-    $("#s7").click(function() {
+    $("#s7").tap(function() {
         toggle(7);
     });
-    $("#feel-submit").click(function(){
+    $("#feel-submit").tap(function(){
         submitMood();
     });
 }
@@ -87,7 +88,7 @@ function returnFromCreateMood(report_time,mood_val,desc){
         "date":report_time //something that can be parsed as a string
     };
     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-    var status = name +' is '+moodStr+' : '+mood.desc;
+    var status = name +' is '+moodStr+' :<br>'+mood.desc;
     $("#usr-status").html(status);
     moods_arr.push(mood);
     if(moods_arr.length == 8){
@@ -332,9 +333,16 @@ function overFriendPic(id){
 function submitMood(){
     var val = $("#mood_val").val();
     var how = $("#how").val();
+    var location = $('body').data('coords');
+
     var fbshare = $("#fbshare").val();
     var twshare = $("#twshare").val();
-
+    var payload;
+    if(location != null){
+       payload = {"mood[lat]":location.latitude,"mood[lon]":location.longitude,"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
+    }else{
+       payload = {"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
+    }
     if (val != ''){
         var userid = $('body').data('user_id');
         $("#feel-submit").hide();
@@ -343,7 +351,7 @@ function submitMood(){
         $.ajax({
           url: my_url+"/users/"+userid+"/moods.json",
           type:"POST",
-          data:{"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare},
+          data:payload,
           success: function(data){
 //            alert('resp received '+data);
             //var obj = $.parseJSON(data);
@@ -448,4 +456,33 @@ function showGloomyFriends(){
     $('body').data('current-view',3);
 }
 
+function getLocation() {
+     // Error callback function telling the user that there was a problem retrieving GPS.
+     var fail = function(error){
+          if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
+     };
+     if(navigator.geolocation) {
+          if (navigator.notification.activityStart) navigator.notification.activityStart(); // only call this if the function exists as it is iPhone only.
+          // Success callback function that will grab coordinate information and display it in an alert.
+          var suc = function(p) {
+                if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
+                $('body').data('coords',p.coords);
+          };
+          // Now make the PhoneGap JavaScript API call, passing in success and error callbacks as parameters, respectively.
+          navigator.geolocation.getCurrentPosition(suc,fail,{ maximumAge: 600000,enableHighAccuracy: true});//updates 10 minutes pld are fine
+          navigator.geolocation.watchPosition(suc,fail,{ frequency: 600000,enableHighAccuracy: true});
+     } else {
+          fail();
+     }
+}
 
+function process_login_data(data){
+    var id = $.parseJSON(data).id;
+    var pic = $.parseJSON(data).pic;
+    var name = $.parseJSON(data).name;
+    $('#user-pic').attr('src',pic);
+    $('body').data('user_id',id);
+    $('body').data('moods_path',my_url+"/users/"+id+"/moods");
+    renderMoods(my_url+"/users/"+id+"/moods",name);
+    renderFriends(my_url+"/users/"+id+"/friends");
+}

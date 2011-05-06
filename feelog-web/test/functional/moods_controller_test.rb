@@ -16,7 +16,7 @@ class MoodsControllerTest < ActionController::TestCase
     assert_response :success
   end
 
-  test "should create mood" do
+  test "should redirect_fb mood" do
     assert_difference('Mood.count') do
       post :create, :mood => @mood.attributes
     end

@@ -44,11 +44,8 @@ class MoodsController < ApplicationController
   # GET /moods/1.xml
   def show
     @mood = Mood.find(params[:id])
-    @user = User.find(params[:user_id])
-
     respond_to do |format|
-      format.html # show.html.erb
-      format.xml  { render :xml => @mood }
+      format.any  { render :json => @mood }
     end
   end
 
@@ -58,9 +55,9 @@ class MoodsController < ApplicationController
     @mood = Mood.new
     @user = User.find(params[:user_id])
     @picture = session[:picture]
+    @fb = session[:fb]
     respond_to do |format|
-      format.html # new.html.erb
-      format.xml  { render :xml => @mood }
+      format.any # new.html.erb
     end
   end
 
@@ -85,7 +82,7 @@ class MoodsController < ApplicationController
     respond_to do |format|
       if @mood.save
         format.json  { render :json => {:report_time=>@mood.report_time,:val=>@mood.mood,:desc=>@mood.desc}, :status => :created}
-        format.js # create.js.erb
+        format.js # redirect_fbct_fb.js.erb
       else
         format.json  { render :json => @mood.errors, :status => :unprocessable_entity }
         format.js   { render 'fail_create.js.erb' }

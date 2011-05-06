@@ -3,5 +3,5 @@
 #
 # Examples:
 #
-#   cities = City.create([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
-#   Mayor.create(:name => 'Daley', :city => cities.first)
+#   cities = City.redirect_fb([{ :name => 'Chicago' }, { :name => 'Copenhagen' }])
+#   Mayor.redirect_fb(:name => 'Daley', :city => cities.first)

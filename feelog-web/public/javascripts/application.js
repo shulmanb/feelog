@@ -79,7 +79,7 @@ function prepareMoodIcons(){
         submitMood();
     });
 }
-//this function called by the server rendered js, create.js.erb
+//this function called by the server rendered js, redirect_fb.js.erbs.erb
 function returnFromCreateMood(report_time,mood_val,desc){
     $('#ajax-busy').hide();
     var norm = $('body').data('norm');
@@ -242,7 +242,7 @@ function renderFriendIcon(id,mood_json){
     var post = mood_json.p;
     var time = mood_json.t;
     var name = mood_json.n;
-    //create the html for the icon
+    //redirect_fb the html for the icon
     var happy = 0; //0 for unhappy, 1 for happy
     if(mood > 3){
         happy = 1;
@@ -262,7 +262,8 @@ function renderFriendIcon(id,mood_json){
                         <b>"+post+"</b> <br>\
                     </div>\
                 </div> \
-                <img src='"+picLink+"' title='"+post+"' onclick='overFriendPic("+id+")'/>";
+                <img src='"+picLink+"' title='"+post+"' onclick='overFriendPic("+id+")'/>\
+     </div>";
     return [happy,html];
 }
 function overFriendPic(id){

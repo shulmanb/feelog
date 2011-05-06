@@ -3,6 +3,10 @@
   <%= javascript_include_tag 'highcharts' %>
   <%= javascript_include_tag 'jqcloud-0.1.8.min.js' %>
   <%= stylesheet_link_tag "jqcloud.css" %>
+  <% if @fb == true %>
+    <%= stylesheet_link_tag "main-fb.css" %>
+    <script src="http://connect.facebook.net/en_US/all.js"></script>
+  <% end %>
   <script type="text/javascript">
     var chart;
     var name = '<b><%=@user.username%></b>';
@@ -17,8 +21,15 @@
       renderCloud();
       // Setup the ajax indicator
       $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
+      <% if @fb == true %>
+        FB.init();
+        FB.CanvasClient.setCanvasHeight(700);
+      <% end %>
     });
   </script>
+<% end %>
+<% if @fb == true %>
+   <div id="fb-root"></div>
 <% end %>
 <div class="content">
   <div class="left-side">
