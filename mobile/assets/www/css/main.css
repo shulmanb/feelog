@@ -13,7 +13,9 @@ body{
 	background-color: #e5e2d3;
 	font-family: "Helvetica";
 }
-
+a {
+    text-decoration: none;
+}
 img{
 	border: 0 none;
 }
@@ -38,12 +40,12 @@ img{
 	font-size: 16pt;
 	color: #fff;
 	font-weight: bold;
-	padding-right: 10px;
+	padding-right: 2px;
 }
 
 .st{
 	font-family: "Helvetica";
-	font-size: 14pt;
+	font-size: 10pt;
 	font-style: italic;
 	color: #fff;
 }
@@ -153,7 +155,7 @@ img{
 	background-color:#403152;
 }
 .logo{
-	padding: 6px 10px;
+	margin-left: 55px;
 }
 
 /* start middle part*/
@@ -168,7 +170,7 @@ img{
     width: 270px;
     background-color: #fff;
     border-radius: 20px;
-    margin: 0px auto 10px;
+    margin: 0px auto 5px;
     padding-top:5px;
     padding-bottom:5px;
 }
@@ -247,10 +249,12 @@ img{
     display:none;
 }
 .box-text{
-    font-size: 16pt;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: bold;
 	color: #fff;
-    margin-top: 10px;
-    margin-left: 20px;
+    text-align:center;
+    margin-top:12px;
 }
 
 .smiley{
@@ -309,7 +313,6 @@ img{
 	margin-top: 24px;
 	width: 265px;
 	height: 85px;
-	background: url("sl-bg.png");
 }
 
 .slt{
@@ -336,8 +339,7 @@ img{
 }
 
 .credit{
-	text-align: center;
-	margin-top: 10px;
+    text-align: center;
 	color: #948a54;
 	font-size: 10pt;
 }
@@ -411,4 +413,120 @@ img{
 
 #friends-modal-content{
     display:none;
+}
+
+
+/* jqtouch - toolbar*/
+#jqt .toolbar {
+    background-color:#403152;
+    -webkit-box-sizing: border-box;
+    border-bottom: 1px solid #403152;
+    padding: 10px;
+    height: 40px;
+    position: relative;
+}
+#jqt .black-translucent .toolbar {
+    margin-top: 20px;
+}
+#jqt .toolbar > h1 {
+    position: absolute;
+    overflow: hidden;
+    left: 50%;
+    top: 10px;
+    line-height: 1em;
+    margin: 1px 0 0 -75px;
+    height: 40px;
+    font-size: 20px;
+    width: 150px;
+    font-weight: bold;
+    text-shadow: rgba(0,0,0,1) 0 -1px 1px;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #fff;
+}
+#jqt.landscape .toolbar > h1 {
+    margin-left: -125px;
+    width: 250px;
+}
+#jqt .button, #jqt .back, #jqt .cancel, #jqt .add {
+    position: absolute;
+    overflow: hidden;
+    top: 8px;
+    right: 3px;
+    margin: 0;
+    border-width: 0 5px;
+    padding: 0 3px;
+    width: auto;
+    height: 30px;
+    line-height: 30px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: rgba(0, 0, 0, 0.5) 0px -1px 0;
+    text-overflow: ellipsis;
+    text-decoration: none;
+    white-space: nowrap;
+    background: none;
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/button.png) 0 5 0 5;
+}
+#jqt .button.active,
+#jqt .cancel.active,
+#jqt .add.active {
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/buttonActive.png) 0 5 0 5;
+}
+#jqt .back {
+    left: 3px;
+    right: auto;
+    padding: 0;
+    max-width: 60px;
+    border-width: 0 8px 0 14px;
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/backButton.png) 0 8 0 14;
+}
+#jqt .back.active {
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/backButtonActive.png) 0 8 0 14;
+}
+#jqt .leftButton, #jqt .cancel {
+    left: 6px;
+    right: auto;
+}
+#jqt .add {
+    font-size: 24px;
+    line-height: 24px;
+    font-weight: bold;
+}
+#jqt .bigButton {
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/bigButton.png) 0 12 0 12;
+    border-width: 0 12px;
+    color: #000000;
+    display: block;
+    font-size: 20px;
+    font-weight: bold;
+    line-height: 46px;
+    text-align: center;
+    text-decoration: inherit;
+    text-shadow: rgba(255,255,255,.8) 0 1px 0;
+}
+#jqt .bigButton.active {
+    -webkit-border-image: url(../utils/jqtouch/themes/default/img/bigButtonActive.png) 0 12 0 12;
+    color: #000000;
+}
+/* end jqtouch toolbar*/
+
+
+/* */
+
+
+
+#loading {
+    -webkit-border-radius: 10px;
+    -webkit-box-shadow: rgba(0,0,0, .5) 0px 1px 1px;
+    background: gray;
+}
+
+
+
+.touchable{
+
 }

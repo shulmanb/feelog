@@ -1,8 +1,10 @@
-var my_url = 'http://ec2-184-73-183-35.compute-1.amazonaws.com:8080'//'http://192.168.123.117:3000';
+var my_url = 'http://184.73.183.35/'//'http://192.168.123.117:3000';
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var chart = null;
+var name = null;
 
 function toggle(moodid){
+    console.log("toggle touched");
     $(".smiley-selected").toggleClass("smiley-selected");
     $("#mood_val").val(moodid);
     $('#'+'s'+moodid).toggleClass("smiley-selected");
@@ -49,32 +51,6 @@ function getMoodStr(mood){
     }
 
 }
-function prepareMoodIcons(){
-    $("#s1").tap(function() {
-        toggle(1);
-    });
-    $("#s2").tap(function() {
-        toggle(2);
-    });
-    $("#s3").tap(function() {
-        toggle(3);
-    });
-    $("#s4").tap(function() {
-        toggle(4);
-    });
-    $("#s5").tap(function() {
-        toggle(5);
-    });
-    $("#s6").tap(function() {
-        toggle(6);
-    });
-    $("#s7").tap(function() {
-        toggle(7);
-    });
-    $("#feel-submit").tap(function(){
-        submitMood();
-    });
-}
 //this function called by the server rendered js, create.js.erb
 function returnFromCreateMood(report_time,mood_val,desc){
     $("#how").val("why?");
@@ -89,7 +65,7 @@ function returnFromCreateMood(report_time,mood_val,desc){
     };
     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
     var status = name +' is '+moodStr+' :<br>'+mood.desc;
-    $("#usr-status").html(status);
+    $(".usr-status").html(status);
     moods_arr.push(mood);
     if(moods_arr.length == 8){
         moods_arr.shift();
@@ -158,15 +134,19 @@ function renderMoods(path,name){
     var initializing = false;
     var first_init = true;
     $.ajax(path+"/limit/7.json").success(function(data){
+        console.log("BACK FROM GET MOODS");
         var i = 0;
         if(data.length == 0){
         //set empty data notification
+            console.log("BACK FROM GET MOODS--EMPTY");
         }
         $.each(data, function(key, value) {
             if (key == 'retry'){
+                console.log("BACK FROM GET MOODS--RETRY");
                 setTimeout(function(){renderMoods(path)},value);
                 initializing = true;
             }else if(key == 'retry_cnt'){
+                console.log("BACK FROM GET MOODS--RETRY_CNT "+value);
                 if(value > 1){
                     first_init = false;
                 }
@@ -179,9 +159,11 @@ function renderMoods(path,name){
                 };
                 if(i==0){
                     //latest mood
+                    console.log("BACK FROM GET MOODS--LATEST MOOD "+mood.desc);
                     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
                     var status = name +' is '+moodStr+' : <br>'+mood.desc;
-                    $("#usr-status").html(status);
+                    $(".usr-status").html(status);
+                    console.log("BACK FROM GET MOODS--user status set");
                 }
                 moods_arr.push(mood);
                 i++;
@@ -190,6 +172,7 @@ function renderMoods(path,name){
         $('body').data('moods',moods_arr);
         $('body').data('init',initializing);
         $('body').data('f_init',first_init);
+        jQT.goTo("#home");
     });
 }
 /*
@@ -235,11 +218,14 @@ function renderFriends(path){
     var gloomy = new Array();
     var render_needed = true;
     $.ajax(path).success(function(data){
+        console.log('BACK FROM GET FRIENDS');
         if(data.length == 0){}
         $.each(data, function(id, mood_json) {
             if (id == 'retry'){
+                console.log('BACK FROM GET FRIENDS -- retry');
                 setTimeout(function(){renderFriends(path)},mood_json);
             }else if (id == 'retry_cnt'){
+                console.log('BACK FROM GET FRIENDS - retry cnt '+mood_json);
                 if (mood_json >1){
                     render_needed = false;
                 }
@@ -250,13 +236,16 @@ function renderFriends(path){
                 }else{
                     gloomy.push(rendered[1]);
                 }
+                $('#jqt').append(rendered[2]);
             }
         });
-        $('#happy-box-val').text(happy.length);
-        $('#sad-box-val').text(gloomy.length);
+        console.log('BACK FROM GET FRIENDS - set boxes '+happy.length+" "+gloomy.length);
+        $('.happy-box-val').text(happy.length);
+        $('.sad-box-val').text(gloomy.length);
         if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
+        $.modal.close();
     });
 }
 function redraw_friends_widgets(happy, gloomy){
@@ -309,21 +298,47 @@ function renderFriendIcon(id,mood_json){
     var fb_date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\+0000/;
     var date_array = fb_date_pattern.exec(time);
     var prityTime = month[date_array[2]-1] + " " +date_array[3]+" "+ date_array[1];
-    var html =
+    var picHtml =
     "<div id='"+id+"' class='friend-icon' > \
-                <div id='"+id+"modal' class='modal-content'> \
-                    <img style=\"float:left; padding:5px\" src='"+picLink+"'/>\
-                    <div style=\"float:left; padding-top:5px\">\
-                        <b>"+name+"</b> is: <b>"+getMoodStr(mood)+"</b> <br>\
-                        Posted on "+prityTime+" <br>\
-                        <b>"+post+"</b> <br>\
-                    </div>\
-                </div> \
-                <img src='"+picLink+"' title='"+post+"' onclick='overFriendPic("+id+")'/>";
-    return [happy,html];
+                <img src='"+picLink+"' title='"+post+"' ontouchstart='overFriendPic("+id+")'/>";
+    var contentH = $(window).height() - 160;
+    var friendHtml =
+        "<div id='"+id+"modal' class='modal-content'> \
+            <div class='toolbar'>\
+                <div class='logo'>\
+                    <span class='mt'>Feelogg</span> <span class='st'>makes you happy</span>\
+                </div>\
+                <a href='#' class='back'>Back</a>\
+                <a href='#' class='button' ontouchstart='showHome()'>Home</a>\
+            </div>\
+             <div  class='container'>\
+                <div class='mys container'>\
+                      <div class='fl2'>\
+                          <img class='user-pic' src='images/pic.gif'>\
+                      </div>\
+                      <div class='usr-status'></div>\
+                </div>\
+                <div class='content' style='height:"+contentH+"px' >\
+                        <img style=\"float:left; padding:5px\" src='"+picLink+"'/>\
+                        <div style=\"float:left; padding-top:10px;padding-left:5px;padding-right:5px\">\
+                            <b>"+name+"</b> is: <b>"+getMoodStr(mood)+"</b> <br>\
+                            Posted on "+prityTime+" <br>\
+                        </div>\
+                        <div style=\"margin-top:5px;padding-left:5px;padding-right:5px\">\
+                            post\
+                        </div>\
+                </div>\
+                <div class='credit'>\
+                    Feelogg &copy; 2011\
+                </div>\
+             </div>\
+        </div>";
+
+    return [happy,picHtml,friendHtml];
 }
 function overFriendPic(id){
-    $("#"+id+"modal").modal({'containerId':'friends-modal-container','overlayId':'friends-modal-overlay'});
+    //$("#"+id+"modal").modal({'containerId':'friends-modal-container','overlayId':'friends-modal-overlay'});
+    jQT.goTo("#"+id+"modal");
 }
 
 //new functions
@@ -331,14 +346,15 @@ function overFriendPic(id){
 
 //changed to ajax
 function submitMood(){
+    console.log("SUBMITTING MOOD");
     var val = $("#mood_val").val();
     var how = $("#how").val();
     var location = $('body').data('coords');
-
     var fbshare = $("#fbshare").val();
     var twshare = $("#twshare").val();
     var payload;
     if(location != null){
+        console.log("SUBMITTING MOOD-LOCATION IS NOT NULL");
        payload = {"mood[lat]":location.latitude,"mood[lon]":location.longitude,"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
     }else{
        payload = {"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
@@ -361,39 +377,9 @@ function submitMood(){
         });
     }
 }
-function activeWidget(){
-    var curr = $('body').data('current-view');
-    if(curr == 0){
-        return '#report-widget';
-    }else if(curr == 1){
-        return '#personal-widget';
-    }else if(curr == 2){
-        return '#happy-friends-widget';
-    }else if(curr == 3){
-        return '#sad-friends-widget';
-    }
-    return '';
-}
-
-function activeBox(){
-    var curr = $('body').data('current-box');
-    if(curr == 0){
-        return '#b3';
-    }else if(curr == 1){
-        return '#b4';
-    }else if(curr == 2){
-        return '#b5';
-    }
-    return '';
-}
 
 function showGraph(){
-    $(activeWidget()).hide();
-    $("#personal-widget").show();
-    $('body').data('current-view',1);
-    $(activeBox()).addClass('box-hidden');
-    $("#b4").removeClass('box-hidden');
-    $('body').data('current-box',1);
+    jQT.goTo('#personal-page');
     if(chart == null){
         //initiate the graph for the firts time
         //('setting for initChart');
@@ -404,85 +390,126 @@ function showGraph(){
     }
 }
 function showReport(){
-    var curr = $('body').data('current-view');
-    $(activeWidget()).hide();
-    $("#report-widget").show();
-    $(activeBox()).addClass('box-hidden');
-    $("#b3").removeClass('box-hidden');
-    $('body').data('current-view',0);
-    $('body').data('current-box',0);
+    jQT.goTo('#home');
 }
 
+function showHome(){
+    jQT.goTo('#home');
+}
+
+
 function showHappyFriends(){
-    var happy_cnt = $('#happy-box-val').text();
-    //alert('happy cnt '+happy_cnt);
-    if(happy_cnt == 0 || activeWidget()=='#happy-friends-widget'){
-        return;
-    }
-    var curr = $('body').data('current-view');
-    $(activeWidget()).hide();
-    $(activeBox()).addClass('box-hidden');
-    if(curr == 0){
-        //current view is report
-        $("#b4").removeClass('box-hidden');
-        $('body').data('current-box',1);
-    }else if(curr == 1){
-        //current view is graph
-        $("#b5").removeClass('box-hidden');
-        $('body').data('current-box',2);
-    }
-    $('body').data('current-view',2);
-    $('#happy-friends-widget').show();
+    jQT.goTo("#happy-friends-page");
 }
 
 function showGloomyFriends(){
-    var sad_cnt = $('#sad-box-val').text();
-    //alert('sad cnt '+sad_cnt);
-    if(sad_cnt == 0 ||activeWidget()=='#sad-friends-widget'){
-        return;
-    }
-    var curr = $('body').data('current-view');
-    if(curr == 0){
-        //current view is report
-        $("#report-widget").hide();
-        $("#b3").addClass('box-hidden');
-        $("#b4").removeClass('box-hidden');
-    }else if(curr == 1){
-        //current view is graph
-        $("#personal-widget").hide();
-        $("#b4").addClass('box-hidden');
-        $("#b5").removeClass('box-hidden');
-    }
-    $('body').data('current-view',3);
+    jQT.goTo("#sad-friends-page");
 }
 
 function getLocation() {
      // Error callback function telling the user that there was a problem retrieving GPS.
-     var fail = function(error){
-          if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
+    console.log("START GET LOCATION");
+    var fail = function(error){
+         console.log("GET LOCATION ERROR "+error);
+         if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
      };
      if(navigator.geolocation) {
-          if (navigator.notification.activityStart) navigator.notification.activityStart(); // only call this if the function exists as it is iPhone only.
+          //if (navigator.notification.activityStart) navigator.notification.activityStart(); // only call this if the function exists as it is iPhone only.
           // Success callback function that will grab coordinate information and display it in an alert.
           var suc = function(p) {
-                if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
+                //if (navigator.notification.activityStop) navigator.notification.activityStop(); // only call this if the function exists as it is iPhone only.
+                console.log("GET LOCATION SUCCESS "+p.coords);
                 $('body').data('coords',p.coords);
           };
           // Now make the PhoneGap JavaScript API call, passing in success and error callbacks as parameters, respectively.
-          navigator.geolocation.getCurrentPosition(suc,fail,{ maximumAge: 600000,enableHighAccuracy: true});//updates 10 minutes pld are fine
+          console.log("CALLING get current position");
+          navigator.geolocation.getCurrentPosition(suc,fail,{ maximumAge: 3000,enableHighAccuracy: true});//updates 10 minutes pld are fine
+         console.log("CALLING watch position");
           navigator.geolocation.watchPosition(suc,fail,{ frequency: 600000,enableHighAccuracy: true});
      } else {
           fail();
      }
+    console.log("END GET LOCATION");
+
 }
 
 function process_login_data(data){
     var id = $.parseJSON(data).id;
     var pic = $.parseJSON(data).pic;
-    var name = $.parseJSON(data).name;
-    $('#user-pic').attr('src',pic);
+    name = $.parseJSON(data).name;
+    $('user-pic').attr('src',pic);
     $('body').data('user_id',id);
     $('body').data('moods_path',my_url+"/users/"+id+"/moods");
-    renderMoods(my_url+"/users/"+id+"/moods",name);
     renderFriends(my_url+"/users/"+id+"/friends");
+    renderMoods(my_url+"/users/"+id+"/moods",name);
+    //alert('hide floaty');
+    //$(".loading").hideFloaty();
 }
+
+function doWindowSizeCalc(){
+    var h  = $(window).height();
+    var w = $(window).width();
+    var newH = h-100;
+    var newW = w-50;
+    var pdh = newH/2-50;
+    var pdw=newW/2 -50;
+    $(".bg").css({width: w + "px", height: h + "px", overflow:"hidden"});
+    $("#bg").css({width: w + "px"});
+    $(".content").height(h-200);
+    $("#loading").css({height:newH+"px",width:newW+"px",margin:"25px",padding:pdh+"px "+pdw+"px"});
+}
+
+function bindTouchEvents(){
+    $("#fb-login-img").live('touchstart',function(e){
+        console.log("login tapped");
+        fblogin();
+    });
+
+    $(".happy-box.touchable").live('touchstart', function(e){
+         showHappyFriends();
+    });
+
+    $(".sad-box.touchable").live('touchstart', function(e){
+         showGloomyFriends();
+    });
+
+    $(".graph-box").live('touchstart', function(e){
+         showGraph();
+    });
+
+    $(".report-box").live('touchstart',function(e){
+         showReport();
+    });
+
+    $('.home-button').live('touchstart',function(e){
+         showHome();
+    });
+
+    $("#s1").live('touchstart',function() {
+        toggle(1);
+    });
+    $("#s2").live('touchstart',function() {
+        toggle(2);
+    });
+    $("#s3").live('touchstart',function() {
+        toggle(3);
+    });
+    $("#s4").live('touchstart',function() {
+        toggle(4);
+    });
+    $("#s5").live('touchstart',function() {
+        toggle(5);
+    });
+    $("#s6").live('touchstart',function() {
+        toggle(6);
+    });
+    $("#s7").live('touchstart',function() {
+        toggle(7);
+    });
+    $("#feel-submit").live('touchstart',function(){
+        submitMood();
+    });
+
+}
+
+
