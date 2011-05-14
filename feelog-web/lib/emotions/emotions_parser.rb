@@ -18,6 +18,7 @@ class EmotionsParser
     num = 0;
     for s in sentences do
       tagged = tgr.get_readable(s)
+      next if tagged == nil
       arr = tagged.split(' ');
       #This rule removed bacause specifiying someone elses mood reflects yours
       #next if arr[0].end_with?('/NNP')

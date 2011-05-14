@@ -14,7 +14,7 @@
     $(document).ready(function() {
       $('body').data('norm',0);
       prepareMoodIcons();
-      $('body').data('userid', <%= @user.id.to_s %>);
+      $('body').data('userid',<%= @user.id.to_s %>);
       $('body').data('moods_path','<%= user_moods_path(@user)%>');
       renderMoods('<%= user_moods_path(@user)%>');
       renderFriends('<%= '/users/'+@user.id.to_s+'/friends' %>');
@@ -61,6 +61,7 @@
     <div class="mys">
       <div class="fl2"><img src=<%= "'"+ @picture +"'"%>/></div>
       <div id="usr-status"></div>
+      <div id="usr-report"></div>
     </div>
     <div class="sl">
       <div class="slt">

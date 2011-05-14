@@ -94,8 +94,9 @@ function returnFromCreateMood(report_time,mood_val,desc){
         "date":ts.toString()
     };
     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-    var status = name +' is '+moodStr+' : '+mood.desc;
+    var status = name +' is '+moodStr+' : ';
     $("#usr-status").html(status);
+    $("#usr-report").text(mood.desc);
     var series = chart.series[0];
     //shift on more then 10 elements in the graph
     var shift = series.data.length >= 10;
@@ -150,8 +151,9 @@ function renderMoods(path){
                 if(i==0){
                     //latest mood
                     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-                    var status = name +' is '+moodStr+' : '+mood.desc;
-                    $("#usr-status").html(status);
+                    var status = name +' is '+moodStr+' : ';
+                    $("#usr-status").text(status);
+                    $("#usr-report").text(mood.desc);
                 }
                 moods_arr.push(mood);
                 i++;

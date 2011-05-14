@@ -43,12 +43,14 @@ class FBFriendsReader < FBReader
   def self.update_cache(userid, moody_friends)
     puts "MOODS "+moody_friends.to_xml
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
+    #remove old entities
+    @@redis.del(userid.to_s+':friends')
     moody_friends.each() { |id,mood_obj|
       puts "ADDING TO REDIS for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
       @@redis.hset(userid.to_s+':friends', id, JSON.generate(mood_obj))
     }
     @@redis.hset(userid, 'fr_updated', true)
-    @@redis.hset(userid, 'fr_update_ts', Time.now)
+    @@redis.hset(userid, 'fr_update_ts', Time.now.to_i)
     @@redis.expire(userid.to_s+'friends', 60*60*24)
   end
 end
