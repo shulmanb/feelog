@@ -32,16 +32,14 @@ function onClick(point){
         min = "0";
     }
     min = min+ts.getMinutes();
-
-    html = "<div class='modal-content'> \
-               <div>getMoodImageLink(point.y)</div>\
-               <div>edit</div>\
-               <div>point.name</div>\
-               <div>edit</div>\
-               <div>ts.getHours()+\":\"+min+\" \"+month[ts.getMonth()]+\" \"+ts.getDate();</div>\
-               <div><button type=\"button\">Update Post</button></div>\
-            </div>";
-   $.modal(html);
+    html = "<div class='edit-point'> \
+           <div>i"+getMoodImageLink(point.y)+"</div>\
+           <div>edit</div>\
+           <div>"+point.name+"</div>\
+           <div>edit</div>\
+           <div>"+ts.getHours()+":"+min+" "+month[ts.getMonth()]+" "+ts.getDate()+"</div>\
+           <div>Update Post</div>\
+        </div>";   $.modal(html);
 }
 function drawChart(moods,norm) {
     if(!norm){
@@ -92,7 +90,7 @@ function drawChart(moods,norm) {
                 point: {
                     events: {
                         click: function() {
-                            onClick(this.point);
+                            onClick(this);
                         }
                     }
                 }

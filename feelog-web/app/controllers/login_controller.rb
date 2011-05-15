@@ -74,7 +74,7 @@ class LoginController < ApplicationController
       @email = @fb_user.email
     end
 
-    execute_post_login(@user,@picture,@email)
+    execute_post_login(@user,@picture,@email,token)
 
     # Log the authorizing user in.
     respond_to do |format|
@@ -100,7 +100,7 @@ class LoginController < ApplicationController
     @@redis.hset(user.id, 'pic', picture)
     @@redis.hset(user.id, 'email', email)
 
-    execute_post_login(user,picture,email)
+    execute_post_login(user,picture,email,token)
 
     @resp = {:id=>user.id,:pic=>picture,:name=>fb_user.name}
     # Log the authorizing user in.
@@ -109,7 +109,7 @@ class LoginController < ApplicationController
     end
   end
 
-  def check_and_expire(user_id)
+  def check_and_expire(user_id,token)
     last_update = @@redis.hget(user_id, 'fr_update_ts')
     unless last_update == nil
       curr_ts = Time.now.to_i
@@ -129,10 +129,16 @@ class LoginController < ApplicationController
     unless auth = Authorization.find_from_hash(hash)
       # Create a new user or add an auth to existing user, depending on
       # whether there is already a user signed in.
-      auth = Authorization.create_from_hash(hash, current_user)
-      Resque.enqueue(FBOwnReader,token,auth.user.id)
-      session[:initializing]=true
-      puts "INITIALIZING NEW USER"
+      if approved_user(hash['uid'])==false
+        respond_to do |format|
+          format.html { redirect_to("/") }
+        end
+      else
+        auth = Authorization.create_from_hash(hash, current_user)
+        Resque.enqueue(FBOwnReader,token,auth.user.id)
+        session[:initializing]=true
+        puts "INITIALIZING NEW USER"
+      end
     end
     self.current_user = auth.user
     user = auth.user
@@ -145,7 +151,7 @@ class LoginController < ApplicationController
     return user
   end
 
-  def execute_post_login(user, picture, email)
+  def execute_post_login(user, picture, email,token)
     @@redis.expire(user.id, 60*60*24)
     @@redis.expire(user.id.to_s+"friends", 60*60*24)
 
@@ -154,7 +160,9 @@ class LoginController < ApplicationController
     #add logic not to expire for every request,
     #but retrieve updated time and test if it is older than x hours
     #and only than queue resque command
-    check_and_expire(user.id)
-
+    check_and_expire(user.id,token)
+  end
+  def approved_user(uid)
+    return false;
   end
 end

@@ -47,7 +47,7 @@ function getMoodStr(mood){
         case 5:
             return 'happy';
         case 6:
-            return 'twinky';
+            return 'amused';
         case 7:
             return 'very happy';
     }
@@ -264,7 +264,7 @@ function renderFriendIcon(id,mood_json){
                         <b>"+post+"</b> <br>\
                     </div>\
                 </div> \
-                <img src='"+picLink+"' title='"+post+"' onclick='overFriendPic("+id+")'/>\
+                <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+")'/>\
      </div>";
     return [happy,html];
 }
