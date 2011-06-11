@@ -236,9 +236,9 @@ function renderFriends(path){
             }else{
                 var rendered = renderFriendIcon(id,mood_json);
                 if(rendered[0]){
-                    happy.push(rendered[1]);
+                    happy.push([id,rendered[1]]);
                 }else{
-                    gloomy.push(rendered[1]);
+                    gloomy.push([id,rendered[1]]);
                 }
             }
         });
@@ -247,30 +247,53 @@ function renderFriends(path){
         }
     });
 }
+
+function  apply_page_class(index,name,elemId){
+    var remainder = index % 10;
+    var page_id = ( index - remainder ) / 10;
+
+    $('#'+elemId).toggleClass(name+page_id);
+    if(page_id > 0){
+        $('#'+elemId).toggleClass('hidden');
+    }
+}
+
 function redraw_friends_widgets(happy, gloomy){
     $("#happy-friends").empty();
     $("#gloomy-friends").empty();
 
     if(happy.length > 0){
         $("body").data('happy-friends',happy);
+        $('body').data('happy-page',0);
+        if(happy.length > 10){
+            $("#happy-friends-control").toggleClass('hidden');
+        }
+        $('body').data('happy-page-max',Math.floor(happy.length/10));
     }else{
         set_no_data("#happy-friends");
     }
     if(gloomy.length > 0){
         $("body").data('gloomy-friends',gloomy);
+        $('body').data('gloomy-page',0);
+        if(gloomy.length > 10){
+            $("#gloomy-friends-control").toggleClass('hidden');
+        }
+        $('body').data('gloomy-page-max',Math.floor(gloomy.length/10));
     }else{
         set_no_data("#gloomy-friends");
     }
     var i = 0;
-    for (i = 0;i < 10;i++){
+    for (i = 0;;i++){
         var empty = -2;
-        if(happy.length >=i){
-            $("#happy-friends").append(happy[i]);
+        if(happy.length >i){
+            $("#happy-friends").append(happy[i][1]);
+            apply_page_class(i,'happy',happy[i][0]);
         }else{
             empty++;
         }
-        if(gloomy.length >=i){
-            $("#gloomy-friends").append(gloomy[i]);
+        if(gloomy.length >i){
+            $("#gloomy-friends").append(gloomy[i][1]);
+            apply_page_class(i,'gloomy',gloomy[i][0]);
         }else{
             empty++;
         }
@@ -323,6 +346,30 @@ function getMoodPopup(name,mood,post,time,picLink){
 }
 function overFriendPic(id){
     $("#"+id+"modal").modal();
+}
+
+
+function prevFriends(name){
+    var page = $('body').data(name+'-page');
+    if(page == 0){
+        return;
+    }
+    $("."+name+page).toggleClass('hidden');
+    $("."+name+(page-1)).toggleClass('hidden');
+    $('body').data(name+'-page',page-1);
+
+}
+
+function nextFriends(name){
+    var max = $('body').data(name+'-page-max');
+    var page = $('body').data(name+'-page');
+    if(page == max){
+        return;
+    }
+    $("."+name+page).toggleClass('hidden');
+    $("."+name+(page+1)).toggleClass('hidden');
+    $('body').data(name+'-page',page+1);
+
 }
 
 function renderGloomyCloud(){
