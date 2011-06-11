@@ -44,7 +44,9 @@ img{
 
 }
 .logo{
-	padding: 10px 50px;
+	position:absolute;
+    top:10px;
+    left:60px;
 }
 .mt{
 	font-family: "Helvetica";
@@ -69,7 +71,7 @@ img{
 
 .top{
 	position: relative;
-	height: 43px;
+	height: 48px;
     background-color:#403152;
 }
 
