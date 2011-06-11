@@ -21,7 +21,11 @@ class FriendsController < ApplicationController
         session[:friends_retry] = retry_cnt
       end
       if retry_cnt.to_i < 10
-        @resp.update({'retry'=>5000})
+        if retry_cnt.to_i > 2
+          @resp.update({'retry'=>15000})
+        else
+          @resp.update({'retry'=>5000})
+        end
       else
         session.delete(:friends_retry)
       end

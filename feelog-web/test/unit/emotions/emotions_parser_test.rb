@@ -7,7 +7,7 @@ $:.unshift File.join(File.dirname(__FILE__),'..','lib/')
 require 'test/unit'
 require 'emotions/emotions_parser'
 class EmotionsParserTest < Test::Unit::TestCase
-  @parser = EmotionsParser.new
+  @parser = ResqueClient.new
   def test_smiley
     post = 'She is angry today. I am =) today. I was very happy last year'
     res = @parser.pars_post(post)

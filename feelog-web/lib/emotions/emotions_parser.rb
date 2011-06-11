@@ -2,6 +2,34 @@ class EmotionsParser
   def initialize
     @@ops = eval(File.open('lib/emotions/emotions.rb') {|f| f.read })
   end
+  def extracts_countable_words(post)
+    countable_pos = %w{JJ JJR JJS NN NNP NNPS NNS RBS VB VBD VBG VBN VBP VBZ WDT }
+    countable = []
+    tgr = EngTagger.new
+    sentences = tgr.get_sentences(post)
+    for s in sentences do
+      tagged = tgr.get_readable(s).split()
+      next if tagged == nil
+      for word in tagged do
+        puts "testing "+word
+        split = word.split('/')
+        pos = split[1]
+        w = split[0]
+        puts "chceking pos #{pos}"
+        res =  countable_pos.select {|v| v == pos}
+        if res.length == 1
+          puts "adding #{w} to countable"
+          w = w.downcase
+          if w.end_with?('.')
+            l = w.length-1
+            w = w[0..l]
+          end
+          countable.push(w)
+        end
+      end
+    end
+    return countable
+  end
 
   #simple algorithm for extracting emotions from posts
   #1) split post to sentences

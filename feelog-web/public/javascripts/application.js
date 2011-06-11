@@ -1,4 +1,7 @@
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var full_month = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+var week = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 function submitMood(){
     var val = $("#mood_val").val();
@@ -53,6 +56,26 @@ function getMoodStr(mood){
     }
 
 }
+function getMoodColor(mood){
+    switch(mood){
+        case 1:
+            return '#FF0000';
+        case 2:
+            return '#10253F';
+        case 3:
+            return '#174580';
+        case 4:
+            return '#8064A2';
+        case 5:
+            return '#FFFD00';
+        case 6:
+            return '#FF9A00';
+        case 7:
+            return '#FF3E00';
+    }
+
+}
+
 function prepareMoodIcons(){
     $("#s1").click(function() {
         toggle(1);
@@ -82,46 +105,28 @@ function prepareMoodIcons(){
 //this function called by the server rendered js, redirect_fb.js.erbs.erb
 function returnFromCreateMood(report_time,mood_val,desc){
     $('#ajax-busy').hide();
-    var norm = $('body').data('norm');
-    if(!norm) norm = 0;
     $("#how").val("why?");
     $("#mood_val").val('');
     $(".smiley-selected").toggleClass("smiley-selected");
-    var ts = new Date(report_time);
+    var moodStr = '<b>'+getMoodStr(mood_val)+'</b>';
+    var status = name +' is '+moodStr+' : ';
+    $("#usr-status").html(status);
+    $("#usr-report").text(desc);
     var mood = {
         "val":mood_val,
         "desc":desc,
-        "date":ts.toString()
+        "date":report_time
     };
-    var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-    var status = name +' is '+moodStr+' : ';
-    $("#usr-status").html(status);
-    $("#usr-report").text(mood.desc);
-    var series = chart.series[0];
-    //shift on more then 10 elements in the graph
-    var shift = series.data.length >= 10;
-    var d = new Date(report_time).getTime();
-    var p;
-    if(norm == 1){
-        p = {
-            "name":mood.desc,
-            "y":mood.val,
-            "x":d
-        };
-    }else{
-        p = {
-            "name":mood.desc,
-            "y":mood.val,
-            "t":d
-        };
-    }
-    series.addPoint(p,false,shift);
-    if(norm == 0){
-        var categories = chart.xAxis[0].categories;
-        categories.push(d);
-        chart.xAxis[0].setCategories(categories, false);
-    }
-    chart.redraw();
+
+    add_points_to_graph([mood]);
+}
+function create_mood_object(value){
+    var mood = {
+        "val":value.mood.mood,
+        "desc":value.mood.desc,
+        "date":value.mood.report_time
+    };
+    return mood;
 }
 function renderMoods(path){
     var moods_arr = [];
@@ -132,7 +137,7 @@ function renderMoods(path){
         if(data.length == 0){
         //set empty data notification
         }
-
+        $('body').data('page',0);
         $.each(data, function(key, value) {
             if (key == 'retry'){
                 setTimeout(function(){renderMoods(path)},value);
@@ -142,20 +147,15 @@ function renderMoods(path){
                     first_init = false;
                 }
             }else{
-                var mood = {
-                    "id":i,
-                    "val":value.mood.mood,
-                    "desc":value.mood.desc,
-                    "date":value.mood.report_time
-                };
+                var mood = create_mood_object(value);
+                moods_arr.push(mood);
                 if(i==0){
                     //latest mood
                     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
                     var status = name +' is '+moodStr+' : ';
-                    $("#usr-status").text(status);
+                    $("#usr-status").html(status);
                     $("#usr-report").text(mood.desc);
                 }
-                moods_arr.push(mood);
                 i++;
             }
         });
@@ -166,9 +166,50 @@ function renderMoods(path){
             drawChart(moods_arr.reverse(),norm);
         }else if(first_init == true){
             $("#moods-graph").empty();
-            set_init_data("#moods-graph")
+            set_init_data("#moods-graph");
         }
     });
+}
+function traversal_feelings(isOlder){
+    var moods_arr = [];
+    var page = $('body').data('page');
+    if(isOlder){
+        page++;
+    }else{
+        if(page == 0) return;
+        page--;
+    }
+    chart.showLoading();
+    var user_id = $('body').data('userid');
+    var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'.json';
+    $.ajax(path).success(function(data){
+        var i = 0;
+        if(data.length == 0){
+            //disable previous button
+        }else{
+            $('body').data('page',page);
+            $.each(data, function(key, value) {
+                    var mood = create_mood_object(value);
+                    moods_arr.push(mood);
+            });
+        }
+        moods_arr.reverse();
+        set_points_on_graph(moods_arr);
+        chart.hideLoading();
+    });
+
+}
+function olderFeelings(){
+    traversal_feelings(true);
+}
+function newerFeelings(){
+    traversal_feelings(false);
+}
+function zoomIn(){
+
+}
+function zoomOut(){
+
 }
 function set_no_data(tag){
     $(tag).append("<div class='no-data'>No Data Found</div>");
@@ -253,65 +294,85 @@ function renderFriendIcon(id,mood_json){
     }
     var fb_date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\+0000/;
     var date_array = fb_date_pattern.exec(time);
-    var prityTime = month[date_array[2]-1] + " " +date_array[3]+" "+ date_array[1];
+    var prityTime = full_month[date_array[2]-1]+" "+ date_array[3]+" at "+ date_array[4]+":"+date_array[5];
     var html =
     "<div id='"+id+"' class='friend-icon' > \
                 <div id='"+id+"modal' class='modal-content'> \
-                    <img style=\"float:left; padding:5px\" src='"+picLink+"'/>\
-                    <div style=\"float:left; padding-top:5px\">\
-                        <b>"+name+"</b> is: <b>"+getMoodStr(mood)+"</b> <br>\
-                        Posted on "+prityTime+" <br>\
-                        <b>"+post+"</b> <br>\
-                    </div>\
+                    "+getMoodPopup(name,mood,post,prityTime,picLink)+"\
                 </div> \
                 <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+")'/>\
      </div>";
     return [happy,html];
 }
+function getMoodPopup(name,mood,post,time,picLink){
+    var html = "<div class='feel-popup'>\
+        <div class='feel-popup-top'>\
+             <img style=\"float:left\" src='"+picLink+"'/>\
+             <span class='feel-popup-title'>"+name+" feels</span>\
+             <span>"+getMoodImageLink(mood)+"</span>\
+             <span class='feel-popup-title'>"+getMoodStr(mood)+"</span>\
+         </div>\
+         <div class='mood-color-line' style=\"background-color:"+getMoodColor(mood)+"\"></div>\
+         <div class='feel-popup-body'>\
+             <div class='feel-popup-text'>"+post+"</div>\
+             <div class='feel-popup-date'>"+time+"</div>\
+         </div>\
+    </div>";
+    return html;
+
+}
 function overFriendPic(id){
     $("#"+id+"modal").modal();
 }
-function renderCloud(){
-    var word_list = [
-    {
-        text: "Jonathan",
-        weight: 9
-    },
 
-    {
-        text: "Hot",
-        weight: 2
-    },
+function renderGloomyCloud(){
+    var id = $('body').data('userid');
+    $.ajax("/users/"+id+"/gloomy_words.json").success(function(data){
+        var word_list = []
+        $.each(data, function(item,val) {
+            word_list.push(
+            {
+                text: val[0],
+                weight:val[1]
+            }
+            );
+        });
+        $("#gloomy-tag-cloud").jQCloud(word_list);
+        $('body').data('gloomy-cloud',1);
+    });
+}
 
-    {
-        text: "Meeting",
-        weight: 9
-    },
+function changeCloud(){
+    var currCloud = $('body').data('cloud');
+    var gloomyStatus = $('body').data('gloomy-cloud');
 
-    {
-        text: "Friends",
-        weight: 8
-    },
-
-    {
-        text: "Delicious",
-        weight: 5
-    },
-
-    {
-        text: "Love",
-        weight: 3
-    },
-
-    {
-        text: "Funny",
-        weight: 11
-    },
-
-    {
-        text: "Great",
-        weight: 6
+    if(currCloud == 0 ){
+        //happy
+        $('.cloud').toggleClass('hidden');
+        if(gloomyStatus == 0){
+           renderGloomyCloud();
+        }
+        $('body').data('cloud',1);
+    }else{
+        //current gloomy
+        $('.cloud').toggleClass('hidden');
+        $('body').data('cloud',0);
     }
-    ];
-    $("#tag-cloud").jQCloud(word_list);
+}
+
+
+function renderHappyCloud(id){
+    var id = $('body').data('userid');
+    $.ajax("/users/"+id+"/happy_words.json").success(function(data){
+        var word_list = []
+        $.each(data, function(item,val) {
+            word_list.push(
+            {
+                text: val[0],
+                weight:val[1]
+            }
+            );
+        });
+        $("#happy-tag-cloud").jQCloud(word_list);
+    });
 }

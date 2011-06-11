@@ -1,6 +1,5 @@
 require "base64"
 class LoginController < ApplicationController
-  layout "login"
   protect_from_forgery :except => :login,:except => :authorize_client
   before_filter :check_redis_connection
 
@@ -133,6 +132,7 @@ class LoginController < ApplicationController
         respond_to do |format|
           format.html { redirect_to("/") }
         end
+        return
       else
         auth = Authorization.create_from_hash(hash, current_user)
         Resque.enqueue(FBOwnReader,token,auth.user.id)
