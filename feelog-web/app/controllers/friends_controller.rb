@@ -1,5 +1,6 @@
 class FriendsController < ApplicationController
-  before_filter :authorize, :check_redis_connection
+  before_filter  :check_redis_connection
+  #:authorize,
   # GET /:user_id/friends
   def index
     user_id = params[:user_id]

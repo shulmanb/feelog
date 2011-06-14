@@ -15,6 +15,24 @@
         </script>
     </head>
     <body>
+        <div id="fb-root"></div>
+        <script>
+          window.fbAsyncInit = function() {
+            FB.init({
+              appId  : '187063221337398',
+              status : true, // check login status
+              cookie : true, // enable cookies to allow the server to access the session
+              xfbml  : true  // parse XFBML
+            });
+          };
+
+          (function() {
+            var e = document.createElement('script');
+            e.src = '/javascripts/all.js';
+            e.async = true;
+            document.getElementById('fb-root').appendChild(e);
+          }());
+        </script>
         <div class="wrapper">
             <div class="login-container">
                 <div class="login-top">
@@ -41,9 +59,7 @@
                     <div class="login-right">
                         <div class="login-right-fb">
                             <div class="fb-login-img">
-                                <a href='/auth/facebook'>
-                                    <img src='/images/fb_login_button.png'>
-                                </a>
+                                <img src='/images/fb_login_button.png' onclick="fb_login()">
                             </div>
                             <div class="fb-login-txt fb-login-txt-top">
                                 with your
@@ -59,7 +75,7 @@
                     </div>
                 </div>
                 <div class="credit login-left-bottom">
-			Feelogg &copy; 2011 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="" class="credit">About Us</a>  :  <a href="" class="credit">Contact</a>  :  <a href="" class="credit">Blog</a>  :  <a href="" class="credit">API</a>  :   <a href="" class="credit">Help</a>  :  <a href="" class="credit">Jobs</a>  :  <a href="" class="credit">Terms</a>  :  <a href="" class="credit">Privacy</a>
+			         Feelogg &copy; 2011 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="" class="credit">About Us</a>  :  <a href="" class="credit">Contact</a>  :  <a href="" class="credit">Blog</a>  :  <a href="" class="credit">API</a>  :   <a href="" class="credit">Help</a>  :  <a href="" class="credit">Jobs</a>  :  <a href="" class="credit">Terms</a>  :  <a href="" class="credit">Privacy</a>
                 </div>
             </div>
         </div>

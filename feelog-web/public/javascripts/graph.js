@@ -54,7 +54,7 @@ function getGraphIconURL(moodid){
             case 1:
                 return 'url(/images/graph_icon_angry.gif)';
             case 2:
-                return 'url(/images/graph_icon_vary_sad.gif)';
+                return 'url(/images/graph_icon_very_sad.gif)';
             case 3:
                 return 'url(/images/graph_icon_sad.gif)';
             case 4:

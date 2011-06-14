@@ -3,9 +3,9 @@
   <%= javascript_include_tag 'highcharts' %>
   <%= javascript_include_tag 'jqcloud-0.1.8.min.js' %>
   <%= stylesheet_link_tag "jqcloud.css" %>
+  <script src="http://connect.facebook.net/en_US/all.js"></script>
   <% if @fb == true %>
     <%= stylesheet_link_tag "main-fb.css" %>
-    <script src="http://connect.facebook.net/en_US/all.js"></script>
   <% end %>
   <script type="text/javascript">
     var chart;
@@ -24,20 +24,23 @@
       $('body').data('gloomy-cloud',0);
       // Setup the ajax indicator
       $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
+      FB.init({
+              appId  : '187063221337398',
+              status : true, // check login status
+              cookie : true, // enable cookies to allow the server to access the session
+              xfbml  : true  // parse XFBML
+      });
       <% if @fb == true %>
-        FB.init();
         FB.CanvasClient.setCanvasHeight(700);
       <% end %>
     });
   </script>
 <% end %>
-<% if @fb == true %>
-   <div id="fb-root"></div>
-<% end %>
+<div id="fb-root"></div>
 <div class="content">
   <div class="left-side">
     <div class="feelog-input">
-      <%= render 'report' %>
+      <%= render 'moods/report' %>
     </div>
     <div class="hf">my recent feelings</div>
     <div id="moods-graph" class="moods-graph" style='width: 370px; height: 170px;'>

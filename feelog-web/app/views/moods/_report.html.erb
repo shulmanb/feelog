@@ -22,14 +22,12 @@
       <img src="/images/mood-angry.png" />
   </div>
 </div>
-<%= form_for([ @user, @mood ],:remote => true) do |f| %>
-  <div class="ta">
+<div class="ta">
     <input type="text" class="i1" name="mood[desc]" id="how" value="why?" /><br/>
     <input id="mood_val" name="mood[mood]" type="hidden"/>
-  </div>
-  <div class="actions">
+</div>
+<div class="actions">
     <div class="fl"><input id="fbshare" name="fbshare" type="checkbox" checked/> Facebook</div>
     <div class="fl"><input id="twshare" name="twshare" type="checkbox" checked/> Twitter</div>
-    <div id="feel-submit" class="fl"><img src="/images/btnLog.png" onclick="$('#ajax-busy').show()"/></div>
-  </div>
-<%end%>
+    <div id="feel-submit" class="fl"><img src="/images/btnLog.png"/></div>
+</div>

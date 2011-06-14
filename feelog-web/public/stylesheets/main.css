@@ -10,6 +10,7 @@ header, nav, article, section, dialog, figure, aside, footer,fieldset {
 	font-size:100%;
 
 }
+
 body{
 	background-color: #e5e2d3;
 	font-family: "Helvetica";
@@ -450,7 +451,7 @@ img{
     
 }
 /* Overlay */
-#simplemodal-overlay {background-color:grey; cursor:wait;}
+#simplemodal-overlay {background-color:gray; cursor:wait;}
 
 /* Container */
 #simplemodal-container {height:300px; width:500px;background-color:#56436D; border:2px solid #DDD9C3}
@@ -501,4 +502,28 @@ img{
 .cloud-toggle{
     float:right;
     margin-right:30px;
+}
+
+.fb-detail{
+    background-color: #EDEFF4;
+    border-bottom: 1px solid #E5EAF1;
+    margin-top: 2px;
+    padding: 5px 5px 4px;
+    margin: 5px 10px;
+}
+
+.comment-message{
+
+}
+
+.fb-staff{
+
+}
+
+.fb-staff li{
+    display: list-item;
+}
+
+.fb-staff ul{
+    list-style-type: none;
 }

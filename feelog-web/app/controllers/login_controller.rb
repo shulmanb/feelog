@@ -13,7 +13,29 @@ class LoginController < ApplicationController
 
   def authorize_client
        token = params[:token]
-       login_with_token(token)
+       login_with_token(token,true)
+  end
+
+
+  def check_token
+    token=params[:token]
+    fb_user = FbGraph::User.me(token).fetch
+    if fb_user == nil
+      respond_to do |format|
+        format.any  { render :json => {'status'=>'error'} }
+      end
+    else
+      session[:token] = token
+      respond_to do |format|
+        format.any  { render :json => {'status'=>'success'} }
+      end
+    end
+
+  end
+  #login from client javascript FB authentication
+  def home
+    token = session[:token]
+    login_with_token(token,false)
   end
 
   def canvas
@@ -62,16 +84,16 @@ class LoginController < ApplicationController
     #store token for web logins
 
     #check caches
-    if @@redis.exists @user.id
-      @picture = @@redis.hget(@user.id, 'pic')
-      @email = @@redis.hget(@user.id, 'email')
-    elsif
+#    if @@redis.exists @user.id
+#      @picture = @@redis.hget(@user.id, 'pic')
+#      @email = @@redis.hget(@user.id, 'email')
+#    elsif
       @fb_user = FbGraph::User.me(token).fetch
       @picture = @fb_user.picture
       @@redis.hset(@user.id, 'pic', @picture)
       @@redis.hset(@user.id, 'email', @fb_user.email)
       @email = @fb_user.email
-    end
+#    end
 
     execute_post_login(@user,@picture,@email,token)
 
@@ -82,8 +104,7 @@ class LoginController < ApplicationController
     end
   end
 
-
-  def login_with_token(token)
+  def login_with_token(token,ajax)
     fb_user = FbGraph::User.me(token).fetch
     if fb_user == nil
       respond_to do |format|
@@ -92,19 +113,23 @@ class LoginController < ApplicationController
     end
     uid = fb_user.identifier
     hash = {'uid'=>uid,'provider'=>'facebook'}
-    user = get_user(hash,token, true)
+    @user = get_user(hash,token, ajax)
     #already got the data from fb, just use it and update cache
-    picture = fb_user.picture
-    email = fb_user.email
-    @@redis.hset(user.id, 'pic', picture)
-    @@redis.hset(user.id, 'email', email)
+    @picture = fb_user.picture
+    @email = fb_user.email
+    @@redis.hset(@user.id, 'pic', @picture)
+    @@redis.hset(@user.id, 'email', @email)
 
-    execute_post_login(user,picture,email,token)
+    execute_post_login(@user,@picture,@email,token)
 
-    @resp = {:id=>user.id,:pic=>picture,:name=>fb_user.name}
     # Log the authorizing user in.
     respond_to do |format|
-      format.any  { render :json => @resp }
+      if ajax == true
+        @resp = {:id=>@user.id,:pic=>@picture,:name=>fb_user.name}
+        format.any  { render :json => @resp }
+      else
+        format.any  { render 'moods/new'}
+      end
     end
   end
 
@@ -154,7 +179,6 @@ class LoginController < ApplicationController
   def execute_post_login(user, picture, email,token)
     @@redis.expire(user.id, 60*60*24)
     @@redis.expire(user.id.to_s+"friends", 60*60*24)
-
     session[:picture] = picture
     session[:email] = email
     #add logic not to expire for every request,

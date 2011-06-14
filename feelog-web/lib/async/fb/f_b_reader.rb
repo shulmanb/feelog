@@ -10,6 +10,7 @@ class FBReader < ResqueClient
       data = body['data']
       for d in data
         id = d['from']['id']
+        post_id = d['id']
         name = d['from']['name']
         message = d['message']
         time = d['updated_time']
@@ -17,7 +18,7 @@ class FBReader < ResqueClient
         if curr == nil
           curr={'name'=>name,'msgs'=>[]}
         end
-        curr['msgs'].push({'msg'=>message,'time'=>time})
+        curr['msgs'].push({'msg'=>message,'time'=>time,'post_id'=>post_id})
         hash[id]=curr
       end
     end
@@ -31,7 +32,7 @@ class FBReader < ResqueClient
         post = msg['msg']
         mood = @@parser.pars_post(post)
         if mood > 0
-          moods.update({key=>{:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name']}})
+          moods.update({key=>{:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id']}})
           break
         end
       end
