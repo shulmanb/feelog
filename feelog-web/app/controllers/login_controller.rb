@@ -112,11 +112,12 @@ class LoginController < ApplicationController
       end
     end
     uid = fb_user.identifier
-    hash = {'uid'=>uid,'provider'=>'facebook'}
+    @email = fb_user.email
+    #create hash similar to the hash received from fb
+    hash = {'uid'=>uid,'provider'=>'facebook','user_info'=>{'name'=>fb_user.name,'email'=>@email},'credentials'=>{'token'=>token}}
     @user = get_user(hash,token, ajax)
     #already got the data from fb, just use it and update cache
     @picture = fb_user.picture
-    @email = fb_user.email
     @@redis.hset(@user.id, 'pic', @picture)
     @@redis.hset(@user.id, 'email', @email)
 
@@ -187,6 +188,6 @@ class LoginController < ApplicationController
     check_and_expire(user.id,token)
   end
   def approved_user(uid)
-    return false;
+    return true;
   end
 end

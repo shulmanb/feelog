@@ -231,18 +231,22 @@ function newerFeelings(){
 function zoomIn(){
 
 }
+
 function zoomOut(){
 
 }
+
 function set_no_data(tag){
     $(tag).append("<div class='no-data'>No Data Found</div>");
     $(tag).css('background-color','white');
 }
+
 function set_init_data(tag){
     $(tag).append("<div class='no-data'>Initializing..</div>");
     $(tag).append("<img src='/images/initializing.gif'/>");
     $(tag).css('background-color','white');
 }
+
 function renderFriends(path){
     var happy = new Array();
     var gloomy = new Array();
@@ -310,14 +314,12 @@ function redraw_friends_widgets(happy, gloomy){
         var empty = -2;
         if(happy.length >i){
             $("#happy-friends").append(happy[i][1]);
-            retrievePost(happy[i][2]);
             apply_page_class(i,'happy',happy[i][0]);
         }else{
             empty++;
         }
         if(gloomy.length >i){
             $("#gloomy-friends").append(gloomy[i][1]);
-            retrievePost(gloomy[i][2]);
             apply_page_class(i,'gloomy',gloomy[i][0]);
         }else{
             empty++;
@@ -327,6 +329,7 @@ function redraw_friends_widgets(happy, gloomy){
         }
     }
 }
+
 function renderFriendIcon(id,mood_json){
     var picLink = 'https://graph.facebook.com/'+id+'/picture';
     var mood = mood_json.m;
@@ -347,34 +350,187 @@ function renderFriendIcon(id,mood_json){
     var html =
     "<div id='"+id+"' class='friend-icon' > \
                 <div id='"+id+"modal' class='modal-content'> \
-                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id)+"\
+                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id)+"\
                 </div> \
                 <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+","+post_id+")'/>\
      </div>";
     return [happy,html,post_id];
 }
 
-function retrievePost(postId){
-    FB.api(postId, function(response) {
-      if (!response || response.error) {
-        alert('Error occured');
-      } else {
-        if(response.likes){
-          if(response.likes.data.length ==1){
-              $('#'+postId).append("<li class='fb-detail'><div class='fb-inner'>"+response.likes.data[0].name+"likes it</div></li>");
-          }else{
-              $('#'+postId).append("<li class='fb-detail'><div class='fb-inner'>"+response.comments.data.length+"</div></li>");
-          }
+function renderFbDetail(text,display,id){
+    return "<li id='"+display.toLowerCase()+"_"+id+"_detail' class='fb-detail'>" +
+               "<div class='fb-inner'>" +
+                    "<div class='fb-as-link' onclick=\"display"+display+"("+id+")\">" +
+                        "<label id='"+display.toLowerCase()+"_"+id+"_lbl' class='fb-label'>"+text+"</label>" +
+                    "</div>" +
+               "</div>"+
+           "</li>"+
+           "<li id='"+display.toLowerCase()+"_"+id+"_view' class='fb-detail hidden fb-view-"+display.toLowerCase()+"'></li>";
+
+}
+
+function renderFbCommentBox(id){
+    return "<li id='"+id+"_comment_detail' class='fb-detail'>" +
+                   "<div class='fb-inner'>" +
+                      "<div class='fb-comment-wrap'>"+
+                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive' title='Write a comment' class='fb-comment-box' onclick='focusCommentBox(this,"+id+")'  onblur='blurCommentBox(this,"+id+")' onkeydown='if (event.keyCode == 13) { submitComment(this,"+id+"); return false; }'>Write a comment...</textarea> " +
+                      "</div>"+
+                   "</div>"+
+                "</li>";
+}
+function focusOnCommentBox(id){
+    $("#"+id+"_comment").click();
+    $("#"+id+"_comment").focus();
+}
+
+function focusCommentBox(textarea,id){
+    if(!textarea._has_control){
+        textarea._has_control = true;
+        textarea.value='';
+        $("#"+id+"_comment").toggleClass('fb-text-passive');
+    }
+}
+
+function blurCommentBox(textarea,id){
+    if(textarea._has_control){
+        if(textarea.value == ''){
+            textarea._has_control = false;
+            $("#"+id+"_comment").toggleClass('fb-text-passive');
+            textarea.value = 'Write a comment...';
         }
-        if(response.comments){
-            $('#'+postId).append("<li class='fb-detail'><div class='fb-inner'>View all "+response.comments.data.length+" comments</div></li>");
-        }
-        $('#'+postId).append("<li class='fb-detail'><div class='fb-inner'></div><div class='comment-message'>Write a comment...</div></div></li>");
-      }
+    }
+}
+
+function submitComment(textarea,postId){
+    FB.api(postId+"/comments",'post',{message:textarea.value},function(response) {
+        textarea.value = '';
+        textarea.blur();
+        updateCommentsLabel(postId);
     });
 }
 
-function getMoodPopup(name,mood,post,time,picLink,id){
+function like(postId,uid){
+    FB.api(uid+'_'+postId+'/likes','post',function(response) {
+        updateLikesLabel(postId);
+        }
+    );
+}
+
+function displayComments(postId){
+    FB.api({
+            method: 'fql.query',
+            query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
+        },
+        function(data) {
+            alert('View '+data.length)
+        });
+}
+
+function displayLikes(postId){
+    if($("#likes_"+postId+"_view").is(":visible")){
+        $("#likes_"+postId+"_view").toggleClass('hidden');
+        $("#likes_"+postId+"_view").empty();
+    }else{
+        FB.api({
+                method: 'fql.query',
+                query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
+            },
+            function(data) {
+                if(data.length>8){
+                    $("#likes_"+postId+"_view").append("<img style=\"float:right\" src=\"/images/IconRight.gif\"/>");
+                    $("#likes_"+postId+"_view").append("<img style=\"float:left\" src=\"/images/IconLeft.gif\"/>");
+
+                }
+                var i = 0;
+                $.each(data, function(item,val) {
+                    if(i<8){
+                        FB.api({method: 'fql.query',query: "SELECT name,pic_square FROM user WHERE uid = '"+val.user_id+"'"},
+                                function(data){
+                                    $("#likes_"+postId+"_view").append("<img class='fb-like-image' src=\""+data[0].pic_square+"\" title=\""+data[0].name+"\">");
+                                });
+                    }else{
+                        $("#likes_"+postId+"_view").append("<div class='hidden'>"+val.user_id+"</div>");
+                    }
+                    i++;
+                });
+                if(data.length > 0){
+                    $("#likes_"+postId+"_view").toggleClass('hidden');
+                }
+            });
+    }
+}
+
+function updateLikesLabel(postId){
+    FB.api({
+            method: 'fql.query',
+            query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
+        },
+        function(data) {
+            if(data.length > 0){
+                var likes = $('#likes_'+postId+'_lbl').length;
+                if (likes > 0 ) {
+                    $('#likes_'+postId+'_lbl').text(data.length+" people likes it");
+                }else{
+                    $('#'+postId).prepend(renderFbDetail(data.length+" people likes it",'Likes',postId));
+                }
+            }else{
+                $('#likes_'+postId).remove();
+            }
+        });
+}
+
+function updateCommentsLabel(postId){
+    FB.api({
+            method: 'fql.query',
+            query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
+        },
+        function(data) {
+            if(data.length > 0){
+                var comments = $('#comments_'+postId+'_lbl').length;
+                if (comments > 0 ) {
+                    $('#comments_'+postId+'_lbl').text("View all "+data.length+" comments");
+                }else{
+                    $('#'+postId+"_comment_detail").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
+                }
+            }else{
+                $('#comments_'+postId).remove();
+            }
+        }
+    );
+
+}
+
+
+function retrievePost(postId){
+
+    if($("#"+postId+"_comment_detail").length <=0){
+        $('#'+postId).append(renderFbCommentBox(postId));
+        $('#'+postId+"_comment").elastic();
+    }
+
+    FB.api({
+            method: 'fql.query',
+            query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
+        },
+        function(data) {
+            if(data.length > 0){
+                $('#'+postId+"_comment_detail").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
+            }
+        }
+    );
+
+    FB.api({
+            method: 'fql.query',
+            query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
+        },
+        function(data) {
+            if(data.length > 0){
+                $('#'+postId).prepend(renderFbDetail(data.length+" people likes it",'Likes',postId));
+            }
+        });
+}
+
+function getMoodPopup(name,mood,post,time,picLink,id,uid){
     var html = "<div class='feel-popup'>\
         <div class='feel-popup-top'>\
              <img style=\"float:left\" src='"+picLink+"'/>\
@@ -387,20 +543,25 @@ function getMoodPopup(name,mood,post,time,picLink,id){
              <div class='feel-popup-text'>"+post+"</div>\
              <div>\
                    <span class='feel-popup-date'>"+time+' '+"</span>\
-                   <span class='fb-action'>Like </span>-\
-                   <span class='fb-action'> Comment</span> \
+                   <span class='fb-actions'>\
+                       <a class='fb-as-link' title='Like this item'><span class='fb-message' onclick='like("+id+","+uid+")'>Like </span></a>\
+                       <span class='fb-message'> - </span>\
+                       <a class='fb-as-link' title='Leave a comment'><span class='fb-message' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
+                   </span>\
              </div>\
          </div>\
          <ul class='fb-staff' id='"+id+"'>\
          </ul>\
     </div>";
     return html;
-
 }
+
 function overFriendPic(id,post_id){
-    $("#"+id+"modal").modal();
+    $("#"+id+"modal").modal({
+        focus:false,
+        onOpen: retrievePost(post_id)
+     });
 }
-
 
 function prevFriends(name){
     var page = $('body').data(name+'-page');
@@ -410,7 +571,6 @@ function prevFriends(name){
     $("."+name+page).toggleClass('hidden');
     $("."+name+(page-1)).toggleClass('hidden');
     $('body').data(name+'-page',page-1);
-
 }
 
 function nextFriends(name){
@@ -422,7 +582,6 @@ function nextFriends(name){
     $("."+name+page).toggleClass('hidden');
     $("."+name+(page+1)).toggleClass('hidden');
     $('body').data(name+'-page',page+1);
-
 }
 
 function renderGloomyCloud(){
@@ -459,7 +618,6 @@ function changeCloud(){
         $('body').data('cloud',0);
     }
 }
-
 
 function renderHappyCloud(id){
     var id = $('body').data('userid');

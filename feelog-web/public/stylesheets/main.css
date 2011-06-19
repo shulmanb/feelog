@@ -3,7 +3,7 @@ body,
 h1, h2, h3,
 p, ul, li, form, input,
 table, tr, td,
-header, nav, article, section, dialog, figure, aside, footer,fieldset {
+header, nav, article, section, figure, aside, footer,fieldset {
 	border:0;
 	margin:0;
 	padding:0;
@@ -503,7 +503,9 @@ img{
     float:right;
     margin-right:30px;
 }
-
+.fb-actions{
+    padding-left:10px;
+}
 .fb-detail{
     background-color: #EDEFF4;
     border-bottom: 1px solid #E5EAF1;
@@ -512,18 +514,87 @@ img{
     margin: 5px 10px;
 }
 
-.comment-message{
-
+.fb-view-likes{
+    height:52px;
 }
 
+.fb-like-image{
+    margin:1px;
+    float:left;
+}
 .fb-staff{
 
 }
 
-.fb-staff li{
-    display: list-item;
+li.fb-staff{
+    font-size: 11px;
 }
 
-.fb-staff ul{
+ul.fb-staff{
     list-style-type: none;
+}
+
+.fb-message{
+    display: inline;
+    color: #6D84B4;
+}
+.fb-as-link{
+    font-size: 11px;
+    color: #6D84B4;
+    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+    overflow: visible;
+    width: auto;
+    text-align: left;
+    background: none;
+    margin: 0;
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
+
+.fb-label{
+    color:#3b5998;
+    cursor: pointer;
+}
+.fb-as-link:hover{
+    color:#3b5998;
+    text-decoration:underline
+}
+
+.fb-inner{
+    padding:1px;
+}
+
+.fb-comment-wrap{
+    background-color:white;
+    padding-left: 5px;
+}
+.fb-comment-box{
+    border: solid #BDC7D8;
+    position: relative;
+    border-width: 1px;
+    padding-left:5px;
+}
+
+.fb-text-area{
+    cursor: text;
+    border-width: 0px;
+    height:14px;
+    padding:0;
+    line-height:13px;
+    margin:0;
+    width: 100%;
+    resize:none;
+    overflow:hidden;
+
+}
+
+
+.fb-text-area:focus{
+    outline:0px;
+    outline:none;
+}
+
+.fb-text-passive{
+    color:#777;
 }
