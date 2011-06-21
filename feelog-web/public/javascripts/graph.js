@@ -1,10 +1,3 @@
-function isCurrentWeekNumber(date){
-    var onejan = new Date(date.getFullYear(),0,1);
-    var wn  = Math.ceil((((date - onejan) / 86400000) + onejan.getDay()+1)/7);
-    var curr = new Date();
-    var currWn = Math.ceil((((curr - onejan) / 86400000) + onejan.getDay()+1)/7);
-    return (wn == currWn);
-}
 
 function format_label(value){
     var ts = new Date(value);

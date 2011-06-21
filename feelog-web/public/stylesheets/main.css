@@ -454,7 +454,7 @@ img{
 #simplemodal-overlay {background-color:gray; cursor:wait;}
 
 /* Container */
-#simplemodal-container {height:300px; width:500px;background-color:#56436D; border:2px solid #DDD9C3}
+#simplemodal-container {background-color:#56436D; border:2px solid #DDD9C3}
 #simplemodal-container a.modalCloseImg {background:url(/images/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 
 .feel-popup{
@@ -517,7 +517,11 @@ img{
 .fb-view-likes{
     height:52px;
 }
-
+.fb-view-comments{
+   max-height:300px;
+   overflow-y:auto;
+   overflow-x:hidden;
+}
 .fb-like-image{
     margin:1px;
     float:left;
@@ -597,4 +601,39 @@ ul.fb-staff{
 
 .fb-text-passive{
     color:#777;
+}
+
+.fb-comment-pic{
+    height:32px;
+    width:32px;
+}
+.fb-comment{
+    height:34px;
+}
+.fb-comment-name{
+    position:relative;
+    top:-17px;
+    color:black;
+    margin-left:2px;
+    font-weight: bold;
+    color: #3B5998;
+    font-size: 11px;
+    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+}
+.fb-comment-text{
+    position:relative;
+    top:-17px;
+    color:black;
+    margin-left:2px;
+    font-size: 11px;
+    color:#333;
+    font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
+}
+
+.fb-comment-time{
+    color:gray;
+    position: relative;
+    left: 34px;
+    top: -15px;
+    font-size: 11px;
 }

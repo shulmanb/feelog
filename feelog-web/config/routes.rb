@@ -19,5 +19,5 @@ Mooderator::Application.routes.draw do
   match '/users/:user_id/words/:mood/:word' => "words#max_word_count", :via=>:get
   match '/users/:user_id/happy_words' => "words#happy_words", :via=>:get
   match '/users/:user_id/gloomy_words' => "words#gloomy_words", :via=>:get
-
+  match '/login/:token', :to => "login#auth_base64", :via=>:get
 end

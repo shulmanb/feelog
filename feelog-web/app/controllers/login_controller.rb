@@ -37,7 +37,20 @@ class LoginController < ApplicationController
     token = session[:token]
     login_with_token(token,false)
   end
-
+  def auth_base64
+      b64_token = params[:token]
+      token = Base64.decode64(b64_token)
+      puts "token=#{token}"
+      fb_user = FbGraph::User.me(token).fetch
+      if fb_user == nil
+        respond_to do |format|
+          format.any  { render :json => {'error'=>'bad token'} }
+        end
+      end
+      uid = fb_user.identifier
+      hash = {'uid'=>uid,'provider'=>'facebook'}
+      login_user(hash,token)
+   end
   def canvas
        app_id = "136471399753143"
        canvas_page = "http://184.73.183.35/canvas/"

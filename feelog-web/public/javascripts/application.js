@@ -1,7 +1,17 @@
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var full_month = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
 var week = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+var full_week = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function isCurrentWeekNumber(date){
+    var onejan = new Date(date.getFullYear(),0,1);
+    var wn  = Math.ceil((((date - onejan) / 86400000) + onejan.getDay()+1)/7);
+    var curr = new Date();
+    var currWn = Math.ceil((((curr - onejan) / 86400000) + onejan.getDay()+1)/7);
+    return (wn == currWn);
+}
+
+
 
 //changed to ajax
 function submitMood(){
@@ -352,7 +362,7 @@ function renderFriendIcon(id,mood_json){
                 <div id='"+id+"modal' class='modal-content'> \
                     "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id)+"\
                 </div> \
-                <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+","+post_id+")'/>\
+                <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+",\""+post_id+"\")'/>\
      </div>";
     return [happy,html,post_id];
 }
@@ -360,13 +370,12 @@ function renderFriendIcon(id,mood_json){
 function renderFbDetail(text,display,id){
     return "<li id='"+display.toLowerCase()+"_"+id+"_detail' class='fb-detail'>" +
                "<div class='fb-inner'>" +
-                    "<div class='fb-as-link' onclick=\"display"+display+"("+id+")\">" +
+                    "<div class='fb-as-link' onclick=\"display"+display+"('"+id+"')\">" +
                         "<label id='"+display.toLowerCase()+"_"+id+"_lbl' class='fb-label'>"+text+"</label>" +
                     "</div>" +
                "</div>"+
            "</li>"+
-           "<li id='"+display.toLowerCase()+"_"+id+"_view' class='fb-detail hidden fb-view-"+display.toLowerCase()+"'></li>";
-
+           "<li id='"+display.toLowerCase()+"_"+id+"_view' class='hidden fb-view-"+display.toLowerCase()+"'></li>";
 }
 
 function renderFbCommentBox(id){
@@ -378,6 +387,8 @@ function renderFbCommentBox(id){
                    "</div>"+
                 "</li>";
 }
+
+
 function focusOnCommentBox(id){
     $("#"+id+"_comment").click();
     $("#"+id+"_comment").focus();
@@ -406,6 +417,20 @@ function submitComment(textarea,postId){
         textarea.value = '';
         textarea.blur();
         updateCommentsLabel(postId);
+        if($("#comments_"+postId+"_view").is(":visible")){
+            FB.api({
+                    method: 'fql.query',
+                    query: "SELECT text,fromid, time FROM comment WHERE object_id ='"+postId+"' AND id='"+response.id+"' "
+                },
+                function(val) {
+                    var user = getUser(val[0].fromid);
+                    user.wait(function(res){
+                        renderComment(res[0].pic_square,res[0].name,val[0].text,val[0].time,postId);
+                        $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
+                    });
+                });
+
+        }
     });
 }
 
@@ -417,18 +442,76 @@ function like(postId,uid){
 }
 
 function displayComments(postId){
-    FB.api({
-            method: 'fql.query',
-            query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
-        },
-        function(data) {
-            alert('View '+data.length)
-        });
+    if($("#comments_"+postId+"_view").is(":visible")){
+        $("#comments_"+postId+"_view").toggleClass('hidden');
+        $("#comments_"+postId+"_view").empty();
+    }else{
+        FB.api({
+                method: 'fql.query',
+                query: "SELECT id,text,fromid,time FROM comment WHERE object_id='"+postId+"'"
+            },
+            function(data) {
+                var sortfunct = function(a,b){
+                    return (a - b);
+                };
+                data.sort(sortfunct);
+                var qArr = new Array();
+                for(var i = 0;i < data.length;i++){
+                    qArr[i] = getUser(data[i].fromid);
+                }
+                FB.Data.waitOn(qArr, function(args) {
+                    for(var i = 0;i < data.length;i++){
+                        renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
+                    }
+                    $("#comments_"+postId+"_view").toggleClass('hidden');
+                    $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
+                });
+            });
+    }
+}
+function renderComment(pic_square,name,text,time,postId){
+                var html = "<li class='fb-detail fb-comment'>" +
+                                "<img class='fb-comment-pic' src=\""+pic_square+"\">" +
+                                "<span class='fb-comment-name'>"+name+"</span>"+
+                                renderText(text)+
+                                "<div class='fb-comment-time'>"+timestampToCommentTime(time)+"</div>"+
+                            "</li>";
+                $("#comments_"+postId+"_view").append(html);
+                $.modal.setPosition();
+}
+
+function getUser(userid){
+    var queryTemplate = "SELECT name,pic_square FROM user WHERE uid = {0}";
+    var u = FB.Data.query(queryTemplate, userid);
+    return u;
+}
+function renderText(text){
+    return  "<span class='fb-comment-text'>"+text+"</span>";
+}
+function timestampToCommentTime(time){
+    var ts = new Date(1000*time);
+    var str = '';
+    if(isCurrentWeekNumber(ts)){
+        str+=full_week[ts.getDay()];
+    }else{
+        str+= full_month[ts.getMonth()]+" "+ts.getDate();
+    }
+    str+=" at ";
+    var min = "";
+    if(ts.getMinutes()<10){
+        min = "0";
+    }
+    min = min+ts.getMinutes();
+    str+=ts.getHours();
+    str+=":"
+    str+=min;
+    return str;
 }
 
 function displayLikes(postId){
     if($("#likes_"+postId+"_view").is(":visible")){
         $("#likes_"+postId+"_view").toggleClass('hidden');
+        $("#likes_"+postId+"_view").toggleClass('fb-detail');
         $("#likes_"+postId+"_view").empty();
     }else{
         FB.api({
@@ -454,7 +537,9 @@ function displayLikes(postId){
                     i++;
                 });
                 if(data.length > 0){
+                    $("#likes_"+postId+"_view").toggleClass('fb-detail');
                     $("#likes_"+postId+"_view").toggleClass('hidden');
+                    $.modal.setPosition();
                 }
             });
     }
@@ -469,7 +554,7 @@ function updateLikesLabel(postId){
             if(data.length > 0){
                 var likes = $('#likes_'+postId+'_lbl').length;
                 if (likes > 0 ) {
-                    $('#likes_'+postId+'_lbl').text(data.length+" people likes it");
+                    $('#likes_'+postId+'_lbl').text(data.length+" people like it");
                 }else{
                     $('#'+postId).prepend(renderFbDetail(data.length+" people likes it",'Likes',postId));
                 }
@@ -559,6 +644,15 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid){
 function overFriendPic(id,post_id){
     $("#"+id+"modal").modal({
         focus:false,
+        autoPosition: true,
+        autoResize:true,
+        containerCss: {
+            'maxHeight' : '700px',
+            'minHeight' :'300px',
+            'width':'500px'
+        },
+        onShow: function(dlg) {$(dlg.container).css('height','auto')},
+        position: ['10%', '25%'],
         onOpen: retrievePost(post_id)
      });
 }
@@ -643,16 +737,16 @@ function fb_complete_login(token){
 
 function fb_login(){
   FB.getLoginStatus(function(response) {
-  if (response.session) {
-    fb_complete_login(response.session.access_token);
-  } else {
-    FB.login(function(response) {
-        if (response.session) {
-            fb_complete_login(response.session.access_token);
-        } else {
-            // user cancelled login
-        }
-    },{perms:'publish_stream,email,offline_access,read_stream,friends_status'});
-  }
+      if (response.session) {
+        fb_complete_login(response.session.access_token);
+      } else {
+        FB.login(function(response) {
+            if (response.session) {
+                fb_complete_login(response.session.access_token);
+            } else {
+                // user cancelled login
+            }
+        },{perms:'publish_stream,email,offline_access,read_stream,friends_status'});
+      }
   });
 }
