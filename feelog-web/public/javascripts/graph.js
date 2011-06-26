@@ -1,5 +1,4 @@
-
-function format_label(value){
+function zoom0_format_label(value){
     var ts = new Date(value);
     if(isCurrentWeekNumber(ts)){
         return week[ts.getDay()];
@@ -7,10 +6,23 @@ function format_label(value){
         return month[ts.getMonth()]+" "+ts.getDate();
     }
 }
+//days aggregation
+function zoom1_format_label(value){
+    return zoom0_format_label(value*1000);
+}
+//weeks aggregation
+function zoom2_format_label(value){
+    return value;
+}
 
-function format_tooltip(point){
+//month aggregation
+function zoom3_format_label(value){
+    return full_month[value];
+}
 
+function zoom0_format_tooltip(point){
     var ts;
+
     if(point.t){
        ts = new Date(point.t);
     }else{
@@ -24,8 +36,33 @@ function format_tooltip(point){
     var tooltip = "<span style=\"color:white\">"+point.name+"</span><br><span style=\"color:#CCCCCC\">"+month[ts.getMonth()] +" "+ts.getDate()+" @ "+ts.getHours()+":"+min+"</span>";
     return tooltip;
 }
+//tooltip for daily aggregated zoom, should show number of posts
+function zoom1_format_tooltip(point){
+    var ts;
+    if(point.t){
+       ts = new Date(point.t*1000);
+    }else{
+       ts = new Date(point.x*1000);
+    }
+    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted on</span><br><span style=\"color:#CCCCCC\">"+month[ts.getMonth()] +" "+ts.getDate()+"</span>";
+    return tooltip;
+}
 
-function onClick(point){
+//tooltip for weekly aggregated zoom, should show number of posts
+function zoom2_format_tooltip(point){
+    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted</span><br><span style=\"color:#CCCCCC\">during week "+point.t+"</span>";
+    return tooltip;
+}
+
+//tooltip for monthly aggregated zoom, should show number of posts
+function zoom3_format_tooltip(point){
+    var m = point.t;
+    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted during</span><br><span style=\"color:#CCCCCC\">"+full_month[m]+"</span>";
+    return tooltip;
+}
+
+
+function zoom0_onClick(point){
     var ts;
     if(point.t){
        ts = new Date(point.t);
@@ -39,7 +76,22 @@ function onClick(point){
     min = min+ts.getMinutes();
     var prityTime = full_month[ts.getMonth()]+" "+ts.getDate()+" at "+ts.getHours()+":"+min;
     var html = getMoodPopup(name,point.y,point.name,prityTime,$('body').data('picture'));
-    $.modal(html);
+    $.modal(html,{
+        containerCss: {
+            'maxHeight' : '700px',
+            'minHeight' :'300px',
+            'width':'500px'
+        }
+     });
+}
+
+//zoom on click should display on graph all the points from zoomed period
+function zoom1_onClick(point){
+}
+
+function zoom2_onClick(point){
+}
+function zoom3_onClick(point){
 }
 
 function getGraphIconURL(moodid){
@@ -63,13 +115,11 @@ function getGraphIconURL(moodid){
 
 }
 
-
-function drawChart(moods,norm) {
+function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
     if(!norm){
         var norm = 0;
     }
     var moodLabels = ["","", "", "", "", "","", ""];
-    
     var unnormalized_options = {
         chart: {
             renderTo: 'moods-graph',
@@ -147,8 +197,6 @@ function drawChart(moods,norm) {
             enabled: false
         }
     };
-
-    
     var normalized_options = {
         chart: {
             renderTo: 'moods-graph',
@@ -229,10 +277,11 @@ function drawChart(moods,norm) {
         }
     };
     for(var i=0;i<moods.length;i++){
-//        var date_pattern = /([0-9][0-9][0-9][0-9])\-([0-9][0-9])\-([0-9][0-9])T([0-9][0-9])\:([0-9][0-9])\:([0-9][0-9])\Z/;
-//        var date_array = date_pattern.exec(moods[i].date);
-//        var d = new Date(date_array[1],date_array[2]-1,date_array[3],date_array[4],date_array[5]).getTime();
-        var d = new Date(moods[i].date).getTime();
+        if(zoom == 0){
+            var d = new Date(moods[i].date).getTime();
+        }else{
+            var d = moods[i].period;
+        }
 
         var p;
         if(norm == 1){
@@ -278,7 +327,13 @@ function create_unnorm_point(mood,d){
 }
 
 function mood_to_point(mood, norm) {
-    var d = new Date(mood.date).getTime();
+    if(mood.zoom == 0){
+        var d = new Date(mood.date).getTime();
+    }else if(mood.zoom == 1){
+        var d = mood.period;
+    }else{
+        var d = mood.period;
+    }
     var p;
     if (norm == 1) {
         p = create_norm_point(mood,d);

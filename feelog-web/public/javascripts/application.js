@@ -153,12 +153,27 @@ function returnFromCreateMood(report_time,mood_val,desc){
 
     add_points_to_graph([mood]);
 }
-function create_mood_object(value){
-    var mood = {
-        "val":value.mood.mood,
-        "desc":value.mood.desc,
-        "date":value.mood.report_time
-    };
+function create_mood_object(value,zoom){
+    switch(zoom){
+        case 0:
+            var mood = {
+                "val":value.mood.mood,
+                "desc":value.mood.desc,
+                "date":value.mood.report_time,
+                "zoom":0
+            };
+            break;
+        case 1:
+        case 2:
+        case 3:
+            var mood = {
+                "val":value.avg,
+                "desc":value.count,
+                "period":value.per,
+                "zoom":zoom
+            };
+            break;
+    }
     return mood;
 }
 function renderMoods(path){
@@ -171,6 +186,7 @@ function renderMoods(path){
         //set empty data notification
         }
         $('body').data('page',0);
+        $('body').data('zoom',0);
         $.each(data, function(key, value) {
             if (key == 'retry'){
                 setTimeout(function(){renderMoods(path)},value);
@@ -180,7 +196,7 @@ function renderMoods(path){
                     first_init = false;
                 }
             }else{
-                var mood = create_mood_object(value);
+                var mood = create_mood_object(value,0);
                 moods_arr.push(mood);
                 if(i==0){
                     //latest mood
@@ -196,25 +212,31 @@ function renderMoods(path){
             $("#moods-graph").empty();
             var norm = $('body').data('norm');
             if(!norm) norm = 0;
-            drawChart(moods_arr.reverse(),norm);
+            drawChart(moods_arr.reverse(),norm,zoom0_onClick,zoom0_format_label,zoom0_format_tooltip,0);
         }else if(first_init == true){
             $("#moods-graph").empty();
             set_init_data("#moods-graph");
         }
     });
 }
-function traversal_feelings(isOlder){
+function traversal_feelings(isOlder, zoom){
     var moods_arr = [];
     var page = $('body').data('page');
-    if(isOlder){
-        page++;
+    if(zoom != $('body').data('zoom')){
+        //zooming
+        page = 0;
     }else{
-        if(page == 0) return;
-        page--;
+        //traversal
+        if(isOlder){
+            page++;
+        }else{
+            if(page == 0) return;
+            page--;
+        }
     }
     chart.showLoading();
     var user_id = $('body').data('userid');
-    var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'.json';
+    var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'/'+zoom+'.json';
     $.ajax(path).success(function(data){
         var i = 0;
         if(data.length == 0){
@@ -222,28 +244,61 @@ function traversal_feelings(isOlder){
         }else{
             $('body').data('page',page);
             $.each(data, function(key, value) {
-                    var mood = create_mood_object(value);
+                    var mood = create_mood_object(value,zoom);
                     moods_arr.push(mood);
             });
         }
         moods_arr.reverse();
-        set_points_on_graph(moods_arr);
-        chart.hideLoading();
+        if(zoom != $('body').data('zoom')){
+            var norm = $('body').data('norm');
+            var zoom_f = getZoomFunctions(zoom);
+            chart.hideLoading();
+            chart.destroy();
+            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
+            $('body').data('zoom',zoom);
+        }else{
+            set_points_on_graph(moods_arr);
+            chart.hideLoading();
+        }
     });
 
 }
+
+function getZoomFunctions(zoom){
+    switch(zoom){
+        case 0:
+            return {onClick:zoom0_onClick,format_label:zoom0_format_label,format_tooltip:zoom0_format_tooltip};
+        case 1:
+            return {onClick:zoom1_onClick,format_label:zoom1_format_label,format_tooltip:zoom1_format_tooltip};
+        case 2:
+            return {onClick:zoom2_onClick,format_label:zoom2_format_label,format_tooltip:zoom2_format_tooltip};
+        case 3:
+            return {onClick:zoom3_onClick,format_label:zoom3_format_label,format_tooltip:zoom3_format_tooltip};
+    }
+}
+
 function olderFeelings(){
-    traversal_feelings(true);
+    var zoom = $('body').data('zoom');
+    traversal_feelings(true,zoom);
 }
 function newerFeelings(){
-    traversal_feelings(false);
+    var zoom = $('body').data('zoom');
+    traversal_feelings(false,zoom);
 }
 function zoomIn(){
-
+    var zoom = $('body').data('zoom');
+    if (zoom == 0){
+        return;
+    }
+    traversal_feelings(false,zoom-1);
 }
 
 function zoomOut(){
-
+    var zoom = $('body').data('zoom');
+    if( zoom == 3){
+        return;
+    }
+    traversal_feelings(false,zoom+1);
 }
 
 function set_no_data(tag){
@@ -470,12 +525,18 @@ function displayComments(postId){
     }
 }
 function renderComment(pic_square,name,text,time,postId){
-                var html = "<li class='fb-detail fb-comment'>" +
-                                "<img class='fb-comment-pic' src=\""+pic_square+"\">" +
-                                "<span class='fb-comment-name'>"+name+"</span>"+
-                                renderText(text)+
-                                "<div class='fb-comment-time'>"+timestampToCommentTime(time)+"</div>"+
-                            "</li>";
+                var html = "<li class='fb-detail'>" +
+                                "<div class='fb-comment'>"+
+                                     "<img class='fb-comment-pic' src=\""+pic_square+"\">" +
+                                     "<div class='fb-comment-body'>"+
+                                        "<div class='fb-comment-content'>"+
+                                             "<span class='fb-comment-name'>"+name+"</span>"+
+                                             renderText(text)+
+                                         "</div>"+
+                                          "<div class='fb-comment-time'>"+timestampToCommentTime(time)+"</div>"+
+                                    "</div>"+
+                                 "</div>"+
+                           "</li>";
                 $("#comments_"+postId+"_view").append(html);
                 $.modal.setPosition();
 }

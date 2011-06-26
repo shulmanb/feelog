@@ -2,6 +2,7 @@ require 'emotions/emotions_parser'
 
 class MoodsController < ApplicationController
   before_filter :authorize, :check_redis_connection
+  #
   @@parser = EmotionsParser.new
 
 
@@ -31,27 +32,48 @@ class MoodsController < ApplicationController
       end
     end
     session.delete(:init_retry)
-
     if(params[:limit] == nil)
         @moods = User.find(user_id).moods.order("report_time DESC")
     else
         @moods = User.find(user_id).moods.order("report_time DESC").limit(params[:limit].to_i)
     end
-    #@user = User.find(params[:user_id])
-
     respond_to do |format|
-      format.html # index.html.erb
       format.json  { render :json => @moods }
     end
   end
+
+  def get_feels_range_page
+    user_id = params[:user_id]
+    #starting 0
+    page = params[:page].to_i
+    size = params[:size].to_i
+    start_t = params[:start].to_i
+    end_t = params[:end].to_i
+    @moods = User.find(user_id).moods.where("report_time < ? and report_time > ?",end_t,start_t).order("report_time DESC").limit(size).offset(page*size)
+    respond_to do |format|
+      format.json  { render :json => @moods }
+    end
+
+  end
+
 
   def get_feels_page
     user_id = params[:user_id]
     #starting 0
     page = params[:page].to_i
     size = params[:size].to_i
-    @moods = User.find(user_id).moods.order("report_time DESC").limit(size).offset(page*size)
-
+    #0=> no zoom,1=>aggregate by day, 2=>aggregate by weeks 3=>aggregate by month
+    if(params[:zoom] != nil && params[:zoom].to_i>0)
+      #z_limit = calculateZoomOffset(params[:zoom],params[:limit])
+      tmp_moods = Mood.joins(:user).where("user_id = ?",user_id).order("report_time DESC").limit(calculateZoomLimit(params[:zoom],size*(page+1)))
+      status = aggregateByZoomLevel(tmp_moods,params[:zoom], size,page)
+      @moods = status[:result]
+      if status[:need_more]
+        #try another query with bigger limit
+      end
+    else
+      @moods = User.find(user_id).moods.order("report_time DESC").limit(size).offset(page*size)
+    end
     respond_to do |format|
       format.json  { render :json => @moods }
     end
@@ -141,6 +163,119 @@ class MoodsController < ApplicationController
 
 
   private
+  def calculateZoomLimit(zoom,limit)
+    limit = limit.to_i
+    case zoom
+      when '1'
+        return limit*10
+      when '2'
+        return limit*10*7
+      when '3'
+        return limit*10*7*31
+    end
+  end
+
+  #calculates the last mood to retrieve acording to the limit and zoom
+  #1=>daily, 2=>weekly, 3=>monthly
+  def calculateZoomOffsetDate(zoom,limit)
+    now = Time.now
+    limit = limit.to_i
+    case zoom
+      when '1'
+        #calculate the midnight <limit-1> days ago
+        base = Time.mktime(now.year, now.month, now.day,0,0,0)
+        return base - (60*60*24)*(limit-1)
+      when '2'
+        #calculate the midnight of the Saturday limit-1 weeks ago days ago
+        base = Time.mktime(now.year, now.month, now.day,0,0,0)
+        return base - (60*60*24)*(limit*7-1)
+      when '3'
+        #calculate the first day of the month that was limit -1 month ago
+        month = now.month - limit
+        year = 0
+        if(month < 0)
+          month=12+month
+          year = -1
+        else
+          month=month+1
+        end
+        return Time.mktime(now.year+year, month, 1,0,0,0)
+    end
+  end
+
+  #perform aggregation of moods according to the zoom level
+  #receives ordered array of moods according to the report_time
+  def aggregateByZoomLevel(moods,zoom, limit, page)
+      case zoom
+        when '1'
+          return aggregate(moods, limit,page){|a,b|
+            aTime = a.yday
+            bTime = b.yday
+            {:res=>(aTime == bTime),:period=>b.to_i}
+          }
+        when '2'
+          return aggregate(moods, limit,page){|a,b|
+            aTime = a.strftime('%U')
+            bTime = b.strftime('%U')
+            s_date = Date.commercial(b.year, b.strftime('%U').to_i, 1)
+            e_date = Date.commercial(b.year, b.strftime('%U').to_i, 7)
+            {:res=>(aTime == bTime),:period=> s_date.strftime("%b%d")+" to "+e_date.strftime("%b%d")}
+          }
+        when '3'
+          return aggregate(moods, limit,page){|a,b|
+            aTime = a.month
+            bTime = b.month
+            {:res=>(aTime == bTime),:period=>b.month}
+          }
+      end
+  end
+
+  def aggregate( moods, limit,page, &same_period)
+    limit = limit.to_i
+    page = page.to_i
+    aggr_value = 0
+    aggr_count = 0
+    result = Array.new
+    index = 0
+    eval = nil
+    moods.each{|x|
+      if aggr_count > 0
+        eval = yield x.report_time.time,moods[index-1].report_time.time
+        if eval[:res]
+          #same period add to value and count
+          aggr_count=aggr_count+1
+          aggr_value=aggr_value+x.mood
+        else
+          #start new period
+           result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period]})
+           aggr_count=1
+           aggr_value=x.mood
+        end
+      else
+        aggr_count=1
+        aggr_value=x.mood
+      end
+      index=index+1
+    }
+    #push the last period
+    result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period]})
+    res = {}
+    res[:need_more] = false
+    if result.size > limit
+      pages = result.size/limit
+      offset = limit*(page)
+      if offset > result.size
+         offset = result.size - limit
+      end
+      result = result[offset,limit]
+    elsif page > 0 && result.size < limit
+      res[:need_more] = true
+    end
+    res[:result] = result
+    return res
+  end
+
+
   #we will store counter for every word for a mood in a hash {word=>count}
   #we will store top 20 words in a hash {count=>word}
   def perform(post, mood, userid)
