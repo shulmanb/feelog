@@ -87,11 +87,32 @@ function zoom0_onClick(point){
 
 //zoom on click should display on graph all the points from zoomed period
 function zoom1_onClick(point){
+    var range = {start:point.s,end:point.e}
+    $('body').data('zoom-range',range);
+    $('.zoom').toggleClass('hidden');
+    $('.back-to-zoom').toggleClass('hidden');
+    var zoom = $('body').data('zoom');
+    $('body').data('zoom-back',zoom);
+    traversal_feelings(false,0,range);
 }
 
 function zoom2_onClick(point){
+    var range = {start:point.s,end:point.e}
+    $('body').data('zoom-range',range);
+    $('.zoom').toggleClass('hidden');
+    $('.back-to-zoom').toggleClass('hidden');
+    var zoom = $('body').data('zoom');
+    $('body').data('zoom-back',zoom);
+    traversal_feelings(false,0,range);
 }
 function zoom3_onClick(point){
+    var range = {start:point.s,end:point.e}
+    $('body').data('zoom-range',range);
+    $('.zoom').toggleClass('hidden');
+    $('.back-to-zoom').toggleClass('hidden');
+    var zoom = $('body').data('zoom');
+    $('body').data('zoom-back',zoom);
+    traversal_feelings(false,0,range);
 }
 
 function getGraphIconURL(moodid){
@@ -134,29 +155,27 @@ function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
             labels: {
                 formatter: function() {
                     return format_label(this.value);
-                }
+                },
+                style:{fontSize:10,fontFamily:"Arial"}
             }
         },
         yAxis: {
             title: {
-                text: null
+                text:null
             },
             max: 8,
             min: 0,
             tickInterval: 1,
-            labels: {
-
-                formatter: function() {
-                    return moodLabels[this.value];
-                }
-            }
+            labels: {enabled:false}
         },
         tooltip: {
             crosshairs: true,
             shared: false,
             backgroundColor: "#56436D",
+            style:{padding:10},
             borderRadius: 0,
             borderWidth: 0,
+            shadow: false,
             formatter: function() {
                 return format_tooltip(this.point);
             }
@@ -195,6 +214,19 @@ function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
         },
         legend:{
             enabled: false
+        },
+        loading:{
+            labelStyle:{
+                fontWeight: 'bold',
+                position: 'relative',
+                top: '1em',
+            },
+            style: {
+                position: 'absolute',
+                backgroundColor: 'white',
+                opacity: 0.5,
+                textAlign: 'center'
+            }
         }
     };
     var normalized_options = {
@@ -316,21 +348,33 @@ function create_norm_point(mood,d){
 }
 
 function create_unnorm_point(mood,d){
-   return {
-           "name":mood.desc,
-           "y":mood.val,
-           marker:{
-               symbol: getGraphIconURL(mood.val)
-           },
-           "t":d
-          };
+    if(mood.zoom > 0){
+        return {
+               "name":mood.desc,
+               "y":mood.val,
+               marker:{
+                   symbol: getGraphIconURL(mood.val)
+               },
+               "t":d,
+               "s":mood.s,
+               "e":mood.e
+              };
+
+    }else{
+        return {
+               "name":mood.desc,
+               "y":mood.val,
+               marker:{
+                   symbol: getGraphIconURL(mood.val)
+               },
+               "t":d
+              };
+    }
 }
 
 function mood_to_point(mood, norm) {
     if(mood.zoom == 0){
         var d = new Date(mood.date).getTime();
-    }else if(mood.zoom == 1){
-        var d = mood.period;
     }else{
         var d = mood.period;
     }

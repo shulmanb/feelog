@@ -68,8 +68,8 @@ function getMoodImageLink(moodid){
         case 7:
             return '<img src="/images/mood-very_happy.png">';
     }
-
 }
+
 function getMoodStr(mood){
     switch(mood){
         case 1:
@@ -170,7 +170,9 @@ function create_mood_object(value,zoom){
                 "val":value.avg,
                 "desc":value.count,
                 "period":value.per,
-                "zoom":zoom
+                "zoom":zoom,
+                "s":value.s,
+                "e":value.e
             };
             break;
     }
@@ -219,7 +221,7 @@ function renderMoods(path){
         }
     });
 }
-function traversal_feelings(isOlder, zoom){
+function traversal_feelings(isOlder, zoom,range){
     var moods_arr = [];
     var page = $('body').data('page');
     if(zoom != $('body').data('zoom')){
@@ -236,7 +238,11 @@ function traversal_feelings(isOlder, zoom){
     }
     chart.showLoading();
     var user_id = $('body').data('userid');
-    var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'/'+zoom+'.json';
+    if(range != null){
+        var path = '/users/'+user_id+'/moods_range/'+10+'/'+page+'/'+range.start+'/'+range.end+'.json';
+    }else{
+        var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'/'+zoom+'.json';
+    }
     $.ajax(path).success(function(data){
         var i = 0;
         if(data.length == 0){
@@ -247,21 +253,19 @@ function traversal_feelings(isOlder, zoom){
                     var mood = create_mood_object(value,zoom);
                     moods_arr.push(mood);
             });
+            moods_arr.reverse();
+            if(zoom != $('body').data('zoom')){
+                var norm = $('body').data('norm');
+                var zoom_f = getZoomFunctions(zoom);
+                chart.destroy();
+                drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
+                $('body').data('zoom',zoom);
+            }else{
+                set_points_on_graph(moods_arr);
+            }
         }
-        moods_arr.reverse();
-        if(zoom != $('body').data('zoom')){
-            var norm = $('body').data('norm');
-            var zoom_f = getZoomFunctions(zoom);
-            chart.hideLoading();
-            chart.destroy();
-            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
-            $('body').data('zoom',zoom);
-        }else{
-            set_points_on_graph(moods_arr);
-            chart.hideLoading();
-        }
+        chart.hideLoading();
     });
-
 }
 
 function getZoomFunctions(zoom){
@@ -276,21 +280,32 @@ function getZoomFunctions(zoom){
             return {onClick:zoom3_onClick,format_label:zoom3_format_label,format_tooltip:zoom3_format_tooltip};
     }
 }
+function backToZoom(){
+    $('body').removeData('zoom-range');
+    $('.back-to-zoom').toggleClass('hidden');
+    $('.zoom').toggleClass('hidden');
+    var zoom = $('body').data('zoom-back');
+    $('body').removeData('zoom-back');
+    traversal_feelings(false,zoom,null);
+
+}
 
 function olderFeelings(){
     var zoom = $('body').data('zoom');
-    traversal_feelings(true,zoom);
+    var range = $('body').data('zoom-range');
+    traversal_feelings(true,zoom,range);
 }
 function newerFeelings(){
     var zoom = $('body').data('zoom');
-    traversal_feelings(false,zoom);
+    var range = $('body').data('zoom-range');
+    traversal_feelings(false,zoom,range);
 }
 function zoomIn(){
     var zoom = $('body').data('zoom');
     if (zoom == 0){
         return;
     }
-    traversal_feelings(false,zoom-1);
+    traversal_feelings(false,zoom-1,null);
 }
 
 function zoomOut(){
@@ -298,12 +313,11 @@ function zoomOut(){
     if( zoom == 3){
         return;
     }
-    traversal_feelings(false,zoom+1);
+    traversal_feelings(false,zoom+1,null);
 }
 
 function set_no_data(tag){
-    $(tag).append("<div class='no-data'>No Data Found</div>");
-    $(tag).css('background-color','white');
+    $(tag).hide();
 }
 
 function set_init_data(tag){
@@ -355,6 +369,7 @@ function redraw_friends_widgets(happy, gloomy){
     $("#gloomy-friends").empty();
 
     if(happy.length > 0){
+        $("#happy-friends").show();
         $("body").data('happy-friends',happy);
         $('body').data('happy-page',0);
         if(happy.length > 10){
@@ -362,9 +377,10 @@ function redraw_friends_widgets(happy, gloomy){
         }
         $('body').data('happy-page-max',Math.floor(happy.length/10));
     }else{
-        set_no_data("#happy-friends");
+        set_no_data("#happy-friends-widget");
     }
     if(gloomy.length > 0){
+        $("#happy-friends").show();
         $("body").data('gloomy-friends',gloomy);
         $('body').data('gloomy-page',0);
         if(gloomy.length > 10){
@@ -372,7 +388,7 @@ function redraw_friends_widgets(happy, gloomy){
         }
         $('body').data('gloomy-page-max',Math.floor(gloomy.length/10));
     }else{
-        set_no_data("#gloomy-friends");
+        set_no_data("#gloomy-friends-widget");
     }
     var i = 0;
     for (i = 0;;i++){
@@ -519,7 +535,11 @@ function displayComments(postId){
                         renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
                     }
                     $("#comments_"+postId+"_view").toggleClass('hidden');
-                    $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
+                    if(data.length > 7){
+                        $("#comments_"+postId+"_view").tinyscrollbar();
+                        $("#comments_"+postId+"_view").bottom();
+                    }
+//                    $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
                 });
             });
     }
@@ -690,9 +710,9 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid){
              <div>\
                    <span class='feel-popup-date'>"+time+' '+"</span>\
                    <span class='fb-actions'>\
-                       <a class='fb-as-link' title='Like this item'><span class='fb-message' onclick='like("+id+","+uid+")'>Like </span></a>\
-                       <span class='fb-message'> - </span>\
-                       <a class='fb-as-link' title='Leave a comment'><span class='fb-message' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
+                       <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like("+id+","+uid+")'>Like </span></a>\
+                       <span class='feel-popup-date'>&#x00B7;</span>\
+                       <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
                    </span>\
              </div>\
          </div>\

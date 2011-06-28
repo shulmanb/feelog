@@ -49,7 +49,7 @@ class MoodsController < ApplicationController
     size = params[:size].to_i
     start_t = params[:start].to_i
     end_t = params[:end].to_i
-    @moods = User.find(user_id).moods.where("report_time < ? and report_time > ?",end_t,start_t).order("report_time DESC").limit(size).offset(page*size)
+    @moods = User.find(user_id).moods.where("report_time < ? and report_time > ?",Time.at(end_t),Time.at(start_t)).order("report_time DESC").limit(size).offset(page*size)
     respond_to do |format|
       format.json  { render :json => @moods }
     end
@@ -211,26 +211,31 @@ class MoodsController < ApplicationController
           return aggregate(moods, limit,page){|a,b|
             aTime = a.yday
             bTime = b.yday
-            {:res=>(aTime == bTime),:period=>b.to_i}
+            s_date = Time.mktime(b.year, b.month, b.day,0,0,0)
+            e_date = Time.mktime(b.year, b.month, b.day,23,59,59)
+            {:res=>(aTime == bTime),:period=>b.to_i,:s=>s_date.to_i,:e=>e_date.to_i}
           }
         when '2'
           return aggregate(moods, limit,page){|a,b|
             aTime = a.strftime('%U')
             bTime = b.strftime('%U')
-            s_date = Date.commercial(b.year, b.strftime('%U').to_i, 1)
-            e_date = Date.commercial(b.year, b.strftime('%U').to_i, 7)
-            {:res=>(aTime == bTime),:period=> s_date.strftime("%b%d")+" to "+e_date.strftime("%b%d")}
+            s_date = Time.parse(Date.commercial(b.year, b.strftime('%U').to_i, 1).to_s)
+            e_date = Time.parse(Date.commercial(b.year, b.strftime('%U').to_i, 7).to_s)
+            {:res=>(aTime == bTime),:period=> s_date.strftime("%b%d")+" to "+e_date.strftime("%b%d"),:s=>s_date.to_i,:e=>e_date.to_i}
           }
         when '3'
           return aggregate(moods, limit,page){|a,b|
             aTime = a.month
             bTime = b.month
-            {:res=>(aTime == bTime),:period=>b.month}
+            s_date = Time.parse(Date.commercial(b.year, b.month, 1).to_s)
+            e_date = Time.parse((Date.commercial(b.year, b.month+1, 1)-1).to_s)
+            {:res=>(aTime == bTime),:period=>b.month,:s=>s_date.to_i,:e=>e_date.to_i}
           }
       end
   end
 
   def aggregate( moods, limit,page, &same_period)
+    #BUG!!! the aggregation is performed in UTC I should receive the offset from the browser
     limit = limit.to_i
     page = page.to_i
     aggr_value = 0
@@ -245,9 +250,10 @@ class MoodsController < ApplicationController
           #same period add to value and count
           aggr_count=aggr_count+1
           aggr_value=aggr_value+x.mood
+          #puts "#{x.report_time.time.to_s} #{aggr_count.to_s} #{x.user_id}"
         else
           #start new period
-           result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period]})
+           result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period],:s=>eval[:s],:e=>eval[:e]})
            aggr_count=1
            aggr_value=x.mood
         end

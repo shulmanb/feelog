@@ -13,6 +13,9 @@ class ApplicationController < ActionController::Base
       !!current_user
     end
     def check_redis_connection
+      #remove after test
+      #@@redis.select(15)
+      #end remove after test
       if @@redis.client.connected? != true
         @@redis.client.connect
       end

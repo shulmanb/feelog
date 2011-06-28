@@ -44,25 +44,30 @@
       <%= render 'moods/report' %>
     </div>
     <div class="hf">my recent feelings</div>
-    <div id="moods-graph" class="moods-graph" style='width: 370px; height: 170px;'>
+    <div id="moods-graph" class="moods-graph" style='width: 380px; height: 200px;'>
         <div class="mdl"><img src="/images/ajax-loader.gif"/></div>
     </div>
     <div class="graph-control">
-        <span style="color:#8064A2">
-           <img src="/images/IconLeft.gif" onclick="olderFeelings()"/>
-           previous
+        <span id="prev" class="traversal graph-control-left" onclick="olderFeelings()">
+           <img class="control-img" src="/images/IconLeft.gif"/>
+           <span class="control-text">previous</span>
         </span>
-        <span style="color:#8064A2;padding-left:10px">
-           <img src="/images/zoomIn.png" onclick="zoomIn()"/>
-           zoom in
+        <span class="graph-control-middle">
+            <span id="zoom-in" class="zoom" onclick="zoomIn()">
+               <img class="control-img" src="/images/zoomIn.png" />
+               <span class="control-text">zoom in</span>
+            </span>
+            <span id="zoom-back" class="back-to-zoom hidden" onclick="backToZoom()">
+               back to zoom
+            </span>
+            <span id="zoom-out" class="zoom" onclick="zoomOut()">
+                <img class="control-img" src="/images/zoomOut.png" />
+                <span class="control-text">zoom out</span>
+            </span>
         </span>
-        <span style="color:#8064A2;padding-right:10px;padding-left:50px">
-           zoom out
-            <img src="/images/zoomOut.png" onclick="zoomOut()"/>
-        </span>
-        <span style="color:#8064A2" >
-            next
-            <img src="/images/IconRight.gif" onclick="newerFeelings()"/>
+        <span id="next" class="traversal graph-control-right"  onclick="newerFeelings()">
+            <span class="control-text">next</span>
+            <img class="control-img" src="/images/IconRight.gif"/>
         </span>
     </div>
     <div>
@@ -75,10 +80,10 @@
             <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
           <li>You are usually cheerful in Tel Aviv<br/>
             <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
-          <li>Work affects your mood negatively 65% of the time<br/>
+          <!--li>Work affects your mood negatively 65% of the time<br/>
             <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
           <li>You are likely to be edgy tomorrow<br/>
-            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
+            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li-->
         </ul>
       </div>
     </div>
@@ -94,47 +99,45 @@
         Treat yourself to dinner and movie at Cinema City. Only $29.95! <a href="">Click here</a>
       </div>
     </div>
-
-    <div class="act">warm up with <span class="happy">Happy</span> friends</div>
-    <div id="happy-friends" class="friends-action">
-        <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+    <div id="happy-friends-widget"class="friends-control">
+        <div class="act">warm up with <span class="happy">Happy</span> friends</div>
+        <div id="happy-friends" class="friends-action">
+            <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+        </div>
+        <div class="hidden" id="happy-friends-control">
+            <br>
+            <span class="traversal friends-control-left">
+                 <img class="control-img" src="/images/IconLeft.gif" onclick="prevFriends('happy')"/>
+                <span class="control-text">previous</span>
+            </span>
+            <span class="traversal friends-control-right">
+                <span class="control-text">next</span>
+                <img class="control-img" src="/images/IconRight.gif" onclick="nextFriends('happy')"/>
+            </span>
+        </div>
     </div>
-    <div id="happy-friends-control" class="hidden">
-        <br>
-        <span style="float:left;color:#8064A2">
-             <img src="/images/IconLeft.gif" onclick="prevFriends('happy')"/>
-             previous
-        </span>
-        <span style="float:right;color:#8064A2" >
-              next
-              <img src="/images/IconRight.gif" onclick="nextFriends('happy')"/>
-        </span>
+    <div id="gloomy-friends-widget" class="friends-control">
+        <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
+        <div id="gloomy-friends" class="friends-action">
+            <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+        </div>
+        <div class="hidden" id="gloomy-friends-control">
+            <br>
+            <span class="traversal friends-control-left">
+               <img src="/images/IconLeft.gif" onclick="prevFriends('gloomy')"/>
+                <span class="control-text">previous</span>
+            </span>
+            <span class="traversal friends-control-right">
+                <span class="control-text">previous</span>
+                <img src="/images/IconRight.gif" onclick="nextFriends('gloomy')"/>
+            </span>
+        </div>
     </div>
-
-    <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
-    <div id="gloomy-friends" class="friends-action">
-        <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+    <div class="tag-cloud">
+        <div class="act">my <span onclick="changeCloud()" class="gloomy cloud hidden">Gloomy &#9662 </span> <span onclick="changeCloud()" class="happy cloud">Happy &#9662 </span> Tags</div>
+        <div id="happy-tag-cloud" class="cloud" style="width: 285px; height: 125px;position:relative"></div>
+        <div id="gloomy-tag-cloud" class="cloud hidden" style="width: 285px; height: 125px;position:relative"></div></div>
     </div>
-    <div id="gloomy-friends-control" class="hidden">
-        <br>
-        <span style="float:left;color:#8064A2">
-           <img src="/images/IconLeft.gif" onclick="prevFriends('gloomy')"/>
-           previous
-        </span>
-        <span style="float:right;color:#8064A2" >
-            next
-            <img src="/images/IconRight.gif" onclick="nextFriends('gloomy')"/>
-        </span>
-    </div>
-
-    <div class="act">my <span class="gloomy cloud hidden">Gloomy</span> <span class="happy cloud">Happy</span> Tags
-        <span class="cloud-toggle">
-           <img src="/images/IconRight.gif" onclick="changeCloud()"/>
-        </span>
-    </div>
-    <div id="happy-tag-cloud" class="cloud" style="width: 285px; height: 125px;position:relative"></div>
-    <div id="gloomy-tag-cloud" class="cloud hidden" style="width: 285px; height: 125px;position:relative"></div>
-  </div>
 </div>
 
 

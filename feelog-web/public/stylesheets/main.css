@@ -13,7 +13,7 @@ header, nav, article, section, figure, aside, footer,fieldset {
 
 body{
 	background-color: #e5e2d3;
-	font-family: "Helvetica";
+	font-family:  Helvetica,Calibri,Arial,sans-serif;
     background-repeat: no-repeat;
 
 }
@@ -46,11 +46,11 @@ img{
 }
 .logo{
 	position:absolute;
-    top:10px;
-    left:60px;
+    top:7px;
+    left:45px;
 }
 .mt{
-	font-family: "Helvetica";
+	font-family:  Helvetica,Calibri,Arial,sans-serif;
 	font-size: 16pt;
 	color: #fff;
 	font-weight: bold;
@@ -58,24 +58,29 @@ img{
 }
 
 .st{
-	font-family: "Helvetica";
+	font-family:  Helvetica,Calibri,Arial,sans-serif;
 	font-size: 14pt;
 	font-style: italic;
 	color: #fff;
 }
 
 .ta{
-	font-family: "Helvetica";
+	font-family:  Helvetica,Calibri,Arial,sans-serif;
 	font-size: 10pt;
 	color: #949494;
 }
 
 .top{
 	position: relative;
-	height: 48px;
+	height: 42px;
     background-color:#403152;
 }
+#top-logo{
+    position:relative;
+    top:5px;
+    left:5px;
 
+}
 .login-container{
 	margin: 0 auto;
     width: 980px;
@@ -121,7 +126,7 @@ img{
 .fb-login-txt{
 	position: relative;
     color: white;
-    font-family: Calibri;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
     font-size: 30px;
     font-style: italic;
 }
@@ -151,7 +156,7 @@ img{
 
 .login-left-name{
         color: white;
-        font-family: Calibri;
+        font-family:  Helvetica,Calibri,Arial,sans-serif;
         font-size: 48px;
         font-weight: bold;
         float:left;
@@ -160,7 +165,7 @@ img{
 
 .login-left-moto{
         color: white;
-        font-family: Calibri;
+        font-family:  Helvetica,Calibri,Arial,sans-serif;
         font-size: 28px;
         font-style: italic;
         margin-left: 40px;
@@ -169,7 +174,7 @@ img{
 
 .login-left-expl{
         color:#cccccc;
-        font-family: Calibri;
+        font-family:  Helvetica,Calibri,Arial,sans-serif;
         font-size: 20px;
         margin-top: 160px;
 }
@@ -267,10 +272,35 @@ img{
 
 .smiley:hover{
     cursor:pointer;
-    background:red;
-    border-top:1px solid #EBEBEB;
-    margin-top:-1px;
 }
+.smiley-angry:hover{
+    background:red;
+}
+
+.smiley-verysad:hover{
+    background:#10253F;
+}
+
+.smiley-sad:hover{
+    background:#174580;
+}
+
+.smiley-ok:hover{
+    background:#8064A2;
+}
+
+.smiley-happy:hover{
+    background:#FFFD00;
+}
+.smiley-ammused:hover{
+    background:#FF9A00;
+}
+
+.smiley-veryhappy:hover{
+    background:#FF3E00;
+}
+
+
 
 .actions{
 	text-align: right;
@@ -282,7 +312,7 @@ img{
 
 .dyk{
 	color: #948a54;
-	font-family: "Arial";
+	font-family:  Helvetica,Calibri,Arial,sans-serif;
 	font-size: 10pt;
 }
 
@@ -418,7 +448,7 @@ img{
 
 .mood-time{
     padding: 0;
-    font-family: Arial,"Helvetica Neue",sans-serif;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
     line-height: 15px;
     padding-top: 10px;
 }
@@ -455,7 +485,7 @@ img{
 
 /* Container */
 #simplemodal-container {background-color:#56436D; border:2px solid #DDD9C3}
-#simplemodal-container a.modalCloseImg {background:url(/images/x.png) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
+#simplemodal-container a.modalCloseImg {background:url(/images/X.gif) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 
 .feel-popup{
 
@@ -473,21 +503,26 @@ img{
     padding-left:5px;
 }
 
-.mood-color-line{
-    height:6px;
-    border-bottom:#DDD9C3;
-    border-bottom-width:2px;
-    border-top:#DDD9C3;
-    border-top-width:2px;
+.mood-color-line {
+   height: 6px;
+   border-bottom: #DDD9C3;
+   border-bottom-width: 1px;
+   border-top: #DDD9C3;
+   border-top-width: 1px;
+   border-top-style: solid;
+   border-right-style: none;
+   border-bottom-style: dotted;
+   border-left-style: none;
 }
 
+
 .feel-popup-body{
-    padding:5px;
+    padding:12px;
 }
 
 .feel-popup-text{
     color:white;
-    font-size:18px;
+    font-size:20px;
 }
 
 .feel-popup-date{
@@ -499,19 +534,22 @@ img{
     display:none;
 }
 
-.cloud-toggle{
-    float:right;
-    margin-right:30px;
+.not-shown{
+    visibility:hidden;
+}
+
+.cloud{
+    cursor:pointer;
 }
 .fb-actions{
     padding-left:10px;
 }
 .fb-detail{
-    background-color: #EDEFF4;
+    background-color: #D6D4DD;
     border-bottom: 1px solid #E5EAF1;
-    margin-top: 2px;
     padding: 5px 5px 4px;
-    margin: 5px 10px;
+    margin: 4px 12px;
+    width:450px;
 }
 
 .fb-view-likes{
@@ -541,11 +579,19 @@ ul.fb-staff{
 .fb-message{
     display: inline;
     color: #6D84B4;
+    font-size:13px;
 }
+
+.fb-message-top{
+    display: inline;
+    color: #CC99FF;
+    font-size:13px;
+}
+
 .fb-as-link{
     font-size: 11px;
     color: #6D84B4;
-    font-family: "lucida grande",tahoma,verdana,arial,sans-serif;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
     overflow: visible;
     width: auto;
     text-align: left;
@@ -557,7 +603,7 @@ ul.fb-staff{
 }
 
 .fb-label{
-    color:#3b5998;
+    color: #38239A;
     cursor: pointer;
 }
 .fb-as-link:hover{
@@ -569,9 +615,12 @@ ul.fb-staff{
     padding:1px;
 }
 
-.fb-comment-wrap{
-    background-color:white;
-    padding-left: 5px;
+.fb-comment-wrap {
+    background-color: white;
+    padding: 5px 5px 0px 5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #A9A4C8;
 }
 .fb-comment-box{
     border: solid #BDC7D8;
@@ -590,17 +639,22 @@ ul.fb-staff{
     width: 100%;
     resize:none;
     overflow:hidden;
-
+    font-family: Helvetica,Calibri,Arial,sans-serif;
+    font-size:11px;
 }
 
 
 .fb-text-area:focus{
     outline:0px;
     outline:none;
+    font-family: Helvetica,Calibri,Arial,sans-serif;
+    font-size:11px;
 }
 
 .fb-text-passive{
     color:#777;
+    font-family: Helvetica,Calibri,Arial,sans-serif;
+    font-size:12px;
 }
 
 .fb-comment-pic{
@@ -649,4 +703,62 @@ ul.fb-staff{
 .clearfix{
     display:block;
     zoom:1
+}
+
+.back-to-zoom{
+
+}
+
+.highcharts-tooltip{
+    width:300px;
+}
+
+
+.back-to-zoom,.zoom,.traversal{
+    font-size:11px;
+    color:#8064A2;
+}
+.graph-control{
+    padding-bottom:25px;
+}
+.control-text{
+    position: relative;
+    bottom: 5px;
+    cursor:pointer;
+}
+
+.control-img{
+    cursor:pointer;
+}
+
+.graph-control-left{
+    float:left;
+}
+
+.graph-control-right{
+    float:right;
+    padding-right:25px;
+}
+
+.friends-control-left{
+    float:left;
+    padding-left:10px;
+}
+
+.friends-control{
+    padding-bottom:10px;
+}
+
+.friends-control-right{
+    float:right;
+    padding-right:28px;
+}
+
+
+.graph-control-middle{
+    padding-left:55px;
+}
+
+#zoom-out{
+    padding-left:10px;
 }
