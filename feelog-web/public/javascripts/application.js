@@ -556,7 +556,7 @@ function submitComment(textarea,postId){
                     var user = getUser(val[0].fromid);
                     user.wait(function(res){
                         renderComment(res[0].pic_square,res[0].name,val[0].text,val[0].time,postId);
-                        $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
+                        $("#"+postId+"_popup").scrollTop($("#"+postId+"_popup")[0].scrollHeight);
                     });
                 });
 
@@ -596,9 +596,7 @@ function displayComments(postId){
                         renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
                     }
                     $("#comments_"+postId+"_view").toggleClass('hidden');
-                    if(data.length > 6){
-                        $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
-                    }
+                    $("#"+postId+"_popup").scrollTop($("#"+postId+"_popup")[0].scrollHeight);
                 });
             });
     }
@@ -659,23 +657,40 @@ function displayLikes(postId){
                 query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
             },
             function(data) {
-                if(data.length>8){
-                    $("#likes_"+postId+"_view").append("<img style=\"float:right\" src=\"/images/IconRight.gif\"/>");
-                    $("#likes_"+postId+"_view").append("<img style=\"float:left\" src=\"/images/IconLeft.gif\"/>");
-
-                }
                 var i = 0;
+                var scroll = (data.length > 8);
+                var hidden = [];
+                var template = "SELECT name,pic_square FROM user WHERE uid={0}";
+                var waitOn = [];
                 $.each(data, function(item,val) {
-                    if(i<8){
-                        FB.api({method: 'fql.query',query: "SELECT name,pic_square FROM user WHERE uid = '"+val.user_id+"'"},
-                                function(data){
-                                    $("#likes_"+postId+"_view").append("<img class='fb-like-image' src=\""+data[0].pic_square+"\" title=\""+data[0].name+"\">");
-                                });
-                    }else{
-                        $("#likes_"+postId+"_view").append("<div class='hidden'>"+val.user_id+"</div>");
-                    }
-                    i++;
+//                    for(var j = 0;j <10;j++){
+                        if((scroll && i<7)||(!scroll && i < 8)){
+                            waitOn[i] = FB.Data.query(template,val.user_id);
+                        }else{
+                            hidden.push(val.user_id);
+                        }
+                        i++;
+//                    }
                 });
+
+                FB.Data.waitOn(waitOn,function(data){
+                    for(var i = 0;i <data.length;i++){
+                            $("#likes_"+postId+"_view").append("<img class='fb-like-image' id='"+"lk_"+i+"'src=\""+data[i][0].pic_square+"\" title=\""+data[i][0].name+"\">");
+                    }
+                    for(var i = 0;i <hidden.length;i++){
+                        var indx = i+7;
+                        $("#likes_"+postId+"_view").append("<div class='hidden' id='"+"lk_"+indx+"'>"+hidden[i]+"</div>");
+                    }
+                });
+
+                if(scroll){
+                    $("#likes_"+postId+"_view").append("<span onclick='nextLikes()' class=\"arrow-right\"/>");
+                    $("#likes_"+postId+"_view").append("<span onclick='prevLikes()' class=\"arrow-left\"/>");
+                    $('body').data('likes-start',0);
+                    $('body').data('likes-last',hidden.length+6);
+                    $('body').data('likes-open',6);
+                }
+
                 if(data.length > 0){
                     $("#likes_"+postId+"_view").toggleClass('fb-detail');
                     $("#likes_"+postId+"_view").toggleClass('hidden');
@@ -684,6 +699,61 @@ function displayLikes(postId){
             });
     }
 }
+
+function nextLikes(){
+    var start = $('body').data('likes-start');
+    var last = $('body').data('likes-last');
+    if(start+7>=last){
+        return;
+    }
+    var opnCnt  = (start+7+4 <=last)?4:last-start-6;
+    hideLikes(start,opnCnt);
+    openLikes(start+7,opnCnt);
+    $('body').data('likes-start',start+opnCnt);
+
+}
+
+function prevLikes(){
+    var start = $('body').data('likes-start');
+    if(start == 0){
+        return;
+    }
+    var opnCnt  = (start-4 > 0)?4:start;
+    openLikes(start-opnCnt,opnCnt);
+    hideLikes(start+7-opnCnt,opnCnt);
+    $('body').data('likes-start',start-opnCnt);
+}
+
+function hideLikes(startIndx, cnt){
+    for(var i=0;i<cnt;i++){
+        $('#lk_'+(startIndx+i)).toggleClass('hidden',true);
+    }
+}
+
+function openLikes(startIndx, cnt){
+    var retrieved = $('body').data('likes-open');
+    var ids = []
+    for(var i=0;i<cnt;i++){
+        if(startIndx+i<=retrieved){
+            $('#lk_'+(startIndx+i)).toggleClass('hidden',false);
+        }else{
+            ids.push($('#lk_'+(startIndx+i)).text());
+        }
+    }
+    var template = "SELECT name,pic_square FROM user WHERE uid={0}";
+    var waitOn = [];
+    for(var i = 0;i<ids.length;i++){
+        waitOn[i] = FB.Data.query(template,ids[i]);
+    }
+    FB.Data.waitOn(waitOn,function(data){
+        for(var i = 0;i <data.length;i++){
+            var indx = retrieved+i+1;
+            $("#lk_"+indx).replaceWith("<img class='fb-like-image' id='"+"lk_"+indx+"'src=\""+data[i][0].pic_square+"\" title=\""+data[i][0].name+"\">");
+        }
+        $('body').data('likes-open',retrieved+data.length);
+    });
+}
+
 
 function updateLikesLabel(postId){
     FB.api({
@@ -758,7 +828,7 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
              <span class='feel-popup-title'>"+getMoodStr(mood)+"</span>\
          </div>\
          <div class='mood-color-line' style=\"background-color:"+getMoodColor(mood)+"\"></div>\
-         <div class='feel-popup-body'>\
+         <div class='feel-popup-body' "+insertIdIfNotNull(id,"_popup")+">\
              <div class='feel-popup-text'>"+post+"</div>\
              <div>\
                    <span class='feel-popup-date'>"+time+' '+"</span>"+
@@ -770,6 +840,10 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
     return html;
 }
 
+function insertIdIfNotNull(id,txt){
+    if (id == null) return "";
+    return "id='"+id+txt+"'";
+}
 function getFbStaff(fb,id){
     if(!fb){
         return "";

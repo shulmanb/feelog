@@ -550,6 +550,9 @@ img{
 
 .feel-popup-body{
     padding:12px;
+    max-height:500px;
+    overflow-y:auto;
+    overflow-x:hidden;
 }
 
 .feel-popup-text{
@@ -588,10 +591,6 @@ img{
     height:52px;
 }
 .fb-view-comments{
-   max-height:300px;
-   overflow-y:auto;
-   overflow-x:hidden;
-   margin: -4px 0px;
 }
 .fb-like-image{
     margin:1px;
@@ -743,8 +742,22 @@ ul.fb-staff{
     width:300px;
 }
 
+.arrow-left{
+    float:left;
+    background-image: url("/images/ArrowLeftTransparent.gif");
+    margin-right:9px;
+}
+.arrow-right{
+    float:right;
+    background-image: url("/images/ArrowRightTransparent.gif");
+}
 
-.back-to-zoom,.zoom,.traversal{
+.arrow-left, .arrow-right{
+    width: 19px;
+    height: 16px;
+    margin-top: 15px;
+}
+.zoom,.traversal{
     font-size:11px;
     color:#8064A2;
 }
