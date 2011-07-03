@@ -1,33 +1,35 @@
 <div class="hf">how do you feel?</div>
 <div class="smiles">
   <div id="s1" class="smiley smiley-veryhappy">
-      <img src="/images/mood-very_happy.png" />
+      <img src="/images/mood-very_happy.png" title="very happy"/>
   </div>
   <div id="s2" class="smiley smiley-ammused">
-      <img src="/images/mood-twink.png" />
+      <img src="/images/mood-twink.png" title="ammused"/>
   </div>
   <div id="s3" class="smiley smiley-happy">
-      <img src="/images/mood-happy.png" />
+      <img src="/images/mood-happy.png" title="happy"/>
   </div>
   <div id="s4" class="smiley smiley-ok">
-      <img src="/images/mood-ok.png" />
+      <img src="/images/mood-ok.png" title="ok"/>
   </div>
   <div id="s5" class="smiley smiley-sad">
-      <img src="/images/mood-sad.png" />
+      <img src="/images/mood-sad.png" title="sad"/>
   </div>
   <div id="s6" class="smiley smiley-verysad">
-      <img src="/images/mood-very_sad.png" />
+      <img src="/images/mood-very_sad.png" title="very sad"/>
   </div>
   <div id="s7" class="smiley smiley-angry">
-      <img src="/images/mood-angry.png" />
+      <img src="/images/mood-angry.png" title="angry"/>
   </div>
 </div>
 <div class="ta">
-    <input type="text" class="i1" name="mood[desc]" id="how" value="why?" /><br/>
+    <textarea class="mood-report report-text-passive" name="mood[desc]" id="how" onblur="onReportBlur(this)" onfocus="onReportFocus(this)" onkeydown="if(event.keyCode == 13){submitMood(this);return false;}">why?</textarea>
+    <br/>
     <input id="mood_val" name="mood[mood]" type="hidden"/>
 </div>
 <div class="actions">
     <div class="fl"><input id="fbshare" name="fbshare" type="checkbox" checked/> Facebook</div>
-    <div class="fl"><input id="twshare" name="twshare" type="checkbox" checked/> Twitter</div>
+    <div class="fl"><input id="twshare" name="twshare" type="checkbox" disabled="true"/> Twitter</div>
+    <div class="fl"><input id="twshare" name="twshare" type="checkbox" disabled="true"/> Google+</div>
     <div id="feel-submit" class="fl"><img src="/images/btnLog.png"/></div>
 </div>

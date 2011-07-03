@@ -33,11 +33,16 @@ class FriendsController < ApplicationController
       @resp.update({'retry_cnt'=>retry_cnt})
     end
     #parse the json str to ruby hash
+    friends_arr = []
     unless @friends == nil
       @friends.each{|key,json_val|
-        @resp.update({key=>JSON.parse(json_val)})
+        val = JSON.parse(json_val)
+        val['u_id']=key
+        friends_arr.push(val)
       }
     end
+    friends_arr = friends_arr.sort_by{|v|v['t']}.reverse()
+    @resp['friends']=friends_arr
     respond_to do |format|
       format.json  { render :json => @resp}
     end

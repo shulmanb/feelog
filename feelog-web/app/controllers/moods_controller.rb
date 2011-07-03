@@ -116,9 +116,10 @@ class MoodsController < ApplicationController
     @user = User.find(params[:user_id])
     @mood.user_id = params[:user_id]
     @mood.report_time = Time.now
-    fbshare = params[:fbshare]
-    twshare = params[:twshare]
     @mood_desc = @mood.desc
+    if params[:fb_id] != nil
+      @mood.fb_id = params[:fb_id]
+    end
     #Resque.enqueue(WordCounter,@mood.desc, @mood.mood, @mood.user_id)
     perform(@mood.desc, @mood.mood, @mood.user_id)
     respond_to do |format|
@@ -221,14 +222,14 @@ class MoodsController < ApplicationController
             bTime = b.strftime('%U')
             s_date = Time.parse(Date.commercial(b.year, b.strftime('%U').to_i, 1).to_s)
             e_date = Time.parse(Date.commercial(b.year, b.strftime('%U').to_i, 7).to_s)
-            {:res=>(aTime == bTime),:period=> s_date.strftime("%b%d")+" to "+e_date.strftime("%b%d"),:s=>s_date.to_i,:e=>e_date.to_i}
+            {:res=>(aTime == bTime),:period=> s_date.strftime("%b%d")+"-"+e_date.strftime("%b%d"),:s=>s_date.to_i,:e=>e_date.to_i}
           }
         when '3'
           return aggregate(moods, limit,page){|a,b|
             aTime = a.month
             bTime = b.month
-            s_date = Time.parse(Date.commercial(b.year, b.month, 1).to_s)
-            e_date = Time.parse((Date.commercial(b.year, b.month+1, 1)-1).to_s)
+            s_date = DateTime.new(b.year, b.month, 1).to_time
+            e_date = (DateTime.new(b.year, b.month+1, 1)-1).to_time
             {:res=>(aTime == bTime),:period=>b.month,:s=>s_date.to_i,:e=>e_date.to_i}
           }
       end
@@ -267,11 +268,12 @@ class MoodsController < ApplicationController
     result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period]})
     res = {}
     res[:need_more] = false
+
     if result.size > limit
-      pages = result.size/limit
       offset = limit*(page)
       if offset > result.size
-         offset = result.size - limit
+         #offset = result.size - limit
+        result = []
       end
       result = result[offset,limit]
     elsif page > 0 && result.size < limit
@@ -282,7 +284,7 @@ class MoodsController < ApplicationController
   end
 
 
-  #we will store counter for every word for a mood in a hash {word=>count}
+    #we will store counter for every word for a mood in a hash {word=>count}
   #we will store top 20 words in a hash {count=>word}
   def perform(post, mood, userid)
      puts "RECEIVED POST "+post

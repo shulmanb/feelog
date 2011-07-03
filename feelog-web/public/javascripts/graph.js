@@ -1,3 +1,153 @@
+var chart;
+var moodLabels = ["","", "", "", "", "","", ""];
+var normalized_options = {
+    chart: {
+        renderTo: 'moods-graph',
+        defaultSeriesType: 'spline'
+    },
+    title: {
+        text: null
+    },
+    xAxis: {
+        type: "datetime",
+        maxZoom: 3600 * 1000,
+        labels: {
+            style: {
+                fontSize:'7pt'
+            }
+        }
+    },
+    yAxis: {
+        title: {
+            text: null
+        },
+        max: 8,
+        min: 0,
+        tickInterval: 1,
+        labels: {
+            formatter: function() {
+                return moodLabels[this.value];
+            }
+        }
+    },
+    tooltip: {
+        crosshairs: false,
+        shared: false,
+        backgroundColor: "#56436D",
+        borderRadius: 0,
+        borderWidth: 0
+    },
+    plotOptions: {
+        area:{
+          fillColor: '#DDD9C3'
+        },
+        series:{
+            cursor: 'pointer'
+        },
+        spline: {
+            marker: {
+                radius: 4,
+                lineColor: '#666666',
+                lineWidth: 1
+            }
+        }
+    },
+    series: [{
+        name: 'Happiness',
+        marker: {
+            symbol: 'circle'
+        },
+        data:[]
+    }],
+    credites:{
+        enabled: false
+    },
+    legend:{
+        enabled: false
+    }
+};
+var unnormalized_options = {
+    chart: {
+        renderTo: 'moods-graph',
+        defaultSeriesType: 'spline',
+        spacingLeft: 0
+    },
+    title: {
+        text: null
+    },
+    xAxis: {
+        type: "linear",
+        categories:[],
+        labels: {
+            style:{fontSize:10,fontFamily:"Arial"}
+        }
+    },
+    yAxis: {
+        title: {
+            text:null
+        },
+        max: 8,
+        min: 0,
+        tickInterval: 1,
+        labels: {enabled:false}
+    },
+    tooltip: {
+        crosshairs: false,
+        shared: false,
+        backgroundColor: "#56436D",
+        style:{padding:10},
+        borderRadius: 0,
+        borderWidth: 0,
+        shadow: false
+    },
+    plotOptions: {
+        area:{
+          fillColor: '#DDD9C3'
+        },
+        series:{
+            cursor: 'pointer',
+            point:{
+                events:{}
+            }
+        },
+        spline: {
+            marker: {
+                radius: 4,
+                lineColor: '#666666',
+                lineWidth: 1
+            }
+        }
+    },
+    series: [{
+        name: 'Happiness',
+        marker: {
+            symbol: 'circle'
+        },
+        data:[]
+    }],
+    credits:{
+        enabled: false
+    },
+    legend:{
+        enabled: false
+    },
+    loading:{
+        labelStyle:{
+            fontWeight: 'bold',
+            position: 'relative',
+            top: '70px',
+            color:'white'
+        },
+        style: {
+            position: 'absolute',
+            backgroundColor: "#56436D",
+            opacity: 0.8,
+            textAlign: 'center'
+        }
+    }
+};
+
+
 function zoom0_format_label(value){
     var ts = new Date(value);
     if(isCurrentWeekNumber(ts)){
@@ -75,22 +225,44 @@ function zoom0_onClick(point){
     }
     min = min+ts.getMinutes();
     var prityTime = full_month[ts.getMonth()]+" "+ts.getDate()+" at "+ts.getHours()+":"+min;
-    var html = getMoodPopup(name,point.y,point.name,prityTime,$('body').data('picture'));
-    $.modal(html,{
-        containerCss: {
-            'maxHeight' : '700px',
-            'minHeight' :'300px',
-            'width':'500px'
-        }
-     });
+    var post_id = null;
+    var uid = null;
+    if(point.fb_id != null){
+        var tmp = point.fb_id.split("_");
+        post_id = tmp[1];
+        uid = tmp[0];
+    }
+    var html = getMoodPopup(name,point.y,point.name,prityTime,$('body').data('picture'),post_id,uid,point.fb_id != null);
+    if(point.fb_id == null){
+        $.modal(html,{
+            containerCss: {
+                'maxHeight' : '700px',
+                'minHeight' :'300px',
+                'width':'500px'
+            }
+         });
+
+    }else{
+         $.modal(html,{
+            focus:false,
+            autoPosition: true,
+            autoResize:true,
+            containerCss: {
+                'maxHeight' : '700px',
+                'minHeight' :'300px',
+                'width':'500px'
+            },
+            onShow: function(dlg) {$(dlg.container).css('height','auto');$(".fb-comment-box").elastic()},
+            position: ['10%', '25%'],
+            onOpen: retrievePost(post_id)
+         });
+    }
 }
 
 //zoom on click should display on graph all the points from zoomed period
 function zoom1_onClick(point){
     var range = {start:point.s,end:point.e}
     $('body').data('zoom-range',range);
-    $('.zoom').toggleClass('hidden');
-    $('.back-to-zoom').toggleClass('hidden');
     var zoom = $('body').data('zoom');
     $('body').data('zoom-back',zoom);
     traversal_feelings(false,0,range);
@@ -99,8 +271,6 @@ function zoom1_onClick(point){
 function zoom2_onClick(point){
     var range = {start:point.s,end:point.e}
     $('body').data('zoom-range',range);
-    $('.zoom').toggleClass('hidden');
-    $('.back-to-zoom').toggleClass('hidden');
     var zoom = $('body').data('zoom');
     $('body').data('zoom-back',zoom);
     traversal_feelings(false,0,range);
@@ -108,8 +278,6 @@ function zoom2_onClick(point){
 function zoom3_onClick(point){
     var range = {start:point.s,end:point.e}
     $('body').data('zoom-range',range);
-    $('.zoom').toggleClass('hidden');
-    $('.back-to-zoom').toggleClass('hidden');
     var zoom = $('body').data('zoom');
     $('body').data('zoom-back',zoom);
     traversal_feelings(false,0,range);
@@ -136,178 +304,19 @@ function getGraphIconURL(moodid){
 
 }
 
+function drawEmptyChart(text){
+    chart = new Highcharts.Chart(unnormalized_options);
+    if(text != null){
+        chart.showLoading(text);
+    }
+}
+
 function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
     if(!norm){
         var norm = 0;
     }
-    var moodLabels = ["","", "", "", "", "","", ""];
-    var unnormalized_options = {
-        chart: {
-            renderTo: 'moods-graph',
-            defaultSeriesType: 'spline'
-        },
-        title: {
-            text: null
-        },
-        xAxis: {
-            type: "linear",
-            categories:[],
-            labels: {
-                formatter: function() {
-                    return format_label(this.value);
-                },
-                style:{fontSize:10,fontFamily:"Arial"}
-            }
-        },
-        yAxis: {
-            title: {
-                text:null
-            },
-            max: 8,
-            min: 0,
-            tickInterval: 1,
-            labels: {enabled:false}
-        },
-        tooltip: {
-            crosshairs: true,
-            shared: false,
-            backgroundColor: "#56436D",
-            style:{padding:10},
-            borderRadius: 0,
-            borderWidth: 0,
-            shadow: false,
-            formatter: function() {
-                return format_tooltip(this.point);
-            }
-        },
-        plotOptions: {
-            area:{
-              fillColor: '#DDD9C3'
-            },
-            series:{
-                cursor: 'pointer',
-                point: {
-                    events: {
-                        click: function() {
-                            onClick(this);
-                        }
-                    }
-                }
-            },
-            spline: {
-                marker: {
-                    radius: 4,
-                    lineColor: '#666666',
-                    lineWidth: 1
-                }
-            }
-        },
-        series: [{
-            name: 'Happiness',
-            marker: {
-                symbol: 'circle'
-            },
-            data:[]
-        }],
-        credites:{
-            enabled: false
-        },
-        legend:{
-            enabled: false
-        },
-        loading:{
-            labelStyle:{
-                fontWeight: 'bold',
-                position: 'relative',
-                top: '1em',
-            },
-            style: {
-                position: 'absolute',
-                backgroundColor: 'white',
-                opacity: 0.5,
-                textAlign: 'center'
-            }
-        }
-    };
-    var normalized_options = {
-        chart: {
-            renderTo: 'moods-graph',
-            defaultSeriesType: 'spline'
-        },
-        title: {
-            text: null
-        },
-        xAxis: {
-            type: "datetime",
-            maxZoom: 3600 * 1000,
-            labels: {
-                style: {
-                    fontSize:'7pt'
-                },
-                formatter: function() {
-                    return format_label(this.value);
-                }
-            }
-        },
-        yAxis: {
-            title: {
-                text: null
-            },
-            max: 8,
-            min: 0,
-            tickInterval: 1,
-            labels: {
-                formatter: function() {
-                    return moodLabels[this.value];
-                }
-            }
-        },
-        tooltip: {
-            crosshairs: true,
-            shared: false,
-            backgroundColor: "#56436D",
-            borderRadius: 0,
-            borderWidth: 0,
-            formatter: function() {
-                return format_tooltip(this.point);
-            }
-        },
-        plotOptions: {
-            area:{
-              fillColor: '#DDD9C3'
-            },
-            series:{
-                cursor: 'pointer',
-                point: {
-                    events: {
-                        click: function() {
-                            onClick();
-                        }
-                    }
-                }
-            },
-            spline: {
-                marker: {
-                    radius: 4,
-                    lineColor: '#666666',
-                    lineWidth: 1
-                }
-            }
-        },
-        series: [{
-            name: 'Happiness',
-            marker: {
-                symbol: 'circle'
-            },
-            data:[]
-        }],
-        credites:{
-            enabled: false
-        },
-        legend:{
-            enabled: false
-        }
-    };
+    unnormalized_options.series[0].data = [];
+    unnormalized_options.xAxis.categories = [];
     for(var i=0;i<moods.length;i++){
         if(zoom == 0){
             var d = new Date(moods[i].date).getTime();
@@ -331,6 +340,9 @@ function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
     if(norm == 1){
         options =  normalized_options;
     }else{
+        unnormalized_options.xAxis.labels.formatter = function() {return format_label(this.value);}
+        unnormalized_options.tooltip.formatter = function() {return format_tooltip(this.point);}
+        unnormalized_options.plotOptions.series.point.events.click = function() {onClick(this);}
         options = unnormalized_options;
     }
     chart = new Highcharts.Chart(options);
@@ -357,7 +369,8 @@ function create_unnorm_point(mood,d){
                },
                "t":d,
                "s":mood.s,
-               "e":mood.e
+               "e":mood.e,
+               "fb_id":mood.fb_id
               };
 
     }else{
@@ -367,13 +380,14 @@ function create_unnorm_point(mood,d){
                marker:{
                    symbol: getGraphIconURL(mood.val)
                },
-               "t":d
+               "t":d,
+               "fb_id":mood.fb_id
               };
     }
 }
 
 function mood_to_point(mood, norm) {
-    if(mood.zoom == 0){
+    if(mood.zoom == undefined || mood.zoom == 0){
         var d = new Date(mood.date).getTime();
     }else{
         var d = mood.period;
@@ -414,6 +428,9 @@ function add_points_to_graph(moods){
 sets new points for the graph
  */
 function set_points_on_graph(moods){
+    if(moods == null || moods.length == 0){
+        return;
+    }
     var norm = $('body').data('norm');
     if(!norm) norm = 0;
     var series = chart.series[0];
@@ -429,8 +446,11 @@ function set_points_on_graph(moods){
         }
     }
     series.setData(data,false);
+
     if(norm == 0){
         chart.xAxis[0].setCategories(categories, false);
     }
-    chart.redraw();
+    var options = chart.options
+    chart.destroy();
+    chart = new Highcharts.Chart(options);
 }

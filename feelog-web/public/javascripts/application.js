@@ -16,39 +16,85 @@ function isCurrentWeekNumber(date){
 //changed to ajax
 function submitMood(){
         var val = $("#mood_val").val();
+        $("#how").blur();
         var how = $("#how").val();
         var location = $('body').data('coords');
-        var fbshare = $("#fbshare").val();
-        var twshare = $("#twshare").val();
+        var fbshare = $("#fbshare").is(':checked');
+        var twshare = $("#twshare").is(':checked');
         var payload;
         if(location != null){
-           payload = {"mood[lat]":location.latitude,"mood[lon]":location.longitude,"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
+           payload = {"mood[lat]":location.latitude,"mood[lon]":location.longitude,"mood[desc]":how,"mood[mood]":val};
         }else{
-           payload = {"mood[desc]":how,"mood[mood]":val,"fbshare":fbshare,"twshare":twshare};
+           payload = {"mood[desc]":how,"mood[mood]":val};
         }
         if (val != ''){
             var userid = $('body').data('userid');
             $("#feel-submit").hide();
             $("#ajax-busy").show();
-            $.ajax({
-              url: "/users/"+userid+"/moods.json",
-              type:"POST",
-              data:payload,
-              success: function(data){
-                returnFromCreateMood(data.report_time,data.val,data.desc);
-              }
-            });
+            if(fbshare){
+                FB.api('/me/feed', 'post', { message: how }, function(response) {
+                    var id = response.id;
+                    payload['fb_id'] = id;
+                    $.ajax({
+                      url: "/users/"+userid+"/moods.json",
+                      type:"POST",
+                      data:payload,
+                      success: function(data){
+                        returnFromCreateMood(data.report_time,data.val,data.desc,id);
+                      }
+                    });
+
+                });
+            }else{
+                $.ajax({
+                  url: "/users/"+userid+"/moods.json",
+                  type:"POST",
+                  data:payload,
+                  success: function(data){
+                    returnFromCreateMood(data.report_time,data.val,data.desc,null);
+                  }
+                });
+            }
         }
 }
 
+function onReportFocus(how){
+    if(how.value=="why?"){
+        how.value = "";
+    }
+    $(how).toggleClass("report-text-passive",false);
+}
+
+function onReportBlur(how){
+    if(how.value==""){
+        how.value = "why?";
+    }
+    $(how).toggleClass("report-text-passive",true);
+}
 
 function toggle(moodid){
-    $(".smiley-selected").toggleClass("smiley-selected");
+    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-ammused-selected smiley-veryhappy-selected smiley-selected",false);
     $("#mood_val").val(moodid);
-    $('#'+'s'+moodid).toggleClass("smiley-selected");
-    if($("#how").val()=="why?"){
-        $("#how").val("");
-    }
+    $('#'+'s'+moodid).toggleClass("smiley-selected",true);
+    $('#'+'s'+moodid).toggleClass(function(){
+        switch(moodid){
+            case 7:
+                return "smiley-angry-selected";
+            case 6:
+                return "smiley-verysad-selected";
+            case 5:
+                return "smiley-sad-selected";
+            case 4:
+                return "smiley-ok-selected";
+            case 3:
+                return "smiley-happy-selected";
+            case 2:
+                return "smiley-ammused-selected";
+            case 1:
+                return "smiley-veryhappy-selected";
+        }
+    },true);
+
     $("#how").focus();
 }
 function getMoodImageLink(moodid){
@@ -110,6 +156,7 @@ function getMoodColor(mood){
 }
 
 function prepareMoodIcons(){
+    $("#how").elastic();
     $("#s1").click(function() {
         toggle(1);
     });
@@ -136,11 +183,11 @@ function prepareMoodIcons(){
     });
 }
 //this function called by the server rendered js, redirect_fb.js.erbs.erb
-function returnFromCreateMood(report_time,mood_val,desc){
+function returnFromCreateMood(report_time,mood_val,desc,fb_id){
     $('#ajax-busy').hide();
     $("#how").val("why?");
     $("#mood_val").val('');
-    $(".smiley-selected").toggleClass("smiley-selected");
+    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-ammused-selected smiley-veryhappy-selected smiley-selected",false);
     var moodStr = '<b>'+getMoodStr(mood_val)+'</b>';
     var status = name +' is '+moodStr+' : ';
     $("#usr-status").html(status);
@@ -148,10 +195,12 @@ function returnFromCreateMood(report_time,mood_val,desc){
     var mood = {
         "val":mood_val,
         "desc":desc,
-        "date":report_time
+        "date":report_time,
+        "fb_id":fb_id
     };
-
     add_points_to_graph([mood]);
+    $("#feel-submit").show();
+
 }
 function create_mood_object(value,zoom){
     switch(zoom){
@@ -160,7 +209,8 @@ function create_mood_object(value,zoom){
                 "val":value.mood.mood,
                 "desc":value.mood.desc,
                 "date":value.mood.report_time,
-                "zoom":0
+                "zoom":0,
+                "fb_id":value.mood.fb_id
             };
             break;
         case 1:
@@ -182,7 +232,9 @@ function renderMoods(path){
     var moods_arr = [];
     var initializing = false;
     var first_init = true;
-    $.ajax(path+"/limit/10.json").success(function(data){
+    $("#moods-graph").empty();
+    drawEmptyChart("Loading...")
+    $.ajax(path+"/limit/7.json").success(function(data){
         var i = 0;
         if(data.length == 0){
         //set empty data notification
@@ -211,13 +263,11 @@ function renderMoods(path){
             }
         });
         if(initializing != true){
-            $("#moods-graph").empty();
             var norm = $('body').data('norm');
             if(!norm) norm = 0;
             drawChart(moods_arr.reverse(),norm,zoom0_onClick,zoom0_format_label,zoom0_format_tooltip,0);
         }else if(first_init == true){
-            $("#moods-graph").empty();
-            set_init_data("#moods-graph");
+            set_init_data();
         }
     });
 }
@@ -239,13 +289,13 @@ function traversal_feelings(isOlder, zoom,range){
     chart.showLoading();
     var user_id = $('body').data('userid');
     if(range != null){
-        var path = '/users/'+user_id+'/moods_range/'+10+'/'+page+'/'+range.start+'/'+range.end+'.json';
+        var path = '/users/'+user_id+'/moods_range/'+7+'/'+page+'/'+range.start+'/'+range.end+'.json';
     }else{
-        var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'/'+zoom+'.json';
+        var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
     }
     $.ajax(path).success(function(data){
         var i = 0;
-        if(data.length == 0){
+        if(data == null || data.length == 0){
             //disable previous button
         }else{
             $('body').data('page',page);
@@ -254,15 +304,16 @@ function traversal_feelings(isOlder, zoom,range){
                     moods_arr.push(mood);
             });
             moods_arr.reverse();
+            var norm = $('body').data('norm');
+            var zoom_f = getZoomFunctions(zoom);
+            chart.destroy();
+            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
             if(zoom != $('body').data('zoom')){
-                var norm = $('body').data('norm');
-                var zoom_f = getZoomFunctions(zoom);
-                chart.destroy();
-                drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
                 $('body').data('zoom',zoom);
-            }else{
-                set_points_on_graph(moods_arr);
             }
+//            else{
+//                set_points_on_graph(moods_arr);
+//            }
         }
         chart.hideLoading();
     });
@@ -282,8 +333,6 @@ function getZoomFunctions(zoom){
 }
 function backToZoom(){
     $('body').removeData('zoom-range');
-    $('.back-to-zoom').toggleClass('hidden');
-    $('.zoom').toggleClass('hidden');
     var zoom = $('body').data('zoom-back');
     $('body').removeData('zoom-back');
     traversal_feelings(false,zoom,null);
@@ -301,6 +350,9 @@ function newerFeelings(){
     traversal_feelings(false,zoom,range);
 }
 function zoomIn(){
+    if($('body').data('zoom-back')!=null){
+        return;
+    }
     var zoom = $('body').data('zoom');
     if (zoom == 0){
         return;
@@ -309,6 +361,10 @@ function zoomIn(){
 }
 
 function zoomOut(){
+    if($('body').data('zoom-back')!=null){
+        backToZoom();
+        return;
+    }
     var zoom = $('body').data('zoom');
     if( zoom == 3){
         return;
@@ -320,10 +376,9 @@ function set_no_data(tag){
     $(tag).hide();
 }
 
-function set_init_data(tag){
-    $(tag).append("<div class='no-data'>Initializing..</div>");
-    $(tag).append("<img src='/images/initializing.gif'/>");
-    $(tag).css('background-color','white');
+function set_init_data(){
+    chart.hideLoading();
+    chart.showLoading("Loading User Data...")
 }
 
 function renderFriends(path){
@@ -332,23 +387,26 @@ function renderFriends(path){
     var render_needed = true;
     $.ajax(path).success(function(data){
         if(data.length == 0){}
-        $.each(data, function(id, mood_json) {
+        $.each(data, function(id, val) {
             if (id == 'retry'){
-                setTimeout(function(){renderFriends(path)},mood_json);
+                setTimeout(function(){renderFriends(path)},val);
             }else if (id == 'retry_cnt'){
-                if (mood_json >1){
+                if (val >1){
                     render_needed = false;
                 }
             }else{
-                var rendered = renderFriendIcon(id,mood_json);
-                if(rendered[0]){
-                    happy.push([id,rendered[1],rendered[2]]);
-                }else{
-                    gloomy.push([id,rendered[1],rendered[2]]);
-                }
+                $.each(val, function(indx,mood_json) {
+                    var u_id = mood_json.u_id
+                    var rendered = renderFriendIcon(u_id,mood_json);
+                    if(rendered[0]){
+                        happy.push([u_id,rendered[1],rendered[2]]);
+                    }else{
+                        gloomy.push([u_id,rendered[1],rendered[2]]);
+                    }
+                })
             }
         });
-        if(render_needed == true){
+            if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
     });
@@ -413,11 +471,11 @@ function redraw_friends_widgets(happy, gloomy){
 
 function renderFriendIcon(id,mood_json){
     var picLink = 'https://graph.facebook.com/'+id+'/picture';
-    var mood = mood_json.m;
-    var post = mood_json.p;
-    var time = mood_json.t;
-    var name = mood_json.n;
-    var post_id = mood_json.i;
+    var mood = mood_json.m
+    var post = mood_json.p
+    var time = mood_json.t
+    var name = mood_json.n
+    var post_id = mood_json.i
     //redirect_fb the html for the icon
     var happy = 0; //0 for unhappy, 1 for happy
     if(mood > 3){
@@ -431,7 +489,7 @@ function renderFriendIcon(id,mood_json){
     var html =
     "<div id='"+id+"' class='friend-icon' > \
                 <div id='"+id+"modal' class='modal-content'> \
-                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id)+"\
+                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id,true)+"\
                 </div> \
                 <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+",\""+post_id+"\")'/>\
      </div>";
@@ -439,21 +497,22 @@ function renderFriendIcon(id,mood_json){
 }
 
 function renderFbDetail(text,display,id){
-    return "<li id='"+display.toLowerCase()+"_"+id+"_detail' class='fb-detail'>" +
+    var txt = display.toLowerCase();
+    return "<li id='"+txt+"_"+id+"_detail' class='fb-detail'>" +
                "<div class='fb-inner'>" +
                     "<div class='fb-as-link' onclick=\"display"+display+"('"+id+"')\">" +
-                        "<label id='"+display.toLowerCase()+"_"+id+"_lbl' class='fb-label'>"+text+"</label>" +
+                        "<img src='/images/icon-fb-"+txt+".png'/>"+
+                        "<label id='"+txt+"_"+id+"_lbl' class='fb-label'>"+text+"</label>" +
                     "</div>" +
                "</div>"+
-           "</li>"+
-           "<li id='"+display.toLowerCase()+"_"+id+"_view' class='hidden fb-view-"+display.toLowerCase()+"'></li>";
+           "</li>";
 }
 
 function renderFbCommentBox(id){
     return "<li id='"+id+"_comment_detail' class='fb-detail'>" +
                    "<div class='fb-inner'>" +
                       "<div class='fb-comment-wrap'>"+
-                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive' title='Write a comment' class='fb-comment-box' onclick='focusCommentBox(this,"+id+")'  onblur='blurCommentBox(this,"+id+")' onkeydown='if (event.keyCode == 13) { submitComment(this,"+id+"); return false; }'>Write a comment...</textarea> " +
+                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive fb-comment-box' title='Write a comment' onclick='focusCommentBox(this,"+id+")'  onblur='blurCommentBox(this,"+id+")' onkeydown='if (event.keyCode == 13) { submitComment(this,"+id+"); return false; }'>Write a comment...</textarea> " +
                       "</div>"+
                    "</div>"+
                 "</li>";
@@ -517,6 +576,8 @@ function displayComments(postId){
         $("#comments_"+postId+"_view").toggleClass('hidden');
         $("#comments_"+postId+"_view").empty();
     }else{
+
+
         FB.api({
                 method: 'fql.query',
                 query: "SELECT id,text,fromid,time FROM comment WHERE object_id='"+postId+"'"
@@ -535,30 +596,28 @@ function displayComments(postId){
                         renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
                     }
                     $("#comments_"+postId+"_view").toggleClass('hidden');
-                    if(data.length > 7){
-                        $("#comments_"+postId+"_view").tinyscrollbar();
-                        $("#comments_"+postId+"_view").bottom();
+                    if(data.length > 6){
+                        $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
                     }
-//                    $("#comments_"+postId+"_view").scrollTop($("#comments_"+postId+"_view")[0].scrollHeight);
                 });
             });
     }
 }
 function renderComment(pic_square,name,text,time,postId){
-                var html = "<li class='fb-detail'>" +
-                                "<div class='fb-comment'>"+
-                                     "<img class='fb-comment-pic' src=\""+pic_square+"\">" +
-                                     "<div class='fb-comment-body'>"+
-                                        "<div class='fb-comment-content'>"+
-                                             "<span class='fb-comment-name'>"+name+"</span>"+
-                                             renderText(text)+
-                                         "</div>"+
-                                          "<div class='fb-comment-time'>"+timestampToCommentTime(time)+"</div>"+
-                                    "</div>"+
+        var html = "<li class='fb-detail'>" +
+                        "<div class='fb-comment'>"+
+                             "<img class='fb-comment-pic' src=\""+pic_square+"\">" +
+                             "<div class='fb-comment-body'>"+
+                                "<div class='fb-comment-content'>"+
+                                     "<span class='fb-comment-name'>"+name+"</span>"+
+                                     renderText(text)+
                                  "</div>"+
-                           "</li>";
-                $("#comments_"+postId+"_view").append(html);
-                $.modal.setPosition();
+                                  "<div class='fb-comment-time'>"+timestampToCommentTime(time)+"</div>"+
+                            "</div>"+
+                         "</div>"+
+                   "</li>";
+        $("#comments_"+postId+"_view").append(html);
+        $.modal.setPosition();
 }
 
 function getUser(userid){
@@ -637,7 +696,7 @@ function updateLikesLabel(postId){
                 if (likes > 0 ) {
                     $('#likes_'+postId+'_lbl').text(data.length+" people like it");
                 }else{
-                    $('#'+postId).prepend(renderFbDetail(data.length+" people likes it",'Likes',postId));
+                    $('#likes_'+postId+'_view').before(renderFbDetail(data.length+" people likes it",'Likes',postId));
                 }
             }else{
                 $('#likes_'+postId).remove();
@@ -656,7 +715,7 @@ function updateCommentsLabel(postId){
                 if (comments > 0 ) {
                     $('#comments_'+postId+'_lbl').text("View all "+data.length+" comments");
                 }else{
-                    $('#'+postId+"_comment_detail").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
+                    $('#comments_'+postId+"_view").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
                 }
             }else{
                 $('#comments_'+postId).remove();
@@ -668,19 +727,13 @@ function updateCommentsLabel(postId){
 
 
 function retrievePost(postId){
-
-    if($("#"+postId+"_comment_detail").length <=0){
-        $('#'+postId).append(renderFbCommentBox(postId));
-        $('#'+postId+"_comment").elastic();
-    }
-
     FB.api({
             method: 'fql.query',
             query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
         },
         function(data) {
             if(data.length > 0){
-                $('#'+postId+"_comment_detail").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
+                $('#comments_'+postId+"_view").before(renderFbDetail("View all "+data.length+" comments",'Comments',postId));
             }
         }
     );
@@ -696,7 +749,7 @@ function retrievePost(postId){
         });
 }
 
-function getMoodPopup(name,mood,post,time,picLink,id,uid){
+function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
     var html = "<div class='feel-popup'>\
         <div class='feel-popup-top'>\
              <img style=\"float:left\" src='"+picLink+"'/>\
@@ -708,20 +761,38 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid){
          <div class='feel-popup-body'>\
              <div class='feel-popup-text'>"+post+"</div>\
              <div>\
-                   <span class='feel-popup-date'>"+time+' '+"</span>\
-                   <span class='fb-actions'>\
-                       <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like("+id+","+uid+")'>Like </span></a>\
-                       <span class='feel-popup-date'>&#x00B7;</span>\
-                       <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
-                   </span>\
-             </div>\
-         </div>\
-         <ul class='fb-staff' id='"+id+"'>\
-         </ul>\
+                   <span class='feel-popup-date'>"+time+' '+"</span>"+
+                    getFbActions(fb,id,uid)+
+             "</div>"+
+             getFbStaff(fb,id)+
+         "</div>\
     </div>";
     return html;
 }
 
+function getFbStaff(fb,id){
+    if(!fb){
+        return "";
+    }
+    return  "<ul class='fb-staff' id='"+id+"'>"+
+                "<li id='likes_"+id+"_view' class='hidden fb-view-likes'></li>"+
+                "<li id='comments_"+id+"_view' class='hidden fb-view-comments'></li>"+
+                renderFbCommentBox(id)+
+            "</ul>";
+
+
+}
+
+function getFbActions(fb,id,uid){
+    if(!fb){
+        return "";
+    }
+    return    "<span class='fb-actions'>\
+        <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like("+id+","+uid+")'>Like </span></a>\
+        <span class='feel-popup-date'>&#x00B7;</span>\
+        <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
+    </span>";
+}
 function overFriendPic(id,post_id){
     $("#"+id+"modal").modal({
         focus:false,
@@ -732,7 +803,7 @@ function overFriendPic(id,post_id){
             'minHeight' :'300px',
             'width':'500px'
         },
-        onShow: function(dlg) {$(dlg.container).css('height','auto')},
+        onShow: function(dlg) {$(dlg.container).css('height','auto');$(".fb-comment-box").elastic()},
         position: ['10%', '25%'],
         onOpen: retrievePost(post_id)
      });

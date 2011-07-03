@@ -252,23 +252,54 @@ img{
 	margin-bottom: 5px;
 }
 
-.i1{
+.mood-report{
 	width: 350px;
-	height: 45px;
+    max-height: 70px;
 	border: 1px solid #948a54;
-	color: #948a54;
 	padding: 0 10px;
+    resize:none;
+}
+.report-text-passive{
+    color: #948a54;
+    margin: 0px auto;
 }
 .smiley{
 	float: left;
 	margin-right: 5px;
 }
-
 .smiley-selected{
-    background:red;
-    border-top:1px solid #EBEBEB;
-    margin-top:-1px;
+
 }
+
+.smiley-angry-selected{
+    background:red;
+}
+
+.smiley-verysad-selected{
+    background:#10253F;
+}
+
+.smiley-sad-selected{
+    background:#174580;
+}
+
+.smiley-ok-selected{
+    background:#8064A2;
+}
+
+.smiley-happy-selected{
+    background:#FFFD00;
+}
+.smiley-ammused-selected{
+    background:#FF9A00;
+}
+
+.smiley-veryhappy-selected{
+    background:#FF3E00;
+}
+
+
+
 
 .smiley:hover{
     cursor:pointer;
@@ -484,7 +515,7 @@ img{
 #simplemodal-overlay {background-color:gray; cursor:wait;}
 
 /* Container */
-#simplemodal-container {background-color:#56436D; border:2px solid #DDD9C3}
+#simplemodal-container {box-shadow: 6px 6px 6px #666666;background-color:#56436D; border:2px solid #DDD9C3}
 #simplemodal-container a.modalCloseImg {background:url(/images/X.gif) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 
 .feel-popup{
@@ -499,8 +530,9 @@ img{
 
 .feel-popup-top{
     background-color:white;
-    padding-top:5px;
-    padding-left:5px;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 4px;
 }
 
 .mood-color-line {
@@ -511,7 +543,7 @@ img{
    border-top-width: 1px;
    border-top-style: solid;
    border-right-style: none;
-   border-bottom-style: dotted;
+   border-bottom-style: solid;
    border-left-style: none;
 }
 
@@ -549,7 +581,7 @@ img{
     border-bottom: 1px solid #E5EAF1;
     padding: 5px 5px 4px;
     margin: 4px 12px;
-    width:450px;
+    width:420px;
 }
 
 .fb-view-likes{
@@ -559,13 +591,14 @@ img{
    max-height:300px;
    overflow-y:auto;
    overflow-x:hidden;
+   margin: -4px 0px;
 }
 .fb-like-image{
     margin:1px;
     float:left;
 }
 .fb-staff{
-
+    margin-bottom:7px;
 }
 
 li.fb-staff{
@@ -605,6 +638,7 @@ ul.fb-staff{
 .fb-label{
     color: #38239A;
     cursor: pointer;
+    margin-left:5px;
 }
 .fb-as-link:hover{
     color:#3b5998;
@@ -648,13 +682,12 @@ ul.fb-staff{
     outline:0px;
     outline:none;
     font-family: Helvetica,Calibri,Arial,sans-serif;
-    font-size:11px;
 }
 
 .fb-text-passive{
     color:#777;
     font-family: Helvetica,Calibri,Arial,sans-serif;
-    font-size:12px;
+    font-size:11px;
 }
 
 .fb-comment-pic{
@@ -705,9 +738,6 @@ ul.fb-staff{
     zoom:1
 }
 
-.back-to-zoom{
-
-}
 
 .highcharts-tooltip{
     width:300px;
@@ -742,7 +772,6 @@ ul.fb-staff{
 
 .friends-control-left{
     float:left;
-    padding-left:10px;
 }
 
 .friends-control{
@@ -762,3 +791,4 @@ ul.fb-staff{
 #zoom-out{
     padding-left:10px;
 }
+
