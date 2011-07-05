@@ -167,7 +167,7 @@ function zoom2_format_label(value){
 
 //month aggregation
 function zoom3_format_label(value){
-    return full_month[value];
+    return full_month[value-1];
 }
 
 function zoom0_format_tooltip(point){
@@ -207,7 +207,7 @@ function zoom2_format_tooltip(point){
 //tooltip for monthly aggregated zoom, should show number of posts
 function zoom3_format_tooltip(point){
     var m = point.t;
-    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted during</span><br><span style=\"color:#CCCCCC\">"+full_month[m]+"</span>";
+    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted during</span><br><span style=\"color:#CCCCCC\">"+full_month[m-1]+"</span>";
     return tooltip;
 }
 
@@ -262,25 +262,17 @@ function zoom0_onClick(point){
 //zoom on click should display on graph all the points from zoomed period
 function zoom1_onClick(point){
     var range = {start:point.s,end:point.e}
-    $('body').data('zoom-range',range);
-    var zoom = $('body').data('zoom');
-    $('body').data('zoom-back',zoom);
-    traversal_feelings(false,0,range);
+    move_to_range(0,range);
 }
 
 function zoom2_onClick(point){
     var range = {start:point.s,end:point.e}
-    $('body').data('zoom-range',range);
     var zoom = $('body').data('zoom');
-    $('body').data('zoom-back',zoom);
-    traversal_feelings(false,0,range);
+    move_to_range(1,range);
 }
 function zoom3_onClick(point){
     var range = {start:point.s,end:point.e}
-    $('body').data('zoom-range',range);
-    var zoom = $('body').data('zoom');
-    $('body').data('zoom-back',zoom);
-    traversal_feelings(false,0,range);
+    move_to_range(2,range);
 }
 
 function getGraphIconURL(moodid){

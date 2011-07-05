@@ -10,15 +10,14 @@
   <% end %>
 
   <script type="text/javascript">
-    var chart;
     var name = '<b><%=@user.username%></b>';
-
     $(document).ready(function() {
       $('body').data('norm',0);
       prepareMoodIcons();
       $('body').data('userid',<%= @user.id.to_s %>);
       $('body').data('picture','<%= @picture %>');
       $('body').data('moods_path','<%= user_moods_path(@user)%>');
+      $("#usr-status").html(name);
       renderMoods('<%= user_moods_path(@user)%>');
       renderFriends('<%= '/users/'+@user.id.to_s+'/friends' %>');
       renderHappyCloud();
@@ -68,19 +67,15 @@
             <img class="control-img" src="/images/IconRight.gif"/>
         </span>
     </div>
+    <div style="position:relative">
+      <div id='empty-graph' class="hidden">Start logging your feelings at the Feelogg </br>box above to activate the Feelograph</div>
+    </div>
     <div>
       <div class="hf">did you know?</div>
       <div class="dyk">
         <ul>
-          <li>You are usually happy on Wednesdays<br/>
-            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
-          <li>When you are sad, Dana is usually happy<br/>
-            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
-          <li>You are usually cheerful in Tel Aviv<br/>
-            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
-          <!--li>Work affects your mood negatively 65% of the time<br/>
-            <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li>
-          <li>You are likely to be edgy tomorrow<br/>
+            <li id='empty-did-u-know'>After you feelogg for a while, this section will provide you with interesting insights about your mood...</li>
+            <!--li>You are likely to be edgy tomorrow<br/>
             <a href="">Share</a>  :  <a href="">Advice from Dr. FeelGood</a></li-->
         </ul>
       </div>
@@ -92,11 +87,7 @@
       <div id="usr-status"></div>
       <div id="usr-report"></div>
     </div>
-    <div class="sl">
-      <div class="slt">
-        Treat yourself to dinner and movie at Cinema City. Only $29.95! <a href="">Click here</a>
-      </div>
-    </div>
+
     <div id="happy-friends-widget"class="friends-control">
         <div class="act">warm up with <span class="happy">Happy</span> friends</div>
         <div id="happy-friends" class="friends-action">
@@ -133,6 +124,7 @@
     </div>
     <div class="tag-cloud">
         <div class="act">my <span onclick="changeCloud()" class="gloomy cloud hidden">Gloomy &#9662 </span> <span onclick="changeCloud()" class="happy cloud">Happy &#9662 </span> Tags</div>
+        <div id="empty-cloud" class="happy hidden"><span style="font-size:25px">Tags</span> <span style="font-size:20px">will</span> <span style="font-size:18px">become</span> </br><span style="font-size:25px">meaningful</span> <span style="font-size:10px">as you</span> <span style="font-size:25px">log</span> <span style="font-size:13px">your</span> </br><span style="font-size:25px">feelings</span> <span style="font-size:10px">for</span> <span style="font-size:15px">a while</span></div>
         <div id="happy-tag-cloud" class="cloud" style="width: 285px; height: 125px;position:relative"></div>
         <div id="gloomy-tag-cloud" class="cloud hidden" style="width: 285px; height: 125px;position:relative"></div></div>
     </div>

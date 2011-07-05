@@ -40,6 +40,7 @@ class EmotionsParser
   #4) if past tense skip (VBD, VBN)
   #5) get the happiness scale and add to the average
   def pars_post(post)
+    post.downcase!
     tgr = EngTagger.new
     sentences = tgr.get_sentences(post)
     sum = 0;

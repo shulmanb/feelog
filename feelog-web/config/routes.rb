@@ -4,7 +4,7 @@ Mooderator::Application.routes.draw do
   end
   match '/users/:user_id/moods(/limit/:limit)' => "moods#index", :via=>:get
   match '/users/:user_id/moods_page/:size/:page(/:zoom)' => "moods#get_feels_page", :via=>:get
-  match '/users/:user_id/moods_range/:size/:page/:start/:end/' => "moods#get_feels_range_page", :via=>:get
+  match '/users/:user_id/moods_range/:size/:zoom/:start/:end' => "moods#get_feels_range_page", :via=>:get
   match '/login' => "login#index", :via=>:get
   match '/logout' => "login#logout", :via=>:get
   match '/login' => "login#login", :via=>:post

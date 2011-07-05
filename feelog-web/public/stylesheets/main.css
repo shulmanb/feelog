@@ -253,11 +253,13 @@ img{
 }
 
 .mood-report{
-	width: 350px;
+	width: 360px;
     max-height: 70px;
 	border: 1px solid #948a54;
-	padding: 0 10px;
+	padding-top:10px;
+    padding-left:5px;
     resize:none;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
 }
 .report-text-passive{
     color: #948a54;
@@ -805,3 +807,19 @@ ul.fb-staff{
     padding-left:10px;
 }
 
+#empty-graph{
+    position: absolute;
+    bottom: 130px;
+    left:50px;
+    background-color: #56436D;
+    color: white;
+    padding: 10px;
+    width:250px;
+    text-align: center;
+    font-family: 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+}
+
+#empty-cloud{
+    text-align: center;
+}

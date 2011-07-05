@@ -271,7 +271,39 @@ function renderMoods(path){
         }
     });
 }
-function traversal_feelings(isOlder, zoom,range){
+
+function move_to_range(zoom,range){
+    var user_id = $('body').data('userid');
+    var path = '/users/'+user_id+'/moods_range/'+7+'/'+zoom+'/'+range.start+'/'+range.end+'.json';
+    var moods_arr = [];
+    $.ajax(path).success(function(data){
+        var i = 0;
+        if(data == null || data.moods == null || data.moods.length == 0){
+            //disable previous button
+        }else{
+            $('body').data('page',data.page);
+            $.each(data.moods, function(key, value) {
+                    var mood = create_mood_object(value,zoom);
+                    moods_arr.push(mood);
+            });
+            moods_arr.reverse();
+            var norm = $('body').data('norm');
+            var zoom_f = getZoomFunctions(zoom);
+            chart.destroy();
+            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
+            if(zoom != $('body').data('zoom')){
+                $('body').data('zoom',zoom);
+            }
+//            else{
+//                set_points_on_graph(moods_arr);
+//            }
+        }
+        chart.hideLoading();
+    });
+
+}
+
+function traversal_feelings(isOlder, zoom){
     var moods_arr = [];
     var page = $('body').data('page');
     if(zoom != $('body').data('zoom')){
@@ -288,11 +320,7 @@ function traversal_feelings(isOlder, zoom,range){
     }
     chart.showLoading();
     var user_id = $('body').data('userid');
-    if(range != null){
-        var path = '/users/'+user_id+'/moods_range/'+7+'/'+page+'/'+range.start+'/'+range.end+'.json';
-    }else{
-        var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
-    }
+    var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
     $.ajax(path).success(function(data){
         var i = 0;
         if(data == null || data.length == 0){
@@ -342,12 +370,12 @@ function backToZoom(){
 function olderFeelings(){
     var zoom = $('body').data('zoom');
     var range = $('body').data('zoom-range');
-    traversal_feelings(true,zoom,range);
+    traversal_feelings(true,zoom);
 }
 function newerFeelings(){
     var zoom = $('body').data('zoom');
     var range = $('body').data('zoom-range');
-    traversal_feelings(false,zoom,range);
+    traversal_feelings(false,zoom);
 }
 function zoomIn(){
     if($('body').data('zoom-back')!=null){
@@ -357,7 +385,7 @@ function zoomIn(){
     if (zoom == 0){
         return;
     }
-    traversal_feelings(false,zoom-1,null);
+    traversal_feelings(false,zoom-1);
 }
 
 function zoomOut(){
@@ -369,7 +397,7 @@ function zoomOut(){
     if( zoom == 3){
         return;
     }
-    traversal_feelings(false,zoom+1,null);
+    traversal_feelings(false,zoom+1);
 }
 
 function set_no_data(tag){
@@ -663,14 +691,12 @@ function displayLikes(postId){
                 var template = "SELECT name,pic_square FROM user WHERE uid={0}";
                 var waitOn = [];
                 $.each(data, function(item,val) {
-//                    for(var j = 0;j <10;j++){
                         if((scroll && i<7)||(!scroll && i < 8)){
                             waitOn[i] = FB.Data.query(template,val.user_id);
                         }else{
                             hidden.push(val.user_id);
                         }
                         i++;
-//                    }
                 });
 
                 FB.Data.waitOn(waitOn,function(data){
@@ -908,15 +934,22 @@ function renderGloomyCloud(){
     var id = $('body').data('userid');
     $.ajax("/users/"+id+"/gloomy_words.json").success(function(data){
         var word_list = []
-        $.each(data, function(item,val) {
-            word_list.push(
-            {
-                text: val[0],
-                weight:val[1]
-            }
-            );
-        });
-        $("#gloomy-tag-cloud").jQCloud(word_list);
+        if(data == null || data.length == 0){
+            $("#empty_cloud").toggleClass('happy',false);
+            $("#empty_cloud").toggleClass('gloomy',true);
+            $("#empty_cloud").toggleClass('hidden',false);
+        }else{
+            $("#empty_cloud").toggleClass('hidden',true);
+            $.each(data, function(item,val) {
+                word_list.push(
+                {
+                    text: val[0],
+                    weight:val[1]
+                }
+                );
+            });
+            $("#gloomy-tag-cloud").jQCloud(word_list);
+        }
         $('body').data('gloomy-cloud',1);
     });
 }
@@ -942,16 +975,23 @@ function changeCloud(){
 function renderHappyCloud(id){
     var id = $('body').data('userid');
     $.ajax("/users/"+id+"/happy_words.json").success(function(data){
-        var word_list = []
-        $.each(data, function(item,val) {
-            word_list.push(
-            {
-                text: val[0],
-                weight:val[1]
-            }
-            );
-        });
-        $("#happy-tag-cloud").jQCloud(word_list);
+        if(data == null || data.length == 0){
+            $("#empty_cloud").toggleClass('happy',true);
+            $("#empty_cloud").toggleClass('gloomy',false);
+            $("#empty_cloud").toggleClass('hidden',false);
+        }else{
+            $("#empty_cloud").toggleClass('hidden',true);
+            var word_list = []
+            $.each(data, function(item,val) {
+                word_list.push(
+                {
+                    text: val[0],
+                    weight:val[1]
+                }
+                );
+            });
+            $("#happy-tag-cloud").jQCloud(word_list);
+        }
     });
 }
 
