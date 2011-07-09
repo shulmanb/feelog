@@ -1,0 +1,38 @@
+<div id="settings-widget" class="settings-widget hidden">
+    <div class="hf">my <span class="settings-title">Feelogg</span> settings</div>
+    <div class="networks">
+        <div class="hf settings-section">connected networks</div>
+        <div class="fb-connected">
+            <div class="fb-logo image connected-fblogo"></div>
+            <div class="connected-details">
+                <div class="settings-name"><%=@user.username%></div>
+                <div class="connected-status">connected</div>
+            </div>
+        </div>
+    </div>
+    <div class="sharing-defaults settings-section">
+        <div class="hf">sharing defaults</div>
+        <div class="sharing-settings-icons clearfix">
+            <div class="very-happy-logo image sharing-settings-image"></div>
+            <div class="ammused-logo image sharing-settings-image"></div>
+            <div class="happy-logo image sharing-settings-image"></div>
+            <div class="ok-logo image sharing-settings-image"></div>
+            <div class="sad-logo image sharing-settings-image"></div>
+            <div class="very-sad-logo image sharing-settings-image"></div>
+            <div class="angry-logo image sharing-settings-image"></div>
+        </div>
+        <div class="fb-logo image sharing-default-fblogo"></div>
+        <div class="share-settings-checkboxes clearfix">
+            <input id="1-fb-share" class="share-settings-checkbox" name="7-share" type="checkbox" />
+            <input id="2-fb-share" class="share-settings-checkbox" name="6-share" type="checkbox" />
+            <input id="3-fb-share" class="share-settings-checkbox" name="5-share" type="checkbox" />
+            <input id="4-fb-share" class="share-settings-checkbox" name="4-share" type="checkbox" />
+            <input id="5-fb-share" class="share-settings-checkbox" name="3-share" type="checkbox" />
+            <input id="6-fb-share" class="share-settings-checkbox" name="2-share" type="checkbox" />
+            <input id="7-fb-share" class="share-settings-checkbox" name="1-share" type="checkbox" />
+        </div>
+        <div id="settings-submit" onclick="storeSettings()"></div>
+        <div id="settings-ajax" class="invisible ajax-loading"></div>
+    </div>
+
+</div>

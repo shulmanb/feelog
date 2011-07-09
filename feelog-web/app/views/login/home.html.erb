@@ -1,0 +1,64 @@
+<% content_for :head do %>
+  <%= javascript_include_tag 'graph' %>
+  <%= javascript_include_tag 'highcharts' %>
+  <%= javascript_include_tag 'jqcloud-0.1.8.min.js' %>
+  <%= stylesheet_link_tag "jqcloud.css" %>
+  <!--script src="http://connect.facebook.net/en_US/all.js"></script-->
+    <%= javascript_include_tag 'all' %>
+  <% if @fb == true %>
+    <%= stylesheet_link_tag "main-fb.css" %>
+  <% end %>
+
+  <script type="text/javascript">
+    var name = '<b><%=@user.username%></b>';
+    $(document).ready(function() {
+      $('body').data('norm',0);
+      $('body').data('userid',<%= @user.id.to_s %>);
+      $('body').data('picture','<%= @picture %>');
+      $('body').data('moods_path','<%= user_moods_path(@user)%>');
+      $('body').data('cloud',0);
+      $('body').data('gloomy-cloud',0);
+      $('body').data('view',0);
+      $('body').data('fb-share-defaults',<%= @user.settings %>);
+
+
+      $("#usr-status").html(name);
+      prepareMoodIcons();
+      renderMoods('<%= user_moods_path(@user)%>');
+      renderFriends('<%= '/users/'+@user.id.to_s+'/friends' %>');
+      renderHappyCloud();
+
+      // Setup the ajax indicator
+      $('.actions').append('<div id="ajax-busy" class="fl"><img src="/images/ajax-loader.gif"></div>');
+      FB.init({
+              appId  : '187063221337398',//'136471399753143',//
+              status : true, // check login status
+              cookie : true, // enable cookies to allow the server to access the session
+              xfbml  : true  // parse XFBML
+      });
+      <% if @fb == true %>
+        FB.CanvasClient.setCanvasHeight(700);
+      <% end %>
+    });
+  </script>
+<% end %>
+<div id="fb-root"></div>
+<div id="main-content" class="content">
+  <div id="main-view">
+      <div class="left-side">
+        <%= render 'report' %>
+        <%= render 'graph' %>
+        <%= render 'diduknow' %>
+        <%= render 'diary' %>
+      </div>
+      <div class="right-side">
+        <%= render 'status' %>
+        <%= render 'friends' %>
+        <%= render 'tagcloud' %>
+      </div>
+  </div>
+  <%= render 'settings' %>
+
+  <!--div id="settings-view" class="hidden"></div>
+  <div id="drfeelgood-view" class="hidden"></div-->
+</div>

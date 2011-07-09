@@ -216,11 +216,25 @@ img{
 	width: 770px;
 	margin: 0 auto;
 }
-
+.rc{
+    background-color:white;
+    height:10px;
+    width:500px;
+}
 .rc-top{
 	height: 10px;
 	background-image: url("../images/rc-top.png");
 }
+.rc-top-lc{
+	height: 10px;
+	background-image: url("../images/cortl.gif");
+}
+.rc-top-rc{
+	height: 10px;
+	background-image: url("../images/cortr.gif");
+}
+
+
 .content{
 	position: relative;
 	background-color: #fff;
@@ -245,6 +259,17 @@ img{
 	height: 10px;
 	background-image: url("../images/rc-bot.png");
 }
+
+.rc-bot-lc{
+	height: 10px;
+	background-image: url("../images/corbl.gif");
+}
+
+.rc-bot-rc{
+	height: 10px;
+	background-image: url("../images/corbr.gif");
+}
+
 .hf{
 	font-size: 18pt;
 	color: #948a54;
@@ -571,6 +596,11 @@ img{
     display:none;
 }
 
+.invisible{
+    visibility:hidden;
+}
+
+
 .not-shown{
     visibility:hidden;
 }
@@ -822,4 +852,223 @@ ul.fb-staff{
 
 #empty-cloud{
     text-align: center;
+}
+
+//diary view styling
+
+.diary-widget{
+
+}
+.diary-title{
+     color:#56436D;
+}
+.diary{
+    max-height:570px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
+    font-size:12px;
+    margin-top: 15px;
+}
+
+.diary-day{
+    width: 310px;
+    border: solid;
+    border-width: 1px;
+    border-color: #cccccc;
+    padding:10px;
+}
+.diary-odd-day{
+    position:relative;
+    margin-left:10px;
+}
+.diary-even-day{
+    position:relative;
+    margin-left:40px;
+}
+.diary-date{
+    color: #948A54;
+    font-size: 16pt;
+}
+.diary-day-posts{
+    margin-top: 10px;
+}
+.diary-shadow{
+    background-image:url("/images/BoxShadow.png");
+    height:10px;
+    width:270px;
+    margin-bottom: 10px;
+}
+
+.diary-content{
+
+}
+
+.diary-post{
+    width:310px;
+    min-height:55px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+.diary-post-content{
+    margin-left: 57px;
+}
+.diary-post-hour{
+    color:gray;
+}
+.diary-mood-img{
+    float: left;
+    margin-right: 10px;
+}
+.diary-mood-desc{
+    color: #17375E;
+    font-weight:bold;
+}
+.diary-post-text{
+    margin-top: 3px;
+    color: #17375E;
+}
+
+.loading{
+    background-image: url("/images/ajax-loader.gif");
+    width: 350px;
+    height: 600px;
+    position: absolute;
+    left: 10px;
+    top: 45px;
+    background-repeat: no-repeat;
+    background-color: white;
+    background-position: 50%;
+    opacity: 0.9;
+}
+
+.ajax-loading{
+    background-image: url("/images/ajax-loader.gif");
+    width: 20px;
+    height: 20px;
+    background-repeat: no-repeat;
+}
+#settings-ajax{
+    position: relative;
+    left: 480px;
+    top: 72px;
+}
+.settings-widget{
+    position: absolute;
+    top: 10px;
+    left: 40px;
+    width: 600px;
+    height: 500px;
+}
+
+.settings-title{
+    color:#56436D;
+}
+
+.settings-section{
+    margin-top:20px;
+}
+
+.image{
+    width:50px;
+    height:50px;
+}
+
+.fb-logo{
+    background-image:url(/images/FBlogo.png);
+}
+
+.happy-logo{
+    background-image:url(/images/mood-happy.png);
+}
+.very-happy-logo{
+    background-image:url(/images/mood-very_happy.png);
+}
+.ok-logo{
+    background-image:url(/images/mood-ok.png);
+}
+.ammused-logo{
+    background-image:url(/images/mood-twink.png);
+}
+
+.angry-logo{
+    background-image:url(/images/mood-angry.png);
+}
+.sad-logo{
+    background-image:url(/images/mood-sad.png);
+}
+
+.very-sad-logo{
+    background-image:url(/images/mood-very_sad.png);
+}
+.sharing-settings-image{
+    margin-right:10px;
+    background-repeat: no-repeat;
+    float: left;
+}
+
+.sharing-settings-icons{
+    position:relative;
+    left:80px;
+    margin-top: 20px;
+}
+
+.sharing-default-fblogo{
+    float:left;
+}
+.share-settings-checkboxes{
+    position: relative;
+    left: 50px;
+    top: 16px;
+}
+.share-settings-checkbox{
+    margin-right:43px;
+}
+
+#settings-submit{
+    background-image:url(/images/BtnSave.gif);
+    background-repeat:no-repeat;
+    width: 80px;
+    height: 30px;
+    position: relative;
+    left: 450px;
+    top: 100px;
+    cursor:pointer;
+}
+.fb-connected{
+    margin-left: 50px;
+    margin-top: 20px;
+}
+}
+.connected-fblogo{
+    float:left;
+}
+.settings-name{
+     font-weight:bold;
+}
+.connected-details{
+    position: relative;
+    left: 60px;
+    top: -40px;
+}
+.connected-status{
+    font-size: 14px;
+    margin-left: 5px;
+}
+
+#usr-avg{
+    margin-top:10px;
+}
+#usr-avg-img{
+    height: 50px;
+    background-repeat: no-repeat;
+}
+#usr-avg-txt{
+}
+
+.usr-avg{
+    color: #948A54;
+    font-size: 12pt;
+    position: relative;
+    bottom: 15px;
 }

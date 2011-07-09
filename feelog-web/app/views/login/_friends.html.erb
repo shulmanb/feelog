@@ -1,0 +1,36 @@
+<div id="friends">
+    <div id="happy-friends-widget"class="friends-control">
+        <div class="act">warm up with <span class="happy">Happy</span> friends</div>
+        <div id="happy-friends" class="friends-action">
+            <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+        </div>
+        <div class="hidden" id="happy-friends-control">
+            <br>
+            <span class="traversal friends-control-left">
+                 <img class="control-img" src="/images/IconLeft.gif" onclick="prevFriends('happy')"/>
+                <span class="control-text">previous</span>
+            </span>
+            <span class="traversal friends-control-right">
+                <span class="control-text">next</span>
+                <img class="control-img" src="/images/IconRight.gif" onclick="nextFriends('happy')"/>
+            </span>
+        </div>
+    </div>
+    <div id="gloomy-friends-widget" class="friends-control">
+        <div class="act">cheer up your <span class="gloomy">Gloomy</span> friends</div>
+        <div id="gloomy-friends" class="friends-action">
+            <div class="frl"><img src="/images/ajax-loader.gif"/></div>
+        </div>
+        <div class="hidden" id="gloomy-friends-control">
+            <br>
+            <span class="traversal friends-control-left">
+               <img src="/images/IconLeft.gif" onclick="prevFriends('gloomy')"/>
+               <span class="control-text">previous</span>
+            </span>
+            <span class="traversal friends-control-right">
+                <span class="control-text">previous</span>
+                <img src="/images/IconRight.gif" onclick="nextFriends('gloomy')"/>
+            </span>
+        </div>
+    </div>
+</div>

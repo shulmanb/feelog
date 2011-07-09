@@ -21,4 +21,6 @@ Mooderator::Application.routes.draw do
   match '/users/:user_id/happy_words' => "words#happy_words", :via=>:get
   match '/users/:user_id/gloomy_words' => "words#gloomy_words", :via=>:get
   match '/login/:token', :to => "login#auth_base64", :via=>:get
+  match '/users/:user_id/settings',:to=>"users#retrieve_settings",:via=>:get
+  match '/users/:user_id/settings',:to=>"users#store_settings",:via=>:post
 end

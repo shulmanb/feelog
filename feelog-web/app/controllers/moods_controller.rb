@@ -38,7 +38,6 @@ class MoodsController < ApplicationController
         @moods = User.find(user_id).moods.order("report_time DESC").limit(params[:limit].to_i)
     end
     respond_to do |format|
-      format.html
       format.json  { render :json => @moods }
     end
   end
@@ -96,9 +95,6 @@ class MoodsController < ApplicationController
     @user = User.find(params[:user_id])
     @picture = session[:picture]
     @fb = session[:fb]
-    respond_to do |format|
-      format.any # new.html.erb
-    end
   end
 
   # GET /moods/1/edit
@@ -141,11 +137,9 @@ class MoodsController < ApplicationController
 
     respond_to do |format|
       if @mood.update_attributes(params[:mood])
-        format.html { redirect_to(user_moods_url, :notice => 'Mood was successfully updated.') }
-        format.xml  { head :ok }
+        format.json  { head :ok }
       else
-        format.html { render :action => "edit" }
-        format.xml  { render :xml => @mood.errors, :status => :unprocessable_entity }
+        format.json  { render :xml => @mood.errors, :status => :unprocessable_entity }
       end
     end
   end
@@ -157,8 +151,7 @@ class MoodsController < ApplicationController
     @mood.destroy
 
     respond_to do |format|
-      format.html { redirect_to(user_moods_url) }
-      format.xml  { head :ok }
+      format.json  { head :ok }
     end
   end
 

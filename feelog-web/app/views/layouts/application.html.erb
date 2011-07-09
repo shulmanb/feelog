@@ -4,13 +4,13 @@
     <link href="/images/favicon.ico" rel="shortcut icon"/>
     <TITLE>Feelogg - makes you happy!</TITLE>
     <%= stylesheet_link_tag "main" %>
+    <%= stylesheet_link_tag "qvivo_scroll" %>
     <%= javascript_include_tag  'http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js' %>
     <%= javascript_include_tag 'http://ajax.googleapis.com/ajax/libs/jqueryui/1.7/jquery-ui.min.js' %>
     <%= javascript_include_tag 'application' %>
     <%= javascript_include_tag 'jquery.simplemodal.1.4.1.min' %>
     <%= javascript_include_tag 'jquery.elastic' %>
-
-
+    <%= javascript_include_tag 'qvivo_scroll' %>
     <script language="JavaScript">
       $(document).ready(function() {
         $(".bg").css({width: $(window).width() + "px", height: $(window).height() + "px", overflow:"hidden"});
@@ -29,10 +29,10 @@
         </div>
         <div class="toc">
           <ul>
-            <li><a href="<%=  new_user_mood_path(@user) %>" class="on">Home</a></li>
-            <li><a href="<%=  user_moods_path(@user)%>">MyFeelogg</a></li>
-            <li><a href="">Dr.FeelGood</a></li>
-            <li><a href="<%=  user_path(@user) %>">Profile</a></li>
+            <li><a href="#" id='menu-0' class="on" onclick="switchView(0)">Home</a></li>
+            <li><a href="#" id='menu-1' onclick="switchView(1)">MyFeelogg</a></li>
+            <li><a href="#" id='menu-3' onclick="switchView(3)">Dr.FeelGood</a></li>
+            <li><a href="#" id='menu-2' onclick="switchView(2)">Profile</a></li>
             <li id="logout"><a href="<%=  logout_path %>">Logout</a></li>
           </ul>
         </div>

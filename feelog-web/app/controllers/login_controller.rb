@@ -133,16 +133,18 @@ class LoginController < ApplicationController
     @picture = fb_user.picture
     @@redis.hset(@user.id, 'pic', @picture)
     @@redis.hset(@user.id, 'email', @email)
-
+    if @user.settings == nil
+       @user.settings = 0
+    end
     execute_post_login(@user,@picture,@email,token)
 
     # Log the authorizing user in.
     respond_to do |format|
       if ajax == true
-        @resp = {:id=>@user.id,:pic=>@picture,:name=>fb_user.name}
+        @resp = {:id=>@user.id,:pic=>@picture,:name=>fb_user.name,:settings=>@user.settings}
         format.any  { render :json => @resp }
       else
-        format.any  { render 'moods/new'}
+        format.any  { render 'home'}
       end
     end
   end

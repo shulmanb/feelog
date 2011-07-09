@@ -147,7 +147,6 @@ var unnormalized_options = {
     }
 };
 
-
 function zoom0_format_label(value){
     var ts = new Date(value);
     if(isCurrentWeekNumber(ts)){
@@ -416,33 +415,128 @@ function add_points_to_graph(moods){
     chart.redraw();
 }
 
-/*
-sets new points for the graph
- */
-function set_points_on_graph(moods){
-    if(moods == null || moods.length == 0){
-        return;
-    }
-    var norm = $('body').data('norm');
-    if(!norm) norm = 0;
-    var series = chart.series[0];
-    var data = [];
-    var categories = [];
-    for(var i = 0;i < moods.length;i++) {
-        var __ret = mood_to_point(moods[i], norm);
-        var d = __ret.d;
-        var p = __ret.p;
-        data.push(p);
-        if (norm == 0) {
-            categories.push(d);
+
+function move_to_range(zoom,range){
+    var user_id = $('body').data('userid');
+    var path = '/users/'+user_id+'/moods_range/'+7+'/'+zoom+'/'+range.start+'/'+range.end+'.json';
+    var moods_arr = [];
+    $.ajax(path).success(function(data){
+        var i = 0;
+        if(data == null || data.moods == null || data.moods.length == 0){
+            //disable previous button
+        }else{
+            $('body').data('page',data.page);
+            $.each(data.moods, function(key, value) {
+                    var mood = create_mood_object(value,zoom);
+                    moods_arr.push(mood);
+            });
+            moods_arr.reverse();
+            var norm = $('body').data('norm');
+            var zoom_f = getZoomFunctions(zoom);
+            chart.destroy();
+            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
+            if(zoom != $('body').data('zoom')){
+                $('body').data('zoom',zoom);
+            }
+//            else{
+//                set_points_on_graph(moods_arr);
+//            }
+        }
+        chart.hideLoading();
+    });
+
+}
+
+function traversal_feelings(isOlder, zoom){
+    var moods_arr = [];
+    var page = $('body').data('page');
+    if(zoom != $('body').data('zoom')){
+        //zooming
+        page = 0;
+    }else{
+        //traversal
+        if(isOlder){
+            page++;
+        }else{
+            if(page == 0) return;
+            page--;
         }
     }
-    series.setData(data,false);
+    chart.showLoading();
+    var user_id = $('body').data('userid');
+    var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
+    $.ajax(path).success(function(data){
+        var i = 0;
+        if(data == null || data.length == 0){
+            //disable previous button
+        }else{
+            $('body').data('page',page);
+            $.each(data, function(key, value) {
+                    var mood = create_mood_object(value,zoom);
+                    moods_arr.push(mood);
+            });
+            moods_arr.reverse();
+            var norm = $('body').data('norm');
+            var zoom_f = getZoomFunctions(zoom);
+            chart.destroy();
+            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
+            if(zoom != $('body').data('zoom')){
+                $('body').data('zoom',zoom);
+            }
+        }
+        chart.hideLoading();
+    });
+}
 
-    if(norm == 0){
-        chart.xAxis[0].setCategories(categories, false);
+function getZoomFunctions(zoom){
+    switch(zoom){
+        case 0:
+            return {onClick:zoom0_onClick,format_label:zoom0_format_label,format_tooltip:zoom0_format_tooltip};
+        case 1:
+            return {onClick:zoom1_onClick,format_label:zoom1_format_label,format_tooltip:zoom1_format_tooltip};
+        case 2:
+            return {onClick:zoom2_onClick,format_label:zoom2_format_label,format_tooltip:zoom2_format_tooltip};
+        case 3:
+            return {onClick:zoom3_onClick,format_label:zoom3_format_label,format_tooltip:zoom3_format_tooltip};
     }
-    var options = chart.options
-    chart.destroy();
-    chart = new Highcharts.Chart(options);
+}
+function backToZoom(){
+    $('body').removeData('zoom-range');
+    var zoom = $('body').data('zoom-back');
+    $('body').removeData('zoom-back');
+    traversal_feelings(false,zoom,null);
+
+}
+
+function olderFeelings(){
+    var zoom = $('body').data('zoom');
+    var range = $('body').data('zoom-range');
+    traversal_feelings(true,zoom);
+}
+function newerFeelings(){
+    var zoom = $('body').data('zoom');
+    var range = $('body').data('zoom-range');
+    traversal_feelings(false,zoom);
+}
+function zoomIn(){
+    if($('body').data('zoom-back')!=null){
+        return;
+    }
+    var zoom = $('body').data('zoom');
+    if (zoom == 0){
+        return;
+    }
+    traversal_feelings(false,zoom-1);
+}
+
+function zoomOut(){
+    if($('body').data('zoom-back')!=null){
+        backToZoom();
+        return;
+    }
+    var zoom = $('body').data('zoom');
+    if( zoom == 3){
+        return;
+    }
+    traversal_feelings(false,zoom+1);
 }

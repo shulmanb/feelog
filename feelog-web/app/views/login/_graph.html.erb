@@ -1,0 +1,29 @@
+<div id="graph">
+    <div class="hf">my recent feelings</div>
+    <div id="moods-graph" class="moods-graph" style='width: 380px; height: 200px;'>
+        <div class="mdl"><img src="/images/ajax-loader.gif"/></div>
+    </div>
+    <div class="graph-control">
+        <span id="prev" class="traversal graph-control-left" onclick="olderFeelings()">
+           <img class="control-img" src="/images/IconLeft.gif"/>
+           <span class="control-text">previous</span>
+        </span>
+        <span class="graph-control-middle">
+            <span id="zoom-in" class="zoom" onclick="zoomIn()">
+               <img class="control-img" src="/images/zoomIn.png" />
+               <span class="control-text">zoom in</span>
+            </span>
+            <span id="zoom-out" class="zoom" onclick="zoomOut()">
+                <img class="control-img" src="/images/zoomOut.png" />
+                <span class="control-text">zoom out</span>
+            </span>
+        </span>
+        <span id="next" class="traversal graph-control-right"  onclick="newerFeelings()">
+            <span class="control-text">next</span>
+            <img class="control-img" src="/images/IconRight.gif"/>
+        </span>
+    </div>
+    <div style="position:relative">
+      <div id='empty-graph' class="hidden">Start logging your feelings at the Feelogg </br>box above to activate the Feelograph</div>
+    </div>
+</div>

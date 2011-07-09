@@ -11,7 +11,19 @@ function isCurrentWeekNumber(date){
     return (wn == currWn);
 }
 
-
+function dayOfYear(date){
+    var onejan = new Date(date.getFullYear(),0,1);
+    var days = Math.ceil((date.getTime() - onejan.getTime()) / 86400000);
+    dOff = date.getTimezoneOffset()/60;
+    jOff = onejan.getTimezoneOffset()/60;
+    if(dOff != jOff){
+        //add day to the calculations, as 00:52 considered as prev day
+        if(date.getHours() == 0){
+            days++;
+        }
+    }
+    return days;
+}
 
 //changed to ajax
 function submitMood(){
@@ -94,7 +106,11 @@ function toggle(moodid){
                 return "smiley-veryhappy-selected";
         }
     },true);
-
+    if(isChecked(moodid)){
+        $("#fbshare").attr('checked','checked');
+    }else{
+        $("#fbshare").removeAttr('checked');
+    }
     $("#how").focus();
 }
 function getMoodImageLink(moodid){
@@ -116,22 +132,42 @@ function getMoodImageLink(moodid){
     }
 }
 
+function getMoodImageClass(moodid){
+    switch(moodid){
+        case 1:
+            return 'angry-logo';
+        case 2:
+            return 'very-sad-logo';
+        case 3:
+            return 'sad-logo';
+        case 4:
+            return 'ok-logo';
+        case 5:
+            return 'happy-logo';
+        case 6:
+            return 'ammused-logo';
+        case 7:
+            return 'very-happy-logo';
+    }
+}
+
+
 function getMoodStr(mood){
     switch(mood){
         case 1:
-            return 'angry';
+            return 'Angry';
         case 2:
-            return 'very sad';
+            return 'Very sad';
         case 3:
-            return 'sad';
+            return 'Sad';
         case 4:
-            return 'ok';
+            return 'OK';
         case 5:
-            return 'happy';
+            return 'Happy';
         case 6:
-            return 'amused';
+            return 'Amused';
         case 7:
-            return 'very happy';
+            return 'Very happy';
     }
 
 }
@@ -241,6 +277,8 @@ function renderMoods(path){
         }
         $('body').data('page',0);
         $('body').data('zoom',0);
+        var sum = 0;
+        var cnt = 0;
         $.each(data, function(key, value) {
             if (key == 'retry'){
                 setTimeout(function(){renderMoods(path)},value);
@@ -252,6 +290,8 @@ function renderMoods(path){
             }else{
                 var mood = create_mood_object(value,0);
                 moods_arr.push(mood);
+                cnt++;
+                sum+=mood.val;
                 if(i==0){
                     //latest mood
                     var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
@@ -262,6 +302,18 @@ function renderMoods(path){
                 i++;
             }
         });
+        if(cnt == 0){
+          $('#usr-avg').toggleClass('hidden',true);
+        }else{
+            $('#usr-avg').toggleClass('hidden',false);
+            var avgMood = sum/cnt;
+            var moodTxt = getMoodStr(Math.round(avgMood));
+            var moodImg = getMoodImageLink(Math.round(avgMood));
+            $("#usr-avg-img").append(moodImg);
+            $("#usr-avg-txt").text(moodTxt);
+        }
+
+
         if(initializing != true){
             var norm = $('body').data('norm');
             if(!norm) norm = 0;
@@ -272,133 +324,6 @@ function renderMoods(path){
     });
 }
 
-function move_to_range(zoom,range){
-    var user_id = $('body').data('userid');
-    var path = '/users/'+user_id+'/moods_range/'+7+'/'+zoom+'/'+range.start+'/'+range.end+'.json';
-    var moods_arr = [];
-    $.ajax(path).success(function(data){
-        var i = 0;
-        if(data == null || data.moods == null || data.moods.length == 0){
-            //disable previous button
-        }else{
-            $('body').data('page',data.page);
-            $.each(data.moods, function(key, value) {
-                    var mood = create_mood_object(value,zoom);
-                    moods_arr.push(mood);
-            });
-            moods_arr.reverse();
-            var norm = $('body').data('norm');
-            var zoom_f = getZoomFunctions(zoom);
-            chart.destroy();
-            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
-            if(zoom != $('body').data('zoom')){
-                $('body').data('zoom',zoom);
-            }
-//            else{
-//                set_points_on_graph(moods_arr);
-//            }
-        }
-        chart.hideLoading();
-    });
-
-}
-
-function traversal_feelings(isOlder, zoom){
-    var moods_arr = [];
-    var page = $('body').data('page');
-    if(zoom != $('body').data('zoom')){
-        //zooming
-        page = 0;
-    }else{
-        //traversal
-        if(isOlder){
-            page++;
-        }else{
-            if(page == 0) return;
-            page--;
-        }
-    }
-    chart.showLoading();
-    var user_id = $('body').data('userid');
-    var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
-    $.ajax(path).success(function(data){
-        var i = 0;
-        if(data == null || data.length == 0){
-            //disable previous button
-        }else{
-            $('body').data('page',page);
-            $.each(data, function(key, value) {
-                    var mood = create_mood_object(value,zoom);
-                    moods_arr.push(mood);
-            });
-            moods_arr.reverse();
-            var norm = $('body').data('norm');
-            var zoom_f = getZoomFunctions(zoom);
-            chart.destroy();
-            drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
-            if(zoom != $('body').data('zoom')){
-                $('body').data('zoom',zoom);
-            }
-//            else{
-//                set_points_on_graph(moods_arr);
-//            }
-        }
-        chart.hideLoading();
-    });
-}
-
-function getZoomFunctions(zoom){
-    switch(zoom){
-        case 0:
-            return {onClick:zoom0_onClick,format_label:zoom0_format_label,format_tooltip:zoom0_format_tooltip};
-        case 1:
-            return {onClick:zoom1_onClick,format_label:zoom1_format_label,format_tooltip:zoom1_format_tooltip};
-        case 2:
-            return {onClick:zoom2_onClick,format_label:zoom2_format_label,format_tooltip:zoom2_format_tooltip};
-        case 3:
-            return {onClick:zoom3_onClick,format_label:zoom3_format_label,format_tooltip:zoom3_format_tooltip};
-    }
-}
-function backToZoom(){
-    $('body').removeData('zoom-range');
-    var zoom = $('body').data('zoom-back');
-    $('body').removeData('zoom-back');
-    traversal_feelings(false,zoom,null);
-
-}
-
-function olderFeelings(){
-    var zoom = $('body').data('zoom');
-    var range = $('body').data('zoom-range');
-    traversal_feelings(true,zoom);
-}
-function newerFeelings(){
-    var zoom = $('body').data('zoom');
-    var range = $('body').data('zoom-range');
-    traversal_feelings(false,zoom);
-}
-function zoomIn(){
-    if($('body').data('zoom-back')!=null){
-        return;
-    }
-    var zoom = $('body').data('zoom');
-    if (zoom == 0){
-        return;
-    }
-    traversal_feelings(false,zoom-1);
-}
-
-function zoomOut(){
-    if($('body').data('zoom-back')!=null){
-        backToZoom();
-        return;
-    }
-    var zoom = $('body').data('zoom');
-    if( zoom == 3){
-        return;
-    }
-    traversal_feelings(false,zoom+1);
-}
 
 function set_no_data(tag){
     $(tag).hide();
@@ -456,7 +381,6 @@ function redraw_friends_widgets(happy, gloomy){
 
     if(happy.length > 0){
         $("#happy-friends").show();
-        $("body").data('happy-friends',happy);
         $('body').data('happy-page',0);
         if(happy.length > 10){
             $("#happy-friends-control").toggleClass('hidden');
@@ -466,8 +390,7 @@ function redraw_friends_widgets(happy, gloomy){
         set_no_data("#happy-friends-widget");
     }
     if(gloomy.length > 0){
-        $("#happy-friends").show();
-        $("body").data('gloomy-friends',gloomy);
+        $("#gloomy-friends").show();
         $('body').data('gloomy-page',0);
         if(gloomy.length > 10){
             $("#gloomy-friends-control").toggleClass('hidden');
@@ -848,8 +771,7 @@ function retrievePost(postId){
 function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
     var html = "<div class='feel-popup'>\
         <div class='feel-popup-top'>\
-             <img style=\"float:left\" src='"+picLink+"'/>\
-             <span class='feel-popup-title'>"+name+" feels</span>\
+             <img style=\"float:left\" src='"+picLink+"'/>\             <span class='feel-popup-title'>"+name+" feels</span>\
              <span>"+getMoodImageLink(mood)+"</span>\
              <span class='feel-popup-title'>"+getMoodStr(mood)+"</span>\
          </div>\
@@ -995,6 +917,150 @@ function renderHappyCloud(id){
     });
 }
 
+function retrieveDiaryPosts(){
+    $('#diary-loading').toggleClass('hidden',false);
+    var page = $('body').data('diary-page');
+    page++;
+    var user_id = $('body').data('userid');
+    var path = '/users/'+user_id+'/moods_page/'+10+'/'+page+'/'+0+'.json';
+    $.ajax(path).success(function(data){
+        var i = 0;
+        var moods_arr = [];
+        if(data.length == 0){
+        //set empty data notification
+        }
+        var moods_arr;
+        $.each(data, function(key, value) {
+                var mood = create_mood_object(value,0);
+                moods_arr.push(mood);
+        });
+        renderDiaryPosts(page,moods_arr);
+        $('body').data('diary-page',page);
+        $('#diary-loading').toggleClass('hidden',true);
+    });
+
+}
+
+function initDiaryWidget(){
+    $('body').data('diary-page',-1);
+    $('body').data('diary-last-day',0);
+    $('body').data('diary-disp-days',0);
+
+    retrieveDiaryPosts();
+    $(".diary").scroll(function() {
+   // We check if we're at the bottom of the scrollcontainer
+        if ($(this)[0].scrollHeight - $(this).scrollTop() == $(this).outerHeight()) {
+            retrieveDiaryPosts();
+        }
+    });
+}
+
+function renderDiaryPosts(page,moods){
+     var initialIdx = page*10;
+     var lastDay = $('body').data('diary-last-day');
+     var dispDays = $('body').data('diary-disp-days');
+     for(var i = 0;i<moods.length;i++){
+         var id = initialIdx+i;
+//         moods[i].val
+//         moods[i].desc
+//         moods[i].date
+//         moods[i].zoom
+//         moods[i].fb_id
+           var date = new Date(moods[i].date);
+           var doy = dayOfYear(date);
+           if(doy != lastDay){
+               var dateStr = full_week[date.getDay()]+","+full_month[date.getMonth()]+" "+date.getDate()+" ,"+date.getFullYear();
+               dispDays++;
+               var clz =  (dispDays%2!=0)?'diary-odd-day':'diary-even-day';
+               $('.diary-content').append(renderDiaryDay(clz,doy,dateStr));
+               lastDay = doy;
+               $('body').data('diary-disp-days',dispDays);
+           }
+           var minutes = date.getMinutes();
+           if(minutes < 10){
+               var strMinutes = '0'+minutes;
+           } else{
+               var strMinutes = minutes;
+           }
+
+         var ts = new Date(moods[i].date);
+         var min = "";
+         if(ts.getMinutes()<10){
+             min = "0";
+         }
+         min = min+ts.getMinutes();
+         var prityTime = full_month[ts.getMonth()]+" "+ts.getDate()+" at "+ts.getHours()+":"+min;
+         var post_id = null;
+         var uid = null;
+         if(moods[i].fb_id != null){
+             var tmp = moods[i].fb_id.split("_");
+             post_id = tmp[1];
+             uid = tmp[0];
+         }
+         var popupHtml = getMoodPopup(name,moods[i].val,moods[i].desc,prityTime,$('body').data('picture'),post_id,uid,post_id != null);
+         var time = date.getHours()+":"+strMinutes;
+         $('#diary-day-'+doy).append(renderDiaryEntry(moods[i].val,moods[i].desc,time,post_id,popupHtml,id));
+     }
+    if(page == 0){
+        $('.diary').diaryScroll();
+    }else{
+        $('.diary').diaryUpdate();
+    }
+     $('body').data('diary-last-day',lastDay);
+}
+
+function renderDiaryDay(dayClass,id,date){
+     return "<div class=\""+dayClass+"\">"+
+        "<div class=diary-day>"+
+            "<div class='diary-date'>"+date+"</div>"+
+            "<div id='diary-day-"+id+"' class='diary-day-posts'></div>"+
+        "</div>"+
+        "<div class='diary-shadow'></div>"
+     "</div>";
+}
+function renderDiaryEntry(moodid,text,hour,post_id,popup,id){
+    return "<div class='diary-post' onclick='openMoodPopup("+post_id+","+id+")'>"+
+               "<div class='diary-mood-img'>"+getMoodImageLink(moodid)+"</div>"+
+               "<div class='diary-post-content'>"+
+                   "<span class='diary-mood-desc'>"+getMoodStr(moodid)+" </span>"+
+                   "<span class='diary-post-hour'> @ "+hour+"</span>"+
+                   "<div class='diary-post-text'>"+text+"</div>"+
+               "</div>"+
+           "</div>"+
+           "<div id="+id+"-modal-diary class='modal-content'>"+
+               popup+
+            "</div>";
+}
+
+function openMoodPopup(post_id,id){
+    var modalId = id+"-modal-diary";
+    if(post_id == null){
+        $("#"+modalId).modal({
+            containerCss: {
+                'maxHeight' : '700px',
+                'minHeight' :'300px',
+                'width':'500px'
+            }
+         });
+
+    }else{
+         $("#"+modalId).modal({
+            focus:false,
+            autoPosition: true,
+            autoResize:true,
+            containerCss: {
+                'maxHeight' : '700px',
+                'minHeight' :'300px',
+                'width':'500px'
+            },
+            onShow: function(dlg) {$(dlg.container).css('height','auto');$(".fb-comment-box").elastic()},
+            position: ['10%', '25%'],
+            onOpen: retrievePost(post_id)
+         });
+    }
+}
+
+
 function fb_complete_login(token){
     $.post('/auth_token',{'token':token},function(data){
         window.location='/home';
@@ -1015,4 +1081,144 @@ function fb_login(){
         },{perms:'publish_stream,email,offline_access,read_stream,friends_status'});
       }
   });
+}
+
+function switchView(newView){
+    //views: 0-home, 1-diary, 2-settings 3-Dr. feelgood
+    var currView=$('body').data('view');
+    if(currView == newView){
+        return;
+    }
+    $(".on").toggleClass('on',false);
+
+    if(newView == 2){
+        $("#main-view").toggleClass('hidden',true);
+        showSettings();
+        $("#settings-widget").toggleClass('hidden',false);
+        $("#menu-2").toggleClass('on',true);
+    }else if(newView == 1 ){
+        $("#menu-1").toggleClass('on',true);
+        $("#settings-widget").toggleClass('hidden',true);
+        $("#settings-widget").toggleClass('hidden',true);
+        $("#main-view").toggleClass('hidden',false);
+         $("#diduknow").toggleClass('hidden',true);
+         $("#graph").toggleClass('hidden',true);
+         $("#report").toggleClass('hidden',true);
+         $("#diary").toggleClass('hidden',false);
+         if(!$('body').data('diary-init')==1){
+             initDiaryWidget();
+             $('body').data('diary-init',1);
+         }
+    }else if(newView == 0 ){
+        $("#menu-0").toggleClass('on',true);
+        $("#settings-widget").toggleClass('hidden',true);
+        $("#diduknow").toggleClass('hidden',false);
+        $("#graph").toggleClass('hidden',false);
+        $("#report").toggleClass('hidden',false);
+        $("#diary").toggleClass('hidden',true);
+        $("#main-view").toggleClass('hidden',false);
+    }
+    $('body').data('view',newView);
+}
+
+
+function storeSettings(){
+    var val = 0;
+    if($('#1-fb-share').is(':checked')){
+        val = val | 1;
+    }
+    if($('#2-fb-share').is(':checked')){
+        val = val | 2;
+    }
+    if($('#3-fb-share').is(':checked')){
+        val = val | 4;
+    }
+    if($('#4-fb-share').is(':checked')){
+        val = val | 8;
+    }
+    if($('#5-fb-share').is(':checked')){
+        val = val | 16;
+    }
+    if($('#6-fb-share').is(':checked')){
+        val = val | 32;
+    }
+    if($('#7-fb-share').is(':checked')){
+        val = val | 64;
+    }
+    var share_defaults = $('body').data('fb-share-defaults');
+   if(val != share_defaults){
+       var payload = {"settings":val};
+       $("#settings-submit").toggleClass('invisible',true);
+       $("#settings-ajax").toggleClass('invisible',false);
+       $.ajax({
+         url: "/users/"+$('body').data('userid')+"/settings.json",
+         type:"POST",
+         data:payload,
+         success: function(data){
+             $("#settings-submit").toggleClass('invisible',false);
+             $("#settings-ajax").toggleClass('invisible',true);
+             $('body').data('fb-share-defaults',val);
+         },
+         failure:function(){
+             $("#settings-submit").toggleClass('invisible',false);
+             $("#settings-ajax").toggleClass('invisible',true);
+             showSettings()
+         }
+       });
+   }
+}
+
+function showSettings(){
+    var val = $('body').data('fb-share-defaults');
+    if(val & 1){
+      $('#1-fb-share').attr('checked', 'checked');
+    }
+    if(val & 2){
+      $('#2-fb-share').attr('checked', 'checked');
+    }
+    if(val & 4){
+      $('#3-fb-share').attr('checked', 'checked');
+    }
+    if(val & 8){
+      $('#4-fb-share').attr('checked', 'checked');
+    }
+    if(val & 16){
+      $('#5-fb-share').attr('checked', 'checked');
+    }
+    if(val & 32){
+        $('#6-fb-share').attr('checked', 'checked');
+    }
+    if(val & 64){
+       $('#7-fb-share').attr('checked', 'checked');
+    }
+}
+
+function isChecked(mood){
+    var defaults = $('body').data('fb-share-defaults');
+    var mask = 0;
+    switch(mood){
+        case 1:
+            mask = 1;
+            break;
+        case 2:
+            mask = 2;
+            break;
+        case 3:
+            mask = 4;
+            break;
+        case 4:
+            mask = 8;
+            break;
+        case 5:
+            mask = 16;
+            break;
+        case 6:
+            mask = 32;
+            break;
+        case 7:
+            mask = 64;
+            break;
+    }
+    if((mask&defaults)!=0) return true;
+    return false;
 }
