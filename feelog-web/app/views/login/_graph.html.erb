@@ -8,15 +8,21 @@
            <img class="control-img" src="/images/IconLeft.gif"/>
            <span class="control-text">previous</span>
         </span>
-        <span class="graph-control-middle">
-            <span id="zoom-in" class="zoom" onclick="zoomIn()">
+        <span class="zoom graph-control-middle">
+            <span >zoom:</span>
+            <span id="graph-zoom-post" class="selected-pointer selectable-pointer zoom-option" onclick="zoom(0)"> post </span>
+            <span id="graph-zoom-day" class="selectable-pointer zoom-option" onclick="zoom(1)"> day </span>
+            <span id="graph-zoom-week" class="selectable-pointer zoom-option" onclick="zoom(2)"> week </span>
+            <span id="graph-zoom-month" class="selectable-pointer zoom-option" onclick="zoom(3)"> month </span>
+
+            <!--span id="zoom-in" class="zoom" onclick="zoomIn()">
                <img class="control-img" src="/images/zoomIn.png" />
                <span class="control-text">zoom in</span>
             </span>
             <span id="zoom-out" class="zoom" onclick="zoomOut()">
                 <img class="control-img" src="/images/zoomOut.png" />
                 <span class="control-text">zoom out</span>
-            </span>
+            </span-->
         </span>
         <span id="next" class="traversal graph-control-right"  onclick="newerFeelings()">
             <span class="control-text">next</span>

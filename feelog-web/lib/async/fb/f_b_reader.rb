@@ -33,15 +33,23 @@ class FBReader < ResqueClient
     return hash
   end
 
-  def self.prepare_moods(messages_hash)
-    moods={} #hash of id==>mood
+  def self.prepare_moods(messages_hash, own=false)
+    if own
+      moods = []
+    else
+      moods={} #array of moods for own hash for firnds
+    end
     messages_hash.each {|key, val|
       for msg in val['msgs'] do
         post = msg['msg']
         mood = @@parser.pars_post(post)
         if mood > 0
-          moods.update({key=>{:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id'],:lc=>msg['likes_count'],:cc=>msg['comments_count']}})
-          break
+          if !own
+            moods.update({key=>{:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id'],:lc=>msg['likes_count'],:cc=>msg['comments_count']}})
+            break
+          else
+            moods.push({:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id'],:lc=>msg['likes_count'],:cc=>msg['comments_count']})
+          end
         end
       end
     }

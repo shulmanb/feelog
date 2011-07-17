@@ -1,7 +1,7 @@
 require "base64"
 class LoginController < ApplicationController
   protect_from_forgery :except => :login,:except => :authorize_client
-  before_filter :check_redis_connection
+  skip_before_filter :authorize, :except=>:home
 
   def logout
     reset_session
@@ -81,7 +81,7 @@ class LoginController < ApplicationController
 
   def failure
     respond_to do |format|
-      format.html { redirect_to(login_path(@user)) }
+      format.html { redirect_to('/') }
       format.xml  { head :failure }
     end
   end
@@ -107,12 +107,14 @@ class LoginController < ApplicationController
       @@redis.hset(@user.id, 'email', @fb_user.email)
       @email = @fb_user.email
 #    end
-
+    if @user.settings == nil
+       @user.settings = 0
+    end
     execute_post_login(@user,@picture,@email,token)
 
     # Log the authorizing user in.
     respond_to do |format|
-      format.html { redirect_to(new_user_mood_path(@user)) }
+      format.html { render 'home' }
       format.xml  { head :ok }
     end
   end
@@ -171,7 +173,7 @@ class LoginController < ApplicationController
       # whether there is already a user signed in.
       if approved_user(hash['uid'])==false
         respond_to do |format|
-          format.html { redirect_to("/") }
+          format.html { redirect_to("/beta.html") }
         end
         return
       else

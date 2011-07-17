@@ -26,7 +26,7 @@ class MoodsController < ApplicationController
       #stop trying after 10 retries
       if init == nil and retry_cnt.to_i < 10
         respond_to do |format|
-          format.json  { render :json => {:retry=>15000,:retry_cnt=>retry_cnt} }
+          format.json  { render :json => {:retry=>30000,:retry_cnt=>retry_cnt} }
         end
         return
       end
@@ -265,7 +265,12 @@ class MoodsController < ApplicationController
             aTime = a.month
             bTime = b.month
             s_date = DateTime.new(b.year, b.month, 1).to_time
-            e_date = (DateTime.new(b.year, b.month+1, 1)-1).to_time
+            if b.month == 12
+                e_date = (DateTime.new(b.year+1,1, 1)-1).to_time
+            else
+                e_date = (DateTime.new(b.year, b.month+1, 1)-1).to_time
+            end
+            puts "3: s #{s_date} e #{e_date}"
             {:res=>(aTime == bTime),:period=>b.month,:s=>s_date.to_i,:e=>e_date.to_i}
           }
       end
@@ -295,6 +300,10 @@ class MoodsController < ApplicationController
            result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period],:s=>eval[:s],:e=>eval[:e]})
            aggr_count=1
            aggr_value=x.mood
+           if index == (moods.size - 1)
+             #last element in a separate period
+             eval = yield moods[index].report_time.time,moods[index].report_time.time
+           end
         end
       else
         aggr_count=1
@@ -302,6 +311,7 @@ class MoodsController < ApplicationController
       end
       index=index+1
     }
+
     #push the last period
     result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period],:s=>eval[:s],:e=>eval[:e]})
     res = {}

@@ -42,9 +42,9 @@
     });
   </script>
 <% end %>
-<div id="fb-root"></div>
 <div id="main-content" class="content">
-  <div id="main-view">
+  <img id="btn-home" src="/images/BtnHome.gif" onclick="switchView(0)" class="hidden" style="float:left;position:relative;top:15px;left:10px;cursor:pointer"/>
+  <div id="main-view" class="clearfix">
       <div class="left-side">
         <%= render 'report' %>
         <%= render 'graph' %>

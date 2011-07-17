@@ -182,7 +182,7 @@ function zoom0_format_tooltip(point){
         min = "0";
     }
     min = min+ts.getMinutes();
-    var tooltip = "<span style=\"color:white\">"+point.name+"</span><br><span style=\"color:#CCCCCC\">"+month[ts.getMonth()] +" "+ts.getDate()+" @ "+ts.getHours()+":"+min+"</span>";
+    var tooltip = "<span style=\"color:white\">"+point.name+"</span><br><span style=\"color:#CCCCCC\">"+full_month[ts.getMonth()] +" "+ts.getDate()+" @ "+ts.getHours()+":"+min+"</span>";
     return tooltip;
 }
 //tooltip for daily aggregated zoom, should show number of posts
@@ -193,7 +193,7 @@ function zoom1_format_tooltip(point){
     }else{
        ts = new Date(point.x*1000);
     }
-    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted on</span><br><span style=\"color:#CCCCCC\">"+month[ts.getMonth()] +" "+ts.getDate()+"</span>";
+    var tooltip = "<span style=\"color:white\">"+point.name+" updates posted on</span><br><span style=\"color:#CCCCCC\">"+full_month[ts.getMonth()] +" "+ts.getDate()+"</span>";
     return tooltip;
 }
 
@@ -310,7 +310,7 @@ function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
     unnormalized_options.xAxis.categories = [];
     for(var i=0;i<moods.length;i++){
         if(zoom == 0){
-            var d = new Date(moods[i].date).getTime();
+            var d = new Date(moods[i].date.replace(/-/g,'/').replace('T',' ').replace('Z',' GMT')).getTime();
         }else{
             var d = moods[i].period;
         }
@@ -379,7 +379,7 @@ function create_unnorm_point(mood,d){
 
 function mood_to_point(mood, norm) {
     if(mood.zoom == undefined || mood.zoom == 0){
-        var d = new Date(mood.date).getTime();
+        var d = new Date(mood.date.replace(/-/g,'/').replace('T',' ').replace('Z',' GMT')).getTime();
     }else{
         var d = mood.period;
     }
@@ -420,6 +420,7 @@ function move_to_range(zoom,range){
     var user_id = $('body').data('userid');
     var path = '/users/'+user_id+'/moods_range/'+7+'/'+zoom+'/'+range.start+'/'+range.end+'.json';
     var moods_arr = [];
+    select_zoom(zoom);
     $.ajax(path).success(function(data){
         var i = 0;
         if(data == null || data.moods == null || data.moods.length == 0){
@@ -447,12 +448,31 @@ function move_to_range(zoom,range){
 
 }
 
+function select_zoom(zoom){
+    $(".zoom-option").removeClass("selected-pointer");
+    switch(zoom){
+        case 0:
+            $("#graph-zoom-post").addClass("selected-pointer");
+            break;
+        case 1:
+            $("#graph-zoom-day").addClass("selected-pointer");
+            break;
+        case 2:
+            $("#graph-zoom-week").addClass("selected-pointer");
+            break;
+        case 3:
+            $("#graph-zoom-month").addClass("selected-pointer");
+            break;
+    }
+}
+
 function traversal_feelings(isOlder, zoom){
     var moods_arr = [];
     var page = $('body').data('page');
     if(zoom != $('body').data('zoom')){
         //zooming
         page = 0;
+        select_zoom(zoom);
     }else{
         //traversal
         if(isOlder){
@@ -527,6 +547,10 @@ function zoomIn(){
         return;
     }
     traversal_feelings(false,zoom-1);
+}
+
+function zoom(zoom){
+    traversal_feelings(false,zoom);
 }
 
 function zoomOut(){

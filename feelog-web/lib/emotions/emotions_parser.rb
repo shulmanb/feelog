@@ -42,19 +42,25 @@ class EmotionsParser
   def pars_post(post)
     post.downcase!
     tgr = EngTagger.new
+    start = Time.now
     sentences = tgr.get_sentences(post)
+#    puts "PARSING #{sentences.to_s}"
     sum = 0;
     num = 0;
     for s in sentences do
-      tagged = tgr.get_readable(s)
+      sen_start = Time.now
+      tagged = s #tgr.get_readable(s)
+      #puts "TAGGED #{tagged.to_s}"
       next if tagged == nil
       arr = tagged.split(' ');
       #This rule removed bacause specifiying someone elses mood reflects yours
       #next if arr[0].end_with?('/NNP')
       #test if starts with PAST  if yes skip
-      next if arr[0].end_with?('/VBD')
+      #see if return it
+      #next if arr[0].end_with?('/VBD')
       #test if PRP and not I
-      next if arr[0].end_with?('/PRP') and arr[0].split('/')[0] != 'I'
+      #see if return it
+      #next if arr[0].end_with?('/PRP') and arr[0].split('/')[0] != 'I'
       an_res = analyze_sentence(arr)
       local_sum = an_res[0]
       local_num = an_res[1]
@@ -63,12 +69,15 @@ class EmotionsParser
       if local_sum == 0 and relevant
         #test for smileys
         res = check_for_smileys(s)
+#        puts "SMILEY TEST #{res}"
         local_sum +=res[0]
         local_num+=res[1]
       end
       sum+=local_sum
       num+=local_num
+#      puts "SENTENCE PARSED IN #{Time.now.usec-sen_start.usec}"
     end
+    puts "POST PARSED IN #{Time.now.usec-start.usec}"
     return 0 if num == 0
     return sum/num
   end
@@ -106,35 +115,40 @@ class EmotionsParser
   end
 
   def analyze_sentence(arr)
+#    puts "ANALYZING SENTENCE #{arr.to_s}"
     i = 0
     relevant = true
     sum = 0
     num = 0
     for word in arr do
-      if word.end_with?('/JJ')
-        word = word.split('/')[0]
+#      puts "CHECKING WORD #{word}"
+#      if word.end_with?('/JJ') || word.end_with?('/NNP')
+#        word = word.split('/')[0]
+#        puts "UNTAGGED WORD #{word}"
         dict = @@ops[word]
+#        puts "dictionary value for #{word} is #{dict}"
         unless dict == nil
           num+=1
           tmp_sum=dict[:v]
           #check if previous word in sentence is RB and if it is in dictionary
           unless i == 0
             prev = arr[i-1]
-            if prev.end_with?('/RB')
+#            if prev.end_with?('/RB')
               prev = prev.split('/')[0]
               score = dict[prev]
               tmp_sum=score unless score == nil
-            end
+#            end
           end
+#          puts "WORD SCORE #{tmp_sum} total #{sum+tmp_sum}"
           sum+=tmp_sum
         end
-      elsif word.end_with?('/VBD') or word.end_with?('/VBN')
+#      elsif word.end_with?('/VBD') or word.end_with?('/VBN')
         #4) if past tense skip (VBD, VBN), clear all scores for the sentence
-        relevant = false
-        num = 0
-        sum = 0
-        break
-      end
+#        relevant = false
+#        num = 0
+#        sum = 0
+#        break
+#      end
       i =i+1
     end
     return [sum,num,relevant]

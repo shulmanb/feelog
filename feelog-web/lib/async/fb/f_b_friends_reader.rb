@@ -17,6 +17,7 @@ class FBFriendsReader < FBReader
     batch = []
     i = 1
     result={}
+    puts "CHECKING FRIENDS #{p['data']}"
     for friend in p['data'] do
        url = friend['id']+'/statuses?since='+since
        batch.push({'method'=>'GET','relative_url'=>url})
@@ -36,11 +37,13 @@ class FBFriendsReader < FBReader
       :access_token=>accesskey,
       :batch=>json_batch)
     result.update(parse_response(response))
+    puts "RESULT"+result.to_xml
     moody_friends = prepare_moods(result)
     update_cache(userid,moody_friends)
   end
 
   def self.update_cache(userid, moody_friends)
+    puts "UPDATUING CACHE"
     puts "MOODS "+moody_friends.to_xml
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
     #remove old entities

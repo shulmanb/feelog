@@ -1,3 +1,6 @@
+# encoding: UTF-8
+hebrew = 'עברית'
+
 # 7 -very happy
 # 6 - twink
 # 5 - happy
@@ -141,6 +144,15 @@
    'uptight'=> {:v=>1,'not'=>2},
    'vexed'=> {:v=>1,'not'=>2},
    'wrathful'=> {:v=>1,'not'=>2},
+   'bummed'=> {:v=>2},
+   'pissed'=> {:v=>1},
+    'finally'=> {:v=>5},
+    'stranded'=> {:v=>3},
+     'stuck'=> {:v=>3,'not'=>2},
+    'unfuckingbelievable'=> {:v=>1},
+    'awesome'=> {:v=>7},
+    'rocking'=> {:v=>5},
+    'amazing '=> {:v=>7},
    'שמח'=> {:v=>5,'מאוד'=>6,'ממש'=>6,'לא'=>3},
    'שמחה'=> {:v=>5,'מאוד'=>6,'ממש'=>6,'לא'=>3},
    'מאושר'=> {:v=>7,'לא'=>3},

@@ -85,7 +85,7 @@ function onReportBlur(how){
 }
 
 function toggle(moodid){
-    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-ammused-selected smiley-veryhappy-selected smiley-selected",false);
+    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-cheerful-selected smiley-veryhappy-selected smiley-selected",false);
     $("#mood_val").val(moodid);
     $('#'+'s'+moodid).toggleClass("smiley-selected",true);
     $('#'+'s'+moodid).toggleClass(function(){
@@ -101,7 +101,7 @@ function toggle(moodid){
             case 3:
                 return "smiley-happy-selected";
             case 2:
-                return "smiley-ammused-selected";
+                return "smiley-cheerful-selected";
             case 1:
                 return "smiley-veryhappy-selected";
         }
@@ -132,6 +132,25 @@ function getMoodImageLink(moodid){
     }
 }
 
+function getMoodSmallImageLink(moodid){
+    switch(moodid){
+        case 1:
+            return '<img src="/images/graph_icon_angry.gif">';
+        case 2:
+            return '<img src="/images/graph_icon_very_sad.gif">';
+        case 3:
+            return '<img src="/images/graph_icon_sad.gif">';
+        case 4:
+            return '<img src="/images/graph_icon_ok.gif">';
+        case 5:
+            return '<img src="/images/graph_icon_happy.gif">';
+        case 6:
+            return '<img src="/images/graph_icon_twink.gif">';
+        case 7:
+            return '<img src="/images/graph_icon_very_happy.gif">';
+    }
+}
+
 function getMoodImageClass(moodid){
     switch(moodid){
         case 1:
@@ -145,7 +164,7 @@ function getMoodImageClass(moodid){
         case 5:
             return 'happy-logo';
         case 6:
-            return 'ammused-logo';
+            return 'cheerful-logo';
         case 7:
             return 'very-happy-logo';
     }
@@ -165,7 +184,7 @@ function getMoodStr(mood){
         case 5:
             return 'Happy';
         case 6:
-            return 'Amused';
+            return 'Cheerful';
         case 7:
             return 'Very happy';
     }
@@ -223,7 +242,7 @@ function returnFromCreateMood(report_time,mood_val,desc,fb_id){
     $('#ajax-busy').hide();
     $("#how").val("why?");
     $("#mood_val").val('');
-    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-ammused-selected smiley-veryhappy-selected smiley-selected",false);
+    $(".smiley-selected").toggleClass("smiley-angry-selected smiley-sad-selected smiley-verysad-selected smiley-ok-selected smiley-happy-selected smiley-cheerful-selected smiley-veryhappy-selected smiley-selected",false);
     var moodStr = '<b>'+getMoodStr(mood_val)+'</b>';
     var status = name +' is '+moodStr+' : ';
     $("#usr-status").html(status);
@@ -234,7 +253,13 @@ function returnFromCreateMood(report_time,mood_val,desc,fb_id){
         "date":report_time,
         "fb_id":fb_id
     };
+    var currZoom = $('body').data('zoom');
+    if(currZoom != 0){
+        zoom(0);
+    }
+    addPointToDiary(mood);
     add_points_to_graph([mood]);
+
     $("#feel-submit").show();
 
 }
@@ -308,7 +333,7 @@ function renderMoods(path){
             $('#usr-avg').toggleClass('hidden',false);
             var avgMood = sum/cnt;
             var moodTxt = getMoodStr(Math.round(avgMood));
-            var moodImg = getMoodImageLink(Math.round(avgMood));
+            var moodImg = getMoodSmallImageLink(Math.round(avgMood));
             $("#usr-avg-img").append(moodImg);
             $("#usr-avg-txt").text(moodTxt);
         }
@@ -359,7 +384,7 @@ function renderFriends(path){
                 })
             }
         });
-            if(render_needed == true){
+        if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
     });
@@ -375,26 +400,36 @@ function  apply_page_class(index,name,elemId){
     }
 }
 
+
+function applyFriendsWysdgetStyle(widgetid,arr){
+    if(arr.length >5){
+        $(widgetid).toggleClass('friends-action-small',false)
+        $(widgetid).toggleClass('friends-action',true)
+    }else{
+        $(widgetid).toggleClass('friends-action',false)
+        $(widgetid).toggleClass('friends-action-small',true)
+    }
+    if(arr.length > 10){
+        $(widgetid+"-control").toggleClass('hidden');
+    }
+
+    $(widgetid).show();
+}
 function redraw_friends_widgets(happy, gloomy){
     $("#happy-friends").empty();
     $("#gloomy-friends").empty();
 
     if(happy.length > 0){
-        $("#happy-friends").show();
+        applyFriendsWysdgetStyle("#happy-friends",happy);
         $('body').data('happy-page',0);
-        if(happy.length > 10){
-            $("#happy-friends-control").toggleClass('hidden');
-        }
         $('body').data('happy-page-max',Math.floor(happy.length/10));
     }else{
         set_no_data("#happy-friends-widget");
     }
     if(gloomy.length > 0){
+        applyFriendsWysdgetStyle("#gloomy-friends",gloomy);
         $("#gloomy-friends").show();
         $('body').data('gloomy-page',0);
-        if(gloomy.length > 10){
-            $("#gloomy-friends-control").toggleClass('hidden');
-        }
         $('body').data('gloomy-page-max',Math.floor(gloomy.length/10));
     }else{
         set_no_data("#gloomy-friends-widget");
@@ -523,33 +558,38 @@ function like(postId,uid){
 }
 
 function displayComments(postId){
-    if($("#comments_"+postId+"_view").is(":visible")){
-        $("#comments_"+postId+"_view").toggleClass('hidden');
-        $("#comments_"+postId+"_view").empty();
-    }else{
-
-
-        FB.api({
-                method: 'fql.query',
-                query: "SELECT id,text,fromid,time FROM comment WHERE object_id='"+postId+"'"
-            },
-            function(data) {
-                var sortfunct = function(a,b){
-                    return (a - b);
-                };
-                data.sort(sortfunct);
-                var qArr = new Array();
-                for(var i = 0;i < data.length;i++){
-                    qArr[i] = getUser(data[i].fromid);
-                }
-                FB.Data.waitOn(qArr, function(args) {
+    if($('body').data(postId+'comments-click-on')==null){
+       $('body').data(postId+'comments-click-on','on');
+        if($("#comments_"+postId+"_view").is(":visible")){
+            $('body').removeData(postId+'comments-on');
+            $("#comments_"+postId+"_view").toggleClass('hidden');
+            $("#comments_"+postId+"_view").empty();
+            $('body').removeData(postId+'comments-click-on');
+        }else{
+            FB.api({
+                    method: 'fql.query',
+                    query: "SELECT id,text,fromid,time FROM comment WHERE object_id='"+postId+"'"
+                },
+                function(data) {
+                    var sortfunct = function(a,b){
+                        return (a - b);
+                    };
+                    data.sort(sortfunct);
+                    var qArr = new Array();
                     for(var i = 0;i < data.length;i++){
-                        renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
+                        qArr[i] = getUser(data[i].fromid);
                     }
-                    $("#comments_"+postId+"_view").toggleClass('hidden');
-                    $("#"+postId+"_popup").scrollTop($("#"+postId+"_popup")[0].scrollHeight);
+                    FB.Data.waitOn(qArr, function(args) {
+                        for(var i = 0;i < data.length;i++){
+                            renderComment(args[i][0].pic_square,args[i][0].name,data[i].text,data[i].time,postId);
+                        }
+                        $("#comments_"+postId+"_view").toggleClass('hidden');
+                        $("#"+postId+"_popup").scrollTop($("#"+postId+"_popup")[0].scrollHeight);
+                    });
+                    $('body').removeData(postId+'comments-click-on');
                 });
-            });
+        }
+
     }
 }
 function renderComment(pic_square,name,text,time,postId){
@@ -598,54 +638,60 @@ function timestampToCommentTime(time){
 }
 
 function displayLikes(postId){
-    if($("#likes_"+postId+"_view").is(":visible")){
-        $("#likes_"+postId+"_view").toggleClass('hidden');
-        $("#likes_"+postId+"_view").toggleClass('fb-detail');
-        $("#likes_"+postId+"_view").empty();
-    }else{
-        FB.api({
-                method: 'fql.query',
-                query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
-            },
-            function(data) {
-                var i = 0;
-                var scroll = (data.length > 8);
-                var hidden = [];
-                var template = "SELECT name,pic_square FROM user WHERE uid={0}";
-                var waitOn = [];
-                $.each(data, function(item,val) {
-                        if((scroll && i<7)||(!scroll && i < 8)){
-                            waitOn[i] = FB.Data.query(template,val.user_id);
-                        }else{
-                            hidden.push(val.user_id);
+    if($('body').data(postId+'likes-click-on')==null){
+       $('body').data(postId+'likes-click-on','on');
+        if($("#likes_"+postId+"_view").is(":visible")){
+            $("#likes_"+postId+"_view").toggleClass('hidden');
+            $("#likes_"+postId+"_view").toggleClass('fb-detail');
+            $("#likes_"+postId+"_view").empty();
+            $('body').removeData(postId+'likes-click-on');
+         }else{
+            FB.api({
+                    method: 'fql.query',
+                    query: "SELECT user_id FROM like WHERE object_id='"+postId+"'"
+                },
+                function(data) {
+                    var i = 0;
+                    var scroll = (data.length > 8);
+                    var hidden = [];
+                    var template = "SELECT name,pic_square FROM user WHERE uid={0}";
+                    var waitOn = [];
+                    $.each(data, function(item,val) {
+                            if((scroll && i<7)||(!scroll && i < 8)){
+                                waitOn[i] = FB.Data.query(template,val.user_id);
+                            }else{
+                                hidden.push(val.user_id);
+                            }
+                            i++;
+                    });
+
+                    FB.Data.waitOn(waitOn,function(data){
+                        for(var i = 0;i <data.length;i++){
+                                $("#likes_"+postId+"_view").append("<img class='fb-like-image' id='"+"lk_"+i+"'src=\""+data[i][0].pic_square+"\" title=\""+data[i][0].name+"\">");
                         }
-                        i++;
-                });
+                        for(var i = 0;i <hidden.length;i++){
+                            var indx = i+7;
+                            $("#likes_"+postId+"_view").append("<div class='hidden' id='"+"lk_"+indx+"'>"+hidden[i]+"</div>");
+                        }
+                    });
 
-                FB.Data.waitOn(waitOn,function(data){
-                    for(var i = 0;i <data.length;i++){
-                            $("#likes_"+postId+"_view").append("<img class='fb-like-image' id='"+"lk_"+i+"'src=\""+data[i][0].pic_square+"\" title=\""+data[i][0].name+"\">");
+                    if(scroll){
+                        $("#likes_"+postId+"_view").append("<span onclick='nextLikes()' class=\"arrow-right\"/>");
+                        $("#likes_"+postId+"_view").append("<span onclick='prevLikes()' class=\"arrow-left\"/>");
+                        $('body').data('likes-start',0);
+                        $('body').data('likes-last',hidden.length+6);
+                        $('body').data('likes-open',6);
                     }
-                    for(var i = 0;i <hidden.length;i++){
-                        var indx = i+7;
-                        $("#likes_"+postId+"_view").append("<div class='hidden' id='"+"lk_"+indx+"'>"+hidden[i]+"</div>");
+
+                    if(data.length > 0){
+                        $("#likes_"+postId+"_view").toggleClass('fb-detail');
+                        $("#likes_"+postId+"_view").toggleClass('hidden');
+                        $.modal.setPosition();
                     }
+                    $('body').removeData(postId+'likes-click-on');
                 });
+        }
 
-                if(scroll){
-                    $("#likes_"+postId+"_view").append("<span onclick='nextLikes()' class=\"arrow-right\"/>");
-                    $("#likes_"+postId+"_view").append("<span onclick='prevLikes()' class=\"arrow-left\"/>");
-                    $('body').data('likes-start',0);
-                    $('body').data('likes-last',hidden.length+6);
-                    $('body').data('likes-open',6);
-                }
-
-                if(data.length > 0){
-                    $("#likes_"+postId+"_view").toggleClass('fb-detail');
-                    $("#likes_"+postId+"_view").toggleClass('hidden');
-                    $.modal.setPosition();
-                }
-            });
     }
 }
 
@@ -746,6 +792,9 @@ function updateCommentsLabel(postId){
 
 
 function retrievePost(postId){
+    $('body').removeData(postId+'comments-on')
+    $('body').removeData(postId+'likes-on');
+
     FB.api({
             method: 'fql.query',
             query: "SELECT text FROM comment WHERE object_id='"+postId+"'"
@@ -857,11 +906,11 @@ function renderGloomyCloud(){
     $.ajax("/users/"+id+"/gloomy_words.json").success(function(data){
         var word_list = []
         if(data == null || data.length == 0){
-            $("#empty_cloud").toggleClass('happy',false);
-            $("#empty_cloud").toggleClass('gloomy',true);
-            $("#empty_cloud").toggleClass('hidden',false);
+            $("#empty-cloud").removeClass("happy");
+            $("#empty-cloud").toggleClass("gloomy",true);
+            $("#empty-cloud").removeClass("hidden");
         }else{
-            $("#empty_cloud").toggleClass('hidden',true);
+            $("#empty-cloud").toggleClass("hidden",true);
             $.each(data, function(item,val) {
                 word_list.push(
                 {
@@ -894,15 +943,15 @@ function changeCloud(){
     }
 }
 
-function renderHappyCloud(id){
+function renderHappyCloud(){
     var id = $('body').data('userid');
     $.ajax("/users/"+id+"/happy_words.json").success(function(data){
         if(data == null || data.length == 0){
-            $("#empty_cloud").toggleClass('happy',true);
-            $("#empty_cloud").toggleClass('gloomy',false);
-            $("#empty_cloud").toggleClass('hidden',false);
+            $("#empty-cloud").removeClass("hidden");
+            $("#empty-cloud").addClass("happy");
+            $("#empty-cloud").removeClass("gloomy");
         }else{
-            $("#empty_cloud").toggleClass('hidden',true);
+            $("#empty-cloud").toggleClass("hidden",true);
             var word_list = []
             $.each(data, function(item,val) {
                 word_list.push(
@@ -947,27 +996,31 @@ function initDiaryWidget(){
     $('body').data('diary-disp-days',0);
 
     retrieveDiaryPosts();
-    $(".diary").scroll(function() {
-   // We check if we're at the bottom of the scrollcontainer
-        if ($(this)[0].scrollHeight - $(this).scrollTop() == $(this).outerHeight()) {
-            retrieveDiaryPosts();
+
+
+    $(window).scroll(function() {
+        if  ($(window).scrollTop() == $(document).height() - $(window).height()){
+            if(!$(".diary").hasClass("hidden")){
+                retrieveDiaryPosts();
+            }
         }
     });
 }
-
+function addPointToDiary(mood){
+    //TODO implements
+}
 function renderDiaryPosts(page,moods){
      var initialIdx = page*10;
      var lastDay = $('body').data('diary-last-day');
      var dispDays = $('body').data('diary-disp-days');
      for(var i = 0;i<moods.length;i++){
          var id = initialIdx+i;
-//         moods[i].val
-//         moods[i].desc
-//         moods[i].date
-//         moods[i].zoom
-//         moods[i].fb_id
-           var date = new Date(moods[i].date);
+           var date = new Date(moods[i].date.replace(/-/g,'/').replace('T',' ').replace('Z',' GMT'));
            var doy = dayOfYear(date);
+           if((doy > lastDay) && (lastDay != 0)){
+               break;
+               //TODO find more elegant solution for this bug
+           }
            if(doy != lastDay){
                var dateStr = full_week[date.getDay()]+","+full_month[date.getMonth()]+" "+date.getDate()+" ,"+date.getFullYear();
                dispDays++;
@@ -983,13 +1036,12 @@ function renderDiaryPosts(page,moods){
                var strMinutes = minutes;
            }
 
-         var ts = new Date(moods[i].date);
          var min = "";
-         if(ts.getMinutes()<10){
+         if(date.getMinutes()<10){
              min = "0";
          }
-         min = min+ts.getMinutes();
-         var prityTime = full_month[ts.getMonth()]+" "+ts.getDate()+" at "+ts.getHours()+":"+min;
+         min = min+date.getMinutes();
+         var prityTime = full_month[date.getMonth()]+" "+date.getDate()+" at "+date.getHours()+":"+min;
          var post_id = null;
          var uid = null;
          if(moods[i].fb_id != null){
@@ -1001,11 +1053,12 @@ function renderDiaryPosts(page,moods){
          var time = date.getHours()+":"+strMinutes;
          $('#diary-day-'+doy).append(renderDiaryEntry(moods[i].val,moods[i].desc,time,post_id,popupHtml,id));
      }
-    if(page == 0){
+/*    if(page == 0){
         $('.diary').diaryScroll();
     }else{
         $('.diary').diaryUpdate();
     }
+*/
      $('body').data('diary-last-day',lastDay);
 }
 
@@ -1090,17 +1143,18 @@ function switchView(newView){
         return;
     }
     $(".on").toggleClass('on',false);
-
     if(newView == 2){
-        $("#main-view").toggleClass('hidden',true);
+        $("#btn-home").toggleClass('hidden',false);
+        $("#main-view").hide();//toggleClass('hidden',true);
         showSettings();
         $("#settings-widget").toggleClass('hidden',false);
         $("#menu-2").toggleClass('on',true);
     }else if(newView == 1 ){
+        $("#btn-home").toggleClass('hidden',false);
         $("#menu-1").toggleClass('on',true);
         $("#settings-widget").toggleClass('hidden',true);
         $("#settings-widget").toggleClass('hidden',true);
-        $("#main-view").toggleClass('hidden',false);
+        $("#main-view").show();//toggleClass('hidden',false);
          $("#diduknow").toggleClass('hidden',true);
          $("#graph").toggleClass('hidden',true);
          $("#report").toggleClass('hidden',true);
@@ -1110,13 +1164,14 @@ function switchView(newView){
              $('body').data('diary-init',1);
          }
     }else if(newView == 0 ){
+        $("#btn-home").toggleClass('hidden',true);
         $("#menu-0").toggleClass('on',true);
         $("#settings-widget").toggleClass('hidden',true);
         $("#diduknow").toggleClass('hidden',false);
         $("#graph").toggleClass('hidden',false);
         $("#report").toggleClass('hidden',false);
         $("#diary").toggleClass('hidden',true);
-        $("#main-view").toggleClass('hidden',false);
+        $("#main-view").show();//toggleClass('hidden',false);
     }
     $('body').data('view',newView);
 }

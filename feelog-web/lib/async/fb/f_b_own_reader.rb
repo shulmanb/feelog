@@ -6,14 +6,16 @@ class FBOwnReader < FBReader
     if @@redis.client.connected? != true
       @@redis.client.connect
     end
-    moods.each(){|id,mood_obj|
+    moods.each(){|mood_obj|
       mood = Mood.new
       mood.mood = mood_obj[:m]
       mood.desc = mood_obj[:p]
       mood.user_id = userid
       mood.report_time = mood_obj[:t]
+      mood.fb_id = mood_obj[:i]
       mood.save()
       puts "STORED MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
+      Resque.enqueue(WordCounter,mood.desc, mood.mood, mood.user_id)
     };
     @@redis.hset(userid,"initialized",true)
     @@redis.expire(userid, 60*60*24)
@@ -32,7 +34,7 @@ class FBOwnReader < FBReader
           :access_token=>accesskey,
           :batch=>json_batch)
     result = parse_response(response)
-    moods = prepare_moods(result)
+    moods = prepare_moods(result,true)
     store_moods(userid, moods)
     #now retrieve statuses for the last year (365 )(without last 30 days)in a different queue
     Resque.enqueue(FBOwnLongReader,accesskey,userid)
