@@ -127,20 +127,24 @@ img{
 	position: relative;
     color: white;
     font-family:  Helvetica,Calibri,Arial,sans-serif;
-    font-size: 30px;
+    font-size: 22px;
     font-style: italic;
+}
+
+.fb-login-allow-txt{
+    color: white;
+    font-family:  Helvetica,Calibri,Arial,sans-serif;
+    font-size: 10px;
 }
 
 .fb-login-txt-top{
     float: left;
-    margin-top: 18px;
-    margin-left: 10px;
+    margin-top: 26px;
+    margin-left: 5px;
 }
 .fb-login-txt-bottom{
-    float: none;
-    position:absolute;
-    margin-top: 50px;
-    margin-left: 50px;
+    margin-top: 5px;
+    margin-left: 5px;
 }
 
 
@@ -565,7 +569,7 @@ img{
 #simplemodal-container a.modalCloseImg {background:url(/images/X.gif) no-repeat; width:25px; height:29px; display:inline; z-index:3200; position:absolute; top:-15px; right:-16px; cursor:pointer;}
 
 .feel-popup{
-
+  overflow-x:hidden;
 }
 .feel-popup-title{
     position: relative;
@@ -708,7 +712,6 @@ ul.fb-staff{
 }
 .fb-comment-box{
     border: solid #BDC7D8;
-    position: relative;
     border-width: 1px;
     padding-left:5px;
 }
@@ -755,11 +758,11 @@ ul.fb-staff{
     font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
 }
 .fb-comment-text{
-    position:relative;
     font-size: 11px;
     color:#333;
     font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
-    left:4px;
+    padding-left:4px;
+    display: block;
 }
 
 .fb-comment-time{
@@ -770,8 +773,7 @@ ul.fb-staff{
 .fb-comment-body{
     display: table-cell;
     vertical-align: top;
-    position: relative;
-    left:7px;
+    padding-left:7px;
 }
 
 .clearfix:after{
@@ -1112,4 +1114,28 @@ ul.fb-staff{
 }
 .selected-pointer{
     text-decoration:underline;
+}
+
+.feedback-text{
+    color: #666;
+    font-size: 11px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.feedback-outer{
+    background-image:url('/images/Warning-Feedback.gif');
+    background-repeat: no-repeat;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    border: 1px;
+    cursor: pointer;
+    background-color:whiteSmoke;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    padding-left: 18px;
+    padding-right: 2px;
+    height: 27px;
+    line-height: 27px;
+    min-width: 54px;
 }

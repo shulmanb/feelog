@@ -55,7 +55,7 @@ class LoginController < ApplicationController
        app_id = "136471399753143"
        canvas_page = "http://184.73.183.35/canvas/"
        @auth_url = "http://www.facebook.com/dialog/oauth?client_id=" + app_id + "&redirect_uri=" + URI.escape(canvas_page, Regexp.new("[^#{URI::PATTERN::UNRESERVED}]"))
-
+       @fb = true
        signed_request = params["signed_request"]
        #TODO: check the signature
        payload = signed_request.split('.')[1]
@@ -146,7 +146,7 @@ class LoginController < ApplicationController
         @resp = {:id=>@user.id,:pic=>@picture,:name=>fb_user.name,:settings=>@user.settings}
         format.any  { render :json => @resp }
       else
-        format.any  { render 'home'}
+        format.html  { render 'home'}
       end
     end
   end

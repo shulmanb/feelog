@@ -1,7 +1,7 @@
 .top{height: 42px}
 #logout {display: none}
 .container {width: 740px;padding-top: 5px}
-.content {height: 590px}
+.content {min-height: 590px}
 .left-side {top: 0px;left:20px;width: 390px;}
 .right-side {top: 0px;right: 0px}
 .moods-graph {margin-top: 0px}
@@ -9,3 +9,7 @@
 .hf{margin: 0px}
 .sl {margin-top:20px}
 .act {margin-top: 5px}
+.rc-top{width:740px}
+.rc-bot{width:740px}
+
+

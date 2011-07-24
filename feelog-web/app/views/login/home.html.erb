@@ -3,8 +3,8 @@
   <%= javascript_include_tag 'highcharts' %>
   <%= javascript_include_tag 'jqcloud-0.1.8.min.js' %>
   <%= stylesheet_link_tag "jqcloud.css" %>
-  <!--script src="http://connect.facebook.net/en_US/all.js"></script-->
-    <%= javascript_include_tag 'all' %>
+  <script src="http://connect.facebook.net/en_US/all.js"></script>
+    <!--%= javascript_include_tag 'all' %-->
   <% if @fb == true %>
     <%= stylesheet_link_tag "main-fb.css" %>
   <% end %>
@@ -58,6 +58,11 @@
       </div>
   </div>
   <%= render 'settings' %>
+  <div class="feedback-outer" onclick="openFeedbackForm()">
+    <div class="feedback-text">
+        Send feedback
+    </div>
+  </div>
 
   <!--div id="settings-view" class="hidden"></div>
   <div id="drfeelgood-view" class="hidden"></div-->

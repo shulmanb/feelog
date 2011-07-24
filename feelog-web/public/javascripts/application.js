@@ -1,3 +1,20 @@
+function getInternetExplorerVersion()
+// Returns the version of Internet Explorer or a -1
+// (indicating the use of another browser).
+{
+  var rv = -1; // Return value assumes failure.
+  if (navigator.appName == 'Microsoft Internet Explorer')
+  {
+    var ua = navigator.userAgent;
+    var re  = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+    if (re.exec(ua) != null)
+      rv = parseFloat( RegExp.$1 );
+  }
+  return rv;
+}
+
+
+
 var month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 var full_month = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 var week = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -294,7 +311,10 @@ function renderMoods(path){
     var initializing = false;
     var first_init = true;
     $("#moods-graph").empty();
-    drawEmptyChart("Loading...")
+    var ie = getInternetExplorerVersion();
+    if(ie == -1 || ie >8){
+        drawEmptyChart("Loading...");
+    }
     $.ajax(path+"/limit/7.json").success(function(data){
         var i = 0;
         if(data.length == 0){
@@ -514,7 +534,7 @@ function focusCommentBox(textarea,id){
     if(!textarea._has_control){
         textarea._has_control = true;
         textarea.value='';
-        $("#"+id+"_comment").toggleClass('fb-text-passive');
+        $("#"+id+"_comment").removeClass('fb-text-passive');
     }
 }
 
@@ -522,7 +542,7 @@ function blurCommentBox(textarea,id){
     if(textarea._has_control){
         if(textarea.value == ''){
             textarea._has_control = false;
-            $("#"+id+"_comment").toggleClass('fb-text-passive');
+            $("#"+id+"_comment").addClass('fb-text-passive');
             textarea.value = 'Write a comment...';
         }
     }
@@ -1276,4 +1296,35 @@ function isChecked(mood){
     }
     if((mask&defaults)!=0) return true;
     return false;
+}
+
+
+function openFeedbackForm(){
+    var src = "https://spreadsheets.google.com/spreadsheet/viewform?formkey=dEhlVHhZeXZLemU4QVlRNGwxYnNwVlE6MQ";
+    $.modal('<iframe src="' + src + '" height="580" width="620" style="border:0">', {
+        containerCss: {
+            height: 590,
+            padding: 0,
+            width: 625,
+            backgroundColor:"#E8EEF7"
+        },
+        overflow:'hidden',
+        autoResize:true,
+        onOpen: function (dialog) {
+            dialog.overlay.fadeIn('fast', function () {
+                dialog.container.slideDown('fast', function () {
+                    dialog.data.fadeIn('fast');
+                });
+            });
+        },
+        onClose: function (dialog) {
+            dialog.data.fadeOut('fast', function () {
+                dialog.container.slideUp('fast', function () {
+                    dialog.overlay.fadeOut('fast', function () {
+                        $.modal.close(); // must call this!
+                    });
+                });
+            });
+        }
+    });
 }

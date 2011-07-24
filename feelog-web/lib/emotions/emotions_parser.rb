@@ -98,6 +98,9 @@ class EmotionsParser
       sm = smiley.dup.insert(3, ' ')
       return true if sentence.scan(sm).size() > 0
     end
+    sm = smiley.dup.insert(smiley.size -1, ' ')
+    return true if sentence.scan(sm).size() > 0
+
   end
 
 

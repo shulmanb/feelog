@@ -28,7 +28,7 @@
 
           (function() {
             var e = document.createElement('script');
-            e.src = '/javascripts/all.js';
+            e.src = 'http://connect.facebook.net/en_US/all.js';
             e.async = true;
             document.getElementById('fb-root').appendChild(e);
           }());
@@ -61,11 +61,13 @@
                             <div class="fb-login-img">
                                 <img src='/images/fb_login_button.png' onclick="fb_login()">
                             </div>
-                            <div class="fb-login-txt fb-login-txt-top">
-                                with your
-                            </div>
-                            <div class="fb-login-txt fb-login-txt-bottom">
-                                Facebook account
+                            <div class="fb-login-txt-top">
+                                <div class="fb-login-txt">
+                                    with your Facebook account
+                                </div>
+                                <div class="fb-login-allow-txt fb-login-txt-bottom">
+                                    please enable Facebook's pop-up screen
+                                </div>
                             </div>
                         </div>
 

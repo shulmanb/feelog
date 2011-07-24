@@ -118,13 +118,7 @@ var unnormalized_options = {
             }
         }
     },
-    series: [{
-        name: 'Happiness',
-        marker: {
-            symbol: 'circle'
-        },
-        data:[]
-    }],
+    series: [{data:[]}],
     credits:{
         enabled: false
     },
@@ -296,6 +290,11 @@ function getGraphIconURL(moodid){
 }
 
 function drawEmptyChart(text){
+    if(chart != null){
+        chart.destroy();
+    }
+    unnormalized_options.series[0].data = [];
+    unnormalized_options.xAxis.categories = [];
     chart = new Highcharts.Chart(unnormalized_options);
     if(text != null){
         chart.showLoading(text);
@@ -335,6 +334,10 @@ function drawChart(moods,norm, onClick,format_label, format_tooltip,zoom) {
         unnormalized_options.tooltip.formatter = function() {return format_tooltip(this.point);}
         unnormalized_options.plotOptions.series.point.events.click = function() {onClick(this);}
         options = unnormalized_options;
+    }
+    if(chart != null){
+        chart.hideLoading();
+        chart.destroy();
     }
     chart = new Highcharts.Chart(options);
 }
@@ -498,7 +501,6 @@ function traversal_feelings(isOlder, zoom){
             moods_arr.reverse();
             var norm = $('body').data('norm');
             var zoom_f = getZoomFunctions(zoom);
-            chart.destroy();
             drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
             if(zoom != $('body').data('zoom')){
                 $('body').data('zoom',zoom);
