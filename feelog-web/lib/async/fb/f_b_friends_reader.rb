@@ -54,6 +54,6 @@ class FBFriendsReader < FBReader
     }
     @@redis.hset(userid, 'fr_updated', true)
     @@redis.hset(userid, 'fr_update_ts', Time.now.to_i)
-    @@redis.expire(userid.to_s+'friends', 60*60*24)
+#    @@redis.expire(userid.to_s+'friends', 60*60*24)
   end
 end
