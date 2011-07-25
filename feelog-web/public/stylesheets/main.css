@@ -1120,12 +1120,11 @@ ul.fb-staff{
     color: #666;
     font-size: 11px;
     font-weight: bold;
-    text-align: center;
+    margin-left: 20px;
+    padding-right: 5px;
 }
 
 .feedback-outer{
-    background-image:url('/images/Warning-Feedback.gif');
-    background-repeat: no-repeat;
     position: fixed;
     bottom: 0px;
     right: 0px;
@@ -1133,9 +1132,16 @@ ul.fb-staff{
     cursor: pointer;
     background-color:whiteSmoke;
     border: 1px solid rgba(0, 0, 0, 0.1);
-    padding-left: 18px;
-    padding-right: 2px;
     height: 27px;
     line-height: 27px;
-    min-width: 54px;
+}
+.feedback-img{
+    background-image:url('/images/Warning-Feedback.gif');
+    background-repeat: no-repeat;
+    height:16px;
+    width:16px;
+    float: left;
+    position: relative;
+    top: 5px;
+    left: 3px;
 }

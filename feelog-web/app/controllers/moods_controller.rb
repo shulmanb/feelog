@@ -297,7 +297,7 @@ class MoodsController < ApplicationController
           #puts "#{x.report_time.time.to_s} #{aggr_count.to_s} #{x.user_id}"
         else
           #start new period
-           result.push({:count=>aggr_count,:avg=>(aggr_value/aggr_count).ceil,:per=>eval[:period],:s=>eval[:s],:e=>eval[:e]})
+           result.push({:count=>aggr_count,:avg=>(aggr_value.to_f/aggr_count.to_f).round(1),:per=>eval[:period],:s=>eval[:s],:e=>eval[:e]})
            aggr_count=1
            aggr_value=x.mood
            if index == (moods.size - 1)

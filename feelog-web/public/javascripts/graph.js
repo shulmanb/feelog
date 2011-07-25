@@ -269,7 +269,7 @@ function zoom3_onClick(point){
 }
 
 function getGraphIconURL(moodid){
-    switch(moodid){
+    switch(Math.round(moodid)){
             case 1:
                 return 'url(/images/graph_icon_angry.gif)';
             case 2:

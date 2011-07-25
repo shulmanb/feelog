@@ -131,7 +131,7 @@ function toggle(moodid){
     $("#how").focus();
 }
 function getMoodImageLink(moodid){
-    switch(moodid){
+    switch(Math.round(moodid)){
         case 1:
             return '<img src="/images/mood-angry.png">';
         case 2:
@@ -150,7 +150,7 @@ function getMoodImageLink(moodid){
 }
 
 function getMoodSmallImageLink(moodid){
-    switch(moodid){
+    switch(Math.round(moodid)){
         case 1:
             return '<img src="/images/graph_icon_angry.gif">';
         case 2:
@@ -169,7 +169,7 @@ function getMoodSmallImageLink(moodid){
 }
 
 function getMoodImageClass(moodid){
-    switch(moodid){
+    switch(Math.round(moodid)){
         case 1:
             return 'angry-logo';
         case 2:
@@ -189,7 +189,7 @@ function getMoodImageClass(moodid){
 
 
 function getMoodStr(mood){
-    switch(mood){
+    switch(Math.round(mood)){
         case 1:
             return 'Angry';
         case 2:
@@ -208,7 +208,7 @@ function getMoodStr(mood){
 
 }
 function getMoodColor(mood){
-    switch(mood){
+    switch(Math.round(mood)){
         case 1:
             return '#FF0000';
         case 2:
@@ -514,11 +514,11 @@ function renderFbDetail(text,display,id){
            "</li>";
 }
 
-function renderFbCommentBox(id){
+function renderFbCommentBox(id,uid){
     return "<li id='"+id+"_comment_detail' class='fb-detail'>" +
                    "<div class='fb-inner'>" +
                       "<div class='fb-comment-wrap'>"+
-                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive fb-comment-box' title='Write a comment' onclick='focusCommentBox(this,"+id+")'  onblur='blurCommentBox(this,"+id+")' onkeydown='if (event.keyCode == 13) { submitComment(this,"+id+"); return false; }'>Write a comment...</textarea> " +
+                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive fb-comment-box' title='Write a comment' onclick=\"focusCommentBox(this,'"+id+"')\"  onblur=\"blurCommentBox(this,'"+id+"')\" onkeydown=\"if (event.keyCode == 13) { submitComment(this,'"+uid+"','"+id+"'); return false; }\">Write a comment...</textarea> " +
                       "</div>"+
                    "</div>"+
                 "</li>";
@@ -548,8 +548,8 @@ function blurCommentBox(textarea,id){
     }
 }
 
-function submitComment(textarea,postId){
-    FB.api(postId+"/comments",'post',{message:textarea.value},function(response) {
+function submitComment(textarea,uid,postId){
+    FB.api(uid+'_'+postId+'/comments','post',{message:textarea.value},function(response) {
         textarea.value = '';
         textarea.blur();
         updateCommentsLabel(postId);
@@ -851,7 +851,7 @@ function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
                    <span class='feel-popup-date'>"+time+' '+"</span>"+
                     getFbActions(fb,id,uid)+
              "</div>"+
-             getFbStaff(fb,id)+
+             getFbStaff(fb,id,uid)+
          "</div>\
     </div>";
     return html;
@@ -861,14 +861,14 @@ function insertIdIfNotNull(id,txt){
     if (id == null) return "";
     return "id='"+id+txt+"'";
 }
-function getFbStaff(fb,id){
+function getFbStaff(fb,id,uid){
     if(!fb){
         return "";
     }
     return  "<ul class='fb-staff' id='"+id+"'>"+
                 "<li id='likes_"+id+"_view' class='hidden fb-view-likes'></li>"+
                 "<li id='comments_"+id+"_view' class='hidden fb-view-comments'></li>"+
-                renderFbCommentBox(id)+
+                renderFbCommentBox(id,uid)+
             "</ul>";
 
 
@@ -879,9 +879,9 @@ function getFbActions(fb,id,uid){
         return "";
     }
     return    "<span class='fb-actions'>\
-        <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like("+id+","+uid+")'>Like </span></a>\
+        <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like('"+id+"','"+uid+"')'>Like </span></a>\
         <span class='feel-popup-date'>&#x00B7;</span>\
-        <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox("+id+")'> Comment</span></a>\
+        <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox('"+id+"')'> Comment</span></a>\
     </span>";
 }
 function overFriendPic(id,post_id){
