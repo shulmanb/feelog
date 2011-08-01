@@ -1027,14 +1027,75 @@ function initDiaryWidget(){
     });
 }
 function addPointToDiary(mood){
-    //TODO implements
+    if($('body').data('diary-init')==1){
+        //find first day element
+        var firstDay = $(".diary-content").children(':first');
+        var id = firstDay.attr('id');
+        var clz = firstDay.attr('class');
+
+        var date = new Date(mood.date.replace(/-/g,'/').replace('T',' ').replace('Z',' GMT'));
+        var dateId = new Date(date.getFullYear(), date.getMonth(), date.getDay(), 0, 0, 0, 0).getTime();
+        var doy = dayOfYear(date);
+
+        if(id != dateId){
+            if(clz == 'diary-odd-day'){
+                clz='diary-even-day';
+            }else{
+                clz='diary-odd-day';
+            }
+            createDiaryDayEntry(clz,date,doy,true);
+        }
+        createDiaryPostEntry(date,mood,doy,date.getTime(),true);
+    }
+
 }
+
+
+
+function createDiaryDayEntry(clz,date,doy,prepand){
+    var dateStr = full_week[date.getDay()]+","+full_month[date.getMonth()]+" "+date.getDate()+" ,"+date.getFullYear();
+    var dateId = new Date(date.getFullYear(), date.getMonth(), date.getDay(), 0, 0, 0, 0).getTime();
+    if(prepand){
+        $('.diary-content').prepend(renderDiaryDay(clz,doy,dateStr,dateId));
+    }else{
+        $('.diary-content').append(renderDiaryDay(clz,doy,dateStr,dateId));
+    }
+}
+
+function createDiaryPostEntry(date,mood,doy,id,prepand){
+  var minutes = date.getMinutes();
+  if(minutes < 10){
+      var strMinutes = '0'+minutes;
+  } else{
+      var strMinutes = minutes;
+  }
+  var min = "";
+  if(date.getMinutes()<10){
+      min = "0";
+  }
+  min = min+date.getMinutes();
+  var prityTime = full_month[date.getMonth()]+" "+date.getDate()+" at "+date.getHours()+":"+min;
+  var post_id = null;
+  var uid = null;
+  if(mood.fb_id != null){
+      var tmp = mood.fb_id.split("_");
+      post_id = tmp[1];
+      uid = tmp[0];
+  }
+  var popupHtml = getMoodPopup(name,mood.val,mood.desc,prityTime,$('body').data('picture'),post_id,uid,post_id != null);
+  var time = date.getHours()+":"+strMinutes;
+    if(!prepand){
+        $('#diary-day-'+doy).append(renderDiaryEntry(mood.val,mood.desc,time,post_id,popupHtml,id));
+    }else{
+        $('#diary-day-'+doy).prepend(renderDiaryEntry(mood.val,mood.desc,time,post_id,popupHtml,id));
+    }
+}
+
 function renderDiaryPosts(page,moods){
      var initialIdx = page*10;
      var lastDay = $('body').data('diary-last-day');
      var dispDays = $('body').data('diary-disp-days');
      for(var i = 0;i<moods.length;i++){
-         var id = initialIdx+i;
            var date = new Date(moods[i].date.replace(/-/g,'/').replace('T',' ').replace('Z',' GMT'));
            var doy = dayOfYear(date);
            if((doy > lastDay) && (lastDay != 0)){
@@ -1042,48 +1103,20 @@ function renderDiaryPosts(page,moods){
                //TODO find more elegant solution for this bug
            }
            if(doy != lastDay){
-               var dateStr = full_week[date.getDay()]+","+full_month[date.getMonth()]+" "+date.getDate()+" ,"+date.getFullYear();
                dispDays++;
                var clz =  (dispDays%2!=0)?'diary-odd-day':'diary-even-day';
-               $('.diary-content').append(renderDiaryDay(clz,doy,dateStr));
-               lastDay = doy;
+               createDiaryDayEntry(clz,date,doy,false);
                $('body').data('diary-disp-days',dispDays);
-           }
-           var minutes = date.getMinutes();
-           if(minutes < 10){
-               var strMinutes = '0'+minutes;
-           } else{
-               var strMinutes = minutes;
-           }
 
-         var min = "";
-         if(date.getMinutes()<10){
-             min = "0";
-         }
-         min = min+date.getMinutes();
-         var prityTime = full_month[date.getMonth()]+" "+date.getDate()+" at "+date.getHours()+":"+min;
-         var post_id = null;
-         var uid = null;
-         if(moods[i].fb_id != null){
-             var tmp = moods[i].fb_id.split("_");
-             post_id = tmp[1];
-             uid = tmp[0];
-         }
-         var popupHtml = getMoodPopup(name,moods[i].val,moods[i].desc,prityTime,$('body').data('picture'),post_id,uid,post_id != null);
-         var time = date.getHours()+":"+strMinutes;
-         $('#diary-day-'+doy).append(renderDiaryEntry(moods[i].val,moods[i].desc,time,post_id,popupHtml,id));
+               lastDay = doy;
+           }
+           createDiaryPostEntry(date,moods[i],doy,date.getTime(),false);
      }
-/*    if(page == 0){
-        $('.diary').diaryScroll();
-    }else{
-        $('.diary').diaryUpdate();
-    }
-*/
      $('body').data('diary-last-day',lastDay);
 }
 
-function renderDiaryDay(dayClass,id,date){
-     return "<div class=\""+dayClass+"\">"+
+function renderDiaryDay(dayClass,id,date, dateId){
+     return "<div id='"+dateId+"' class=\""+dayClass+"\">"+
         "<div class=diary-day>"+
             "<div class='diary-date'>"+date+"</div>"+
             "<div id='diary-day-"+id+"' class='diary-day-posts'></div>"+

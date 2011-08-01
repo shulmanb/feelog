@@ -5,7 +5,8 @@ class FBFriendsReader < FBReader
     if @@redis.client.connected? != true
       @@redis.client.connect
     end
-
+   #query:  select%20status_id,uid,time,message%20from%20status%20where%20uid%20in%20(select%20uid2%20from%20friend%20where%20uid1=%20me())
+   #query:  select uid, name, status, profile_update_time from user where uid in (select uid1 from friend where uid2 = me()) and profile_update_time != 0 and status != "" and status.status_id != 0 order by profile_update_time desc
     response = RestClient.post("https://graph.facebook.com",
       :access_token=>accesskey,
       :batch=>'[{"method":"GET","relative_url":"me/friends"}]')
@@ -43,7 +44,7 @@ class FBFriendsReader < FBReader
   end
 
   def self.update_cache(userid, moody_friends)
-    puts "UPDATUING CACHE"
+    puts "UPDATING CACHE"
     puts "MOODS "+moody_friends.to_xml
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
     #remove old entities

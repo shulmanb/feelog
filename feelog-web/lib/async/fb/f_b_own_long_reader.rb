@@ -22,7 +22,7 @@ class FBOwnLongReader < FBReader
       if @@redis.client.connected? != true
         @@redis.client.connect
       end
-
+     #query: select%20status_id,uid,time,message%20from%20status%20where%20uid=me()%20and%20time>1300000000%20%20and%20time<1300000000%20limit%201000
     #retrieve statuses for the last 30 days
     batch = []
     t = (Time.now - 3600*24*30)
