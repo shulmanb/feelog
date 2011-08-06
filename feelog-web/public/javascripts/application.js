@@ -69,7 +69,7 @@ function submitMood(){
                       type:"POST",
                       data:payload,
                       success: function(data){
-                        returnFromCreateMood(data.report_time,data.val,data.desc,id);
+                        returnFromCreateMood(data.report_time,data.val,data.desc,id,data.id);
                       }
                     });
 
@@ -80,7 +80,7 @@ function submitMood(){
                   type:"POST",
                   data:payload,
                   success: function(data){
-                    returnFromCreateMood(data.report_time,data.val,data.desc,null);
+                    returnFromCreateMood(data.report_time,data.val,data.desc,null,data.id);
                   }
                 });
             }
@@ -146,6 +146,24 @@ function getMoodImageLink(moodid){
             return '<img src="/images/mood-twink.png">';
         case 7:
             return '<img src="/images/mood-very_happy.png">';
+    }
+}
+function getMoodImageUrl(moodid){
+    switch(Math.round(moodid)){
+        case 1:
+            return "/images/mood-angry.png";
+        case 2:
+            return "/images/mood-very_sad.png";
+        case 3:
+            return "/images/mood-sad.png";
+        case 4:
+            return "/images/mood-ok.png";
+        case 5:
+            return "/images/mood-happy.png";
+        case 6:
+            return "/images/mood-twink.png";
+        case 7:
+            return "/images/mood-very_happy.png";
     }
 }
 
@@ -255,7 +273,7 @@ function prepareMoodIcons(){
     });
 }
 //this function called by the server rendered js, redirect_fb.js.erbs.erb
-function returnFromCreateMood(report_time,mood_val,desc,fb_id){
+function returnFromCreateMood(report_time,mood_val,desc,fb_id, mood_id){
     $('#ajax-busy').hide();
     $("#how").val("why?");
     $("#mood_val").val('');
@@ -268,7 +286,8 @@ function returnFromCreateMood(report_time,mood_val,desc,fb_id){
         "val":mood_val,
         "desc":desc,
         "date":report_time,
-        "fb_id":fb_id
+        "fb_id":fb_id,
+        "id":mood_id
     };
     var currZoom = $('body').data('zoom');
     if(currZoom != 0){
@@ -288,7 +307,8 @@ function create_mood_object(value,zoom){
                 "desc":value.mood.desc,
                 "date":value.mood.report_time,
                 "zoom":0,
-                "fb_id":value.mood.fb_id
+                "fb_id":value.mood.fb_id,
+                "id":value.mood.id
             };
             break;
         case 1:
@@ -407,6 +427,7 @@ function renderFriends(path){
         if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
+        $("#intro-wait").hide();
     });
 }
 
@@ -495,7 +516,7 @@ function renderFriendIcon(id,mood_json){
     var html =
     "<div id='"+id+"' class='friend-icon' > \
                 <div id='"+id+"modal' class='modal-content'> \
-                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id,true)+"\
+                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,true,null)+"\
                 </div> \
                 <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+",\""+post_id+"\")'/>\
      </div>";
@@ -514,11 +535,11 @@ function renderFbDetail(text,display,id){
            "</li>";
 }
 
-function renderFbCommentBox(id,uid){
-    return "<li id='"+id+"_comment_detail' class='fb-detail'>" +
+function renderFbCommentBox(fb_post_id,uid){
+    return "<li id='"+fb_post_id+"_comment_detail' class='fb-detail'>" +
                    "<div class='fb-inner'>" +
                       "<div class='fb-comment-wrap'>"+
-                        "<textarea id='"+id+"_comment' class='fb-text-area fb-text-passive fb-comment-box' title='Write a comment' onclick=\"focusCommentBox(this,'"+id+"')\"  onblur=\"blurCommentBox(this,'"+id+"')\" onkeydown=\"if (event.keyCode == 13) { submitComment(this,'"+uid+"','"+id+"'); return false; }\">Write a comment...</textarea> " +
+                        "<textarea id='"+fb_post_id+"_comment' class='fb-text-area fb-text-passive fb-comment-box' title='Write a comment' onclick=\"focusCommentBox(this,'"+fb_post_id+"')\"  onblur=\"blurCommentBox(this,'"+fb_post_id+"')\" onkeydown=\"if (event.keyCode == 13) { submitComment(this,'"+uid+"','"+fb_post_id+"'); return false; }\">Write a comment...</textarea> " +
                       "</div>"+
                    "</div>"+
                 "</li>";
@@ -837,21 +858,22 @@ function retrievePost(postId){
         });
 }
 
-function getMoodPopup(name,mood,post,time,picLink,id,uid,fb){
+function getMoodPopup(name,mood,post,time,picLink,fb_post_id,uid,mood_id){
     var html = "<div class='feel-popup'>\
         <div class='feel-popup-top'>\
-             <img style=\"float:left\" src='"+picLink+"'/>\             <span class='feel-popup-title'>"+name+" feels</span>\
+             <img style=\"float:left\" src='"+picLink+"'/>\
+             <span class='feel-popup-title'>"+name+" feels</span>\
              <span>"+getMoodImageLink(mood)+"</span>\
              <span class='feel-popup-title'>"+getMoodStr(mood)+"</span>\
          </div>\
          <div class='mood-color-line' style=\"background-color:"+getMoodColor(mood)+"\"></div>\
-         <div class='feel-popup-body' "+insertIdIfNotNull(id,"_popup")+">\
+         <div class='feel-popup-body' "+insertIdIfNotNull(fb_post_id,"_popup")+">\
              <div class='feel-popup-text'>"+post+"</div>\
-             <div>\
+             <div class='clearfix'>\
                    <span class='feel-popup-date'>"+time+' '+"</span>"+
-                    getFbActions(fb,id,uid)+
+                    getPostActions(fb_post_id,uid,mood_id)+
              "</div>"+
-             getFbStaff(fb,id,uid)+
+             getFbStaff(fb_post_id,uid)+
          "</div>\
     </div>";
     return html;
@@ -861,28 +883,57 @@ function insertIdIfNotNull(id,txt){
     if (id == null) return "";
     return "id='"+id+txt+"'";
 }
-function getFbStaff(fb,id,uid){
+function getFbStaff(fb_post_id,uid){
+    var fb = (fb_post_id!=null);
     if(!fb){
         return "";
     }
-    return  "<ul class='fb-staff' id='"+id+"'>"+
-                "<li id='likes_"+id+"_view' class='hidden fb-view-likes'></li>"+
-                "<li id='comments_"+id+"_view' class='hidden fb-view-comments'></li>"+
-                renderFbCommentBox(id,uid)+
+    return  "<ul class='fb-staff' id='"+fb_post_id+"'>"+
+                "<li id='likes_"+fb_post_id+"_view' class='hidden fb-view-likes'></li>"+
+                "<li id='comments_"+fb_post_id+"_view' class='hidden fb-view-comments'></li>"+
+                renderFbCommentBox(fb_post_id,uid)+
             "</ul>";
 
 
 }
 
-function getFbActions(fb,id,uid){
-    if(!fb){
+function getPostActions(fb_post_id,uid,mood_id){
+    var fb = (fb_post_id != null);
+    if(!fb && !mood_id){
         return "";
     }
-    return    "<span class='fb-actions'>\
-        <a class='fb-as-link' title='Like this item'><span class='fb-message-top' onclick='like('"+id+"','"+uid+"')'>Like </span></a>\
-        <span class='feel-popup-date'>&#x00B7;</span>\
-        <a class='fb-as-link' title='Leave a comment'><span class='fb-message-top' onclick='focusOnCommentBox('"+id+"')'> Comment</span></a>\
-    </span>";
+    var ret=
+    "<div class='fb-actions'>"
+    if(fb){
+        ret+=  "<div class='fb-as-link action-link' title='Like this item'>" +
+                    "<div class='fb-message-top' onclick=\"like('"+fb_post_id+"','"+uid+"')\">Like </div>" +
+                "</div>"+
+                "<div class='feel-popup-date action-link'>&#x00B7;</div>"+
+                "<div class='fb-as-link action-link' title='Leave a comment'>" +
+                    "<div class='fb-message-top' onclick=\"focusOnCommentBox('"+fb_post_id+"')\"> Comment</div>" +
+                "</div>";
+        if(mood_id!=null){
+            ret+="<div class='feel-popup-date action-link'>&#x00B7;</div>";
+        }
+    }
+    if(mood_id!=null){
+        ret+='<div class="action-link">' +
+                "<div class='fb-as-link' title='Delete'>" +
+                    '<div class="fb-message-top" onclick="deletePost(this)"> Delete</div>' +
+                "</div>"+
+                "<div class='post-confirm hidden'>" +
+                    '<div class="post-confirm-text">Do you want to permanently delete this Feelogg entry?</div>'+
+                    '<div class="confirm-buttons">' +
+                        '<div class="confirm-button" onclick="closeConfirmDialog(this)">Cancel</div>'+
+                        "<div class='confirm-button' onclick=\"confirmDelete('"+mood_id+"','"+uid+"_"+fb_post_id+"',this)\">Delete</div>"+
+                    '</div>'+
+                "</div>"+
+             "</div>";
+    }
+    ret+="</div>";
+    return ret;
+
+
 }
 function overFriendPic(id,post_id){
     $("#"+id+"modal").modal({
@@ -1045,7 +1096,7 @@ function addPointToDiary(mood){
             }
             createDiaryDayEntry(clz,date,doy,true);
         }
-        createDiaryPostEntry(date,mood,doy,date.getTime(),true);
+        createDiaryPostEntry(date,mood,doy,mood.id,true);
     }
 
 }
@@ -1075,19 +1126,19 @@ function createDiaryPostEntry(date,mood,doy,id,prepand){
   }
   min = min+date.getMinutes();
   var prityTime = full_month[date.getMonth()]+" "+date.getDate()+" at "+date.getHours()+":"+min;
-  var post_id = null;
+  var fb_post_id = null;
   var uid = null;
   if(mood.fb_id != null){
       var tmp = mood.fb_id.split("_");
-      post_id = tmp[1];
+      fb_post_id = tmp[1];
       uid = tmp[0];
   }
-  var popupHtml = getMoodPopup(name,mood.val,mood.desc,prityTime,$('body').data('picture'),post_id,uid,post_id != null);
+  var popupHtml = getMoodPopup(name,mood.val,mood.desc,prityTime,$('body').data('picture'),fb_post_id,uid,mood.id);
   var time = date.getHours()+":"+strMinutes;
     if(!prepand){
-        $('#diary-day-'+doy).append(renderDiaryEntry(mood.val,mood.desc,time,post_id,popupHtml,id));
+        $('#diary-day-'+doy).append(renderDiaryEntry(mood.val,mood.desc,time,fb_post_id,popupHtml,id));
     }else{
-        $('#diary-day-'+doy).prepend(renderDiaryEntry(mood.val,mood.desc,time,post_id,popupHtml,id));
+        $('#diary-day-'+doy).prepend(renderDiaryEntry(mood.val,mood.desc,time,fb_post_id,popupHtml,id));
     }
 }
 
@@ -1110,7 +1161,7 @@ function renderDiaryPosts(page,moods){
 
                lastDay = doy;
            }
-           createDiaryPostEntry(date,moods[i],doy,date.getTime(),false);
+           createDiaryPostEntry(date,moods[i],doy,moods[i].id,false);
      }
      $('body').data('diary-last-day',lastDay);
 }
@@ -1124,8 +1175,8 @@ function renderDiaryDay(dayClass,id,date, dateId){
         "<div class='diary-shadow'></div>"
      "</div>";
 }
-function renderDiaryEntry(moodid,text,hour,post_id,popup,id){
-    return "<div class='diary-post' onclick='openMoodPopup("+post_id+","+id+")'>"+
+function renderDiaryEntry(moodid,text,hour,fb_post_id,popup,id){
+    return "<div id='"+id+"' class='diary-post' onclick='openMoodPopup("+fb_post_id+","+id+")'>"+
                "<div class='diary-mood-img'>"+getMoodImageLink(moodid)+"</div>"+
                "<div class='diary-post-content'>"+
                    "<span class='diary-mood-desc'>"+getMoodStr(moodid)+" </span>"+
@@ -1138,9 +1189,9 @@ function renderDiaryEntry(moodid,text,hour,post_id,popup,id){
             "</div>";
 }
 
-function openMoodPopup(post_id,id){
+function openMoodPopup(fb_post_id,id){
     var modalId = id+"-modal-diary";
-    if(post_id == null){
+    if(fb_post_id == null){
         $("#"+modalId).modal({
             containerCss: {
                 'maxHeight' : '700px',
@@ -1161,7 +1212,7 @@ function openMoodPopup(post_id,id){
             },
             onShow: function(dlg) {$(dlg.container).css('height','auto');$(".fb-comment-box").elastic()},
             position: ['10%', '25%'],
-            onOpen: retrievePost(post_id)
+            onOpen: retrievePost(fb_post_id)
          });
     }
 }
@@ -1196,6 +1247,7 @@ function switchView(newView){
         return;
     }
     $(".on").toggleClass('on',false);
+    $(".link").toggleClass('hidden',true);
     if(newView == 2){
         $("#btn-home").toggleClass('hidden',false);
         $("#main-view").hide();//toggleClass('hidden',true);
@@ -1359,5 +1411,82 @@ function openFeedbackForm(){
                 });
             });
         }
+    });
+}
+
+function switchIntroView(curr,next){
+    $("#intro-"+curr).hide();
+    $("#intro-"+next).show();
+    var color = "white";
+    var moodImage ='<img id="intro-mood-image" src="/images/Feeloggo48overWhite.gif">';
+    if(next != 0){
+       color = getMoodColor(3+parseInt(next));
+       moodImage = '<img id="intro-mood-image" src="'+getMoodImageUrl(3+parseInt(next))+'">';
+    }
+    $("#intro-mood-color-line").css("background-color",color);
+    $("#intro-mood-image").replaceWith(moodImage);
+}
+
+
+function showIntro(init){
+    $("#intro").modal({
+        focus:false,
+        autoPosition: true,
+        autoResize:true,
+        containerCss: {
+            'height' :'350px',
+            'width':'500px'
+        },
+        onOpen: function (dialog) {
+            dialog.overlay.fadeIn('fast', function () {
+                dialog.container.slideDown('fast', function () {
+                    dialog.data.fadeIn('fast');
+                });
+            });
+        },
+        onClose: function (dialog) {
+            dialog.data.fadeOut('fast', function () {
+                dialog.container.slideUp('fast', function () {
+                    dialog.overlay.fadeOut('fast', function () {
+                        $.modal.close(); // must call this!
+                    });
+                });
+            });
+        },
+        onShow:function (dialog) {
+            if(init == true){
+                $("#intro-wait").show();
+            }
+        }
+    });
+}
+
+function deletePost(elem){
+    $(elem).parent().parent().find('.post-confirm').removeClass('hidden');
+}
+
+function closeConfirmDialog(elem){
+    $(elem).parent().parent().addClass("hidden");
+}
+
+function confirmDelete(mood_id,fb_post_id,elem){
+    //post to fb and flserver the delete command
+    var diary_id = "#"+mood_id;
+    $.ajax({
+      url: "/users/"+$('body').data('userid')+"/moods/"+mood_id+".json",
+      type:"DELETE",
+      complete : function(data){
+          if(fb_post_id != null && fb_post_id !="null"){
+              FB.api(fb_post_id, 'delete', function(response) {
+              });
+          }
+          var page = $('body').data('page');
+          var zoom = $('body').data('zoom');
+          reloadGraph(zoom,page);
+          closeConfirmDialog(elem);
+          $.modal.close();
+          $(diary_id).remove();
+          $(diary_id+"-modal-diary").remove();
+      }
     });
 }

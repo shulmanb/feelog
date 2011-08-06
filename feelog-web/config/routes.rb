@@ -2,6 +2,7 @@ Mooderator::Application.routes.draw do
   resources :users do
     resources :moods
   end
+  match '/users/:user_id/moods/:moodid' => "moods#destroy", :via=>:delete
   match '/users/:user_id/moods(/limit/:limit)' => "moods#index", :via=>:get
   match '/users/:user_id/moods_page/:size/:page(/:zoom)' => "moods#get_feels_page", :via=>:get
   match '/users/:user_id/moods_range/:size/:zoom/:start/:end' => "moods#get_feels_range_page", :via=>:get
@@ -23,4 +24,5 @@ Mooderator::Application.routes.draw do
   match '/login/:token', :to => "login#auth_base64", :via=>:get
   match '/users/:user_id/settings',:to=>"users#retrieve_settings",:via=>:get
   match '/users/:user_id/settings',:to=>"users#store_settings",:via=>:post
+  match '/users/:user_id/insights' => "users#insights", :via=>:get
 end

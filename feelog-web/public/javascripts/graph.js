@@ -225,7 +225,7 @@ function zoom0_onClick(point){
         post_id = tmp[1];
         uid = tmp[0];
     }
-    var html = getMoodPopup(name,point.y,point.name,prityTime,$('body').data('picture'),post_id,uid,point.fb_id != null);
+    var html = getMoodPopup(name,point.y,point.name,prityTime,$('body').data('picture'),post_id,uid,point.id);
     if(point.fb_id == null){
         $.modal(html,{
             containerCss: {
@@ -349,7 +349,8 @@ function create_norm_point(mood,d){
             marker:{
                 symbol: getGraphIconURL(mood.val)
             },
-            "x":d
+            "x":d,
+            "id":mood.id
           };
 }
 
@@ -364,7 +365,8 @@ function create_unnorm_point(mood,d){
                "t":d,
                "s":mood.s,
                "e":mood.e,
-               "fb_id":mood.fb_id
+               "fb_id":mood.fb_id,
+               "id":mood.id
               };
 
     }else{
@@ -375,7 +377,8 @@ function create_unnorm_point(mood,d){
                    symbol: getGraphIconURL(mood.val)
                },
                "t":d,
-               "fb_id":mood.fb_id
+               "fb_id":mood.fb_id,
+                "id":mood.id
               };
     }
 }
@@ -469,22 +472,8 @@ function select_zoom(zoom){
     }
 }
 
-function traversal_feelings(isOlder, zoom){
+function reloadGraph(zoom,page){
     var moods_arr = [];
-    var page = $('body').data('page');
-    if(zoom != $('body').data('zoom')){
-        //zooming
-        page = 0;
-        select_zoom(zoom);
-    }else{
-        //traversal
-        if(isOlder){
-            page++;
-        }else{
-            if(page == 0) return;
-            page--;
-        }
-    }
     chart.showLoading();
     var user_id = $('body').data('userid');
     var path = '/users/'+user_id+'/moods_page/'+7+'/'+page+'/'+zoom+'.json';
@@ -508,6 +497,25 @@ function traversal_feelings(isOlder, zoom){
         }
         chart.hideLoading();
     });
+}
+
+
+function traversal_feelings(isOlder, zoom){
+    var page = $('body').data('page');
+    if(zoom != $('body').data('zoom')){
+        //zooming
+        page = 0;
+        select_zoom(zoom);
+    }else{
+        //traversal
+        if(isOlder){
+            page++;
+        }else{
+            if(page == 0) return;
+            page--;
+        }
+    }
+    reloadGraph(zoom,page);
 }
 
 function getZoomFunctions(zoom){

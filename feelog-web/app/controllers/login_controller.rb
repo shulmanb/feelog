@@ -168,6 +168,7 @@ class LoginController < ApplicationController
 
 
   def get_user(hash,token,mobile)
+    @initializing = false
     unless auth = Authorization.find_from_hash(hash)
       # Create a new user or add an auth to existing user, depending on
       # whether there is already a user signed in.
@@ -180,6 +181,7 @@ class LoginController < ApplicationController
         auth = Authorization.create_from_hash(hash, current_user)
         Resque.enqueue(FBOwnReader,token,auth.user.id)
         session[:initializing]=true
+        @initializing = true
         puts "INITIALIZING NEW USER"
       end
     end
@@ -187,7 +189,7 @@ class LoginController < ApplicationController
     user = auth.user
     unless mobile == true
       if token != auth.token
-        auth.token = auth['credentials']['token']
+        auth.token = hash['credentials']['token']
         auth.save()
       end
     end
@@ -203,6 +205,8 @@ class LoginController < ApplicationController
     #but retrieve updated time and test if it is older than x hours
     #and only than queue resque command
     check_and_expire(user.id,token)
+    user.last_login = Time.now
+    user.save()
   end
   def approved_user(uid)
     return true;

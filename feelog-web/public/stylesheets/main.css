@@ -35,6 +35,7 @@ img{
 
 .frl{
     margin-left: 100px;
+    float:left;
 }
 
 .mdl{
@@ -423,6 +424,7 @@ img{
 	margin-bottom: 5px;
 	color: #948a54;
 	font-size: 16pt;
+    float:left;
 }
 
 .happy{
@@ -438,15 +440,30 @@ img{
 	margin-top: 10px;
 	color: #948a54;
 	font-size: 10pt;
+    padding-bottom:5px;
 }
 
+
+.credit-link{
+    cursor:pointer;
+}
+.credit-link a{
+ text-decoration: none;
+ color: #948a54;
+}
 .credit a{
  text-decoration: none;
+ color: #948a54;
 }
 
 .credit a:hover{
 	text-decoration: underline	 ;
 }
+
+.credit-link a:hover{
+	text-decoration: underline	 ;
+}
+
 
 .moods-graph{
     margin-top: 10px;
@@ -613,6 +630,7 @@ img{
 .feel-popup-date{
     color:#CCCCCC;
     font-size:12px;
+    float:left;
 }
 
 .hidden{
@@ -633,6 +651,7 @@ img{
 }
 .fb-actions{
     padding-left:10px;
+    float:left;
 }
 .fb-detail{
     background-color: #D6D4DD;
@@ -687,6 +706,10 @@ ul.fb-staff{
     padding: 0;
     border: none;
     cursor: pointer;
+}
+
+.action-link{
+    float:left;
 }
 
 .fb-label{
@@ -761,7 +784,6 @@ ul.fb-staff{
     font-size: 11px;
     color:#333;
     font-family:"lucida grande",tahoma,verdana,arial,sans-serif;
-    padding-left:4px;
     display: block;
 }
 
@@ -820,6 +842,8 @@ ul.fb-staff{
 .control-text{
     position: relative;
     bottom: 5px;
+    font-size:11px;
+    color:#8064A2;
     cursor:pointer;
 }
 
@@ -875,6 +899,7 @@ ul.fb-staff{
 
 #empty-cloud{
     text-align: center;
+    clear:left;
 }
 
 //diary view styling
@@ -1144,4 +1169,118 @@ ul.fb-staff{
     position: relative;
     top: 5px;
     left: 3px;
+}
+.link{
+    padding:50px;
+}
+
+#contact-us-list{
+    padding-left:20px;
+}
+.underlined-link{
+    text-decoration:underline;
+    color:blue;
+    cursor:pointer;
+}
+
+
+.intro-control{
+    position:absolute;
+    bottom:5px;
+}
+
+.intro-prev{
+    position: relative;
+    left: 40px;
+}
+
+
+.intro-next{
+    position: relative;
+    left: 350px;
+}
+
+.intro-title{
+    float: left;
+    margin-right: 45px;
+    margin-top: 6px;
+    color: #CCC;
+}
+
+.intro-part-top{
+    margin-top:20px;
+    margin-left:10px;
+}
+.intro-part{
+    padding:10px 30px;
+}
+
+.intro-step{
+    background-image:url("/images/StepBG.gif");
+    background-repeat:no-repeat;
+    height:33px;
+    width:33px;
+    padding-top: 5px;
+    padding-left: 12px;
+    font-weight: bold;
+    float:left;
+    color: #56436D;
+}
+
+.intro-step-current{
+    color:white;
+}
+
+.intro-control-text{
+    color:#CCCCCC;
+}
+.intro-text{
+    color: white;
+    font-size: 14px;
+    line-height: 1.5;
+}
+#intro-wait{
+    font-size: 11px;
+    position: absolute;
+    right: 0px;
+    top: 15px;
+    width: 160px;
+    color: #666666;
+}
+
+#intro-wait-loader{
+    position: absolute;
+    left: -20px;
+}
+.post-confirm{
+    background-color: #403152;
+    height: 35px;
+    width: 250px;
+    margin-top: 5px;
+    z-index: 10;
+    color: white;
+    font-size: 12px;
+    padding: 10px;
+    position: relative;
+    right: 20px;
+}
+.post-confirm-text{
+    margin-right:10px;
+}
+.confirm-button{
+    background-image:url("/images/BtnSmallBG.gif");
+    background-repeat:no-repeat;
+    height:20px;
+    width:50px;
+    color:white;
+    text-align: center;
+    float:left;
+    margin-left:10px;
+}
+
+.confirm-buttons{
+    position: absolute;
+    right: 50px;
+    bottom: 9px;
+    cursor:pointer;
 }

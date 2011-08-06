@@ -20,9 +20,13 @@
       $('body').data('gloomy-cloud',0);
       $('body').data('view',0);
       $('body').data('fb-share-defaults',<%= @user.settings %>);
-
+      <% if @initializing == true %>
+        showIntro(true);
+      <% end %>
 
       $("#usr-status").html(name);
+
+
       prepareMoodIcons();
       renderMoods('<%= user_moods_path(@user)%>');
       renderFriends('<%= '/users/'+@user.id.to_s+'/friends' %>');
@@ -63,7 +67,8 @@
      <div class="feedback-text">
        Send feedback
      </div>
-</div>
+  </div>
+ <%= render 'intro' %>
 
   <!--div id="settings-view" class="hidden"></div>
   <div id="drfeelgood-view" class="hidden"></div-->

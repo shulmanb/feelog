@@ -120,7 +120,7 @@ class MoodsController < ApplicationController
     perform(@mood.desc, @mood.mood, @mood.user_id)
     respond_to do |format|
       if @mood.save
-        format.json  { render :json => {:report_time=>@mood.report_time,:val=>@mood.mood,:desc=>@mood.desc}, :status => :created}
+        format.json  { render :json => {:report_time=>@mood.report_time,:val=>@mood.mood,:desc=>@mood.desc,:id=>@mood.id}, :status => :created}
         format.js # redirect_fbct_fb.js.erb
       else
         format.json  { render :json => @mood.errors, :status => :unprocessable_entity }
@@ -145,11 +145,8 @@ class MoodsController < ApplicationController
   end
 
   # DELETE /moods/1
-  # DELETE /moods/1.xml
   def destroy
-    @mood = Mood.find(params[:id])
-    @mood.destroy
-
+    @mood = Mood.delete(params[:id])
     respond_to do |format|
       format.json  { head :ok }
     end
@@ -333,7 +330,7 @@ class MoodsController < ApplicationController
   end
 
 
-    #we will store counter for every word for a mood in a hash {word=>count}
+  #we will store counter for every word for a mood in a hash {word=>count}
   #we will store top 20 words in a hash {count=>word}
   def perform(post, mood, userid)
      puts "RECEIVED POST "+post
@@ -394,4 +391,21 @@ class MoodsController < ApplicationController
        end
      end
   end
+
+  def updateMoodCounters(val,userid)
+      date = Time.now
+      weekday = date.wday
+      month = date.month
+      dom = date.mday
+      part_of_month = (dom/7).to_i
+
+
+      #updating mood counters
+      @@redis.hincrby(userid.to_s+":weekday:"+weekday,val,1)
+      @@redis.hincrby(userid.to_s+":month:"+month,val,1)
+      @@redis.hincrby(userid.to_s+":dom:"+dom,val,1)
+      @@redis.hincrby(userid.to_s+":pom:"+part_of_month,val,1)
+  end
+
+
 end
