@@ -66,7 +66,7 @@ class EmotionsParser
       local_num = an_res[1]
       relevant = an_res[2]
 
-      if local_sum == 0 and relevant
+      if relevant
         #test for smileys
         res = check_for_smileys(s)
 #        puts "SMILEY TEST #{res}"
@@ -98,7 +98,7 @@ class EmotionsParser
       sm = smiley.dup.insert(3, ' ')
       return true if sentence.scan(sm).size() > 0
     end
-    sm = smiley.dup.insert(smiley.size -1, ' ')
+    sm = smiley.dup.insert(smiley.size() -1, ' ')
     return true if sentence.scan(sm).size() > 0
 
   end
@@ -143,7 +143,11 @@ class EmotionsParser
 #            end
           end
 #          puts "WORD SCORE #{tmp_sum} total #{sum+tmp_sum}"
-          sum+=tmp_sum
+          if tmp_sum > 0
+            sum+=tmp_sum
+          else
+            num-=1
+          end
         end
 #      elsif word.end_with?('/VBD') or word.end_with?('/VBN')
         #4) if past tense skip (VBD, VBN), clear all scores for the sentence

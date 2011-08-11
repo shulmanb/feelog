@@ -282,6 +282,9 @@ function returnFromCreateMood(report_time,mood_val,desc,fb_id, mood_id){
     var status = name +' is '+moodStr+' : ';
     $("#usr-status").html(status);
     $("#usr-report").text(desc);
+    var recStr = get_recommendation(mood_val);
+    $("#dr-recommendation").html(recStr);
+    $("#feelogood-widget").removeClass("hidden");
     var mood = {
         "val":mood_val,
         "desc":desc,
@@ -516,7 +519,7 @@ function renderFriendIcon(id,mood_json){
     var html =
     "<div id='"+id+"' class='friend-icon' > \
                 <div id='"+id+"modal' class='modal-content'> \
-                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,true,null)+"\
+                    "+getMoodPopup(name,mood,post,prityTime,picLink,post_id,id,null)+"\
                 </div> \
                 <img src='"+picLink+"' title='"+name+" : "+post+"' onclick='overFriendPic("+id+",\""+post_id+"\")'/>\
      </div>";
@@ -908,12 +911,12 @@ function getPostActions(fb_post_id,uid,mood_id){
         ret+=  "<div class='fb-as-link action-link' title='Like this item'>" +
                     "<div class='fb-message-top' onclick=\"like('"+fb_post_id+"','"+uid+"')\">Like </div>" +
                 "</div>"+
-                "<div class='feel-popup-date action-link'>&#x00B7;</div>"+
+                "<div class='feel-popup-date action-link'>&nbsp;&#x00B7;&nbsp;</div>"+
                 "<div class='fb-as-link action-link' title='Leave a comment'>" +
                     "<div class='fb-message-top' onclick=\"focusOnCommentBox('"+fb_post_id+"')\"> Comment</div>" +
                 "</div>";
         if(mood_id!=null){
-            ret+="<div class='feel-popup-date action-link'>&#x00B7;</div>";
+            ret+="<div class='feel-popup-date action-link'>&nbsp;&#x00B7;&nbsp;</div>";
         }
     }
     if(mood_id!=null){
@@ -990,7 +993,7 @@ function renderGloomyCloud(){
                 }
                 );
             });
-            $("#gloomy-tag-cloud").jQCloud(word_list);
+            $("#gloomy-tag-cloud").jQCloud(word_list,{center:{x:110,y:60}});
         }
         $('body').data('gloomy-cloud',1);
     });
@@ -1032,7 +1035,7 @@ function renderHappyCloud(){
                 }
                 );
             });
-            $("#happy-tag-cloud").jQCloud(word_list);
+            $("#happy-tag-cloud").jQCloud(word_list,{center:{x:110,y:60}});
         }
     });
 }
@@ -1489,4 +1492,35 @@ function confirmDelete(mood_id,fb_post_id,elem){
           $(diary_id+"-modal-diary").remove();
       }
     });
+}
+
+
+function inviteAll(){
+    FB.UIServer.Methods["apprequests"]={size:{width:350,height:500}};
+    FB.ui({
+            method: 'apprequests',
+            message: 'I started using Feelogg , a cool (and free!) application to track my mood and see how my friends are feeling. Feelogg is constantly adding cool features and tools to help people become happier!',
+            filters: ['app_non_users'],
+            title: 'Join Feelogg'//,
+//            display:'popup'
+     });
+}
+
+function get_recommendation(mood){
+    switch(mood){
+        case 7:
+            return  "&ldquo;Celebrate your happiness!&rdquo;";
+        case 6:
+            return  "&ldquo;Good one indeed!&rdquo;";
+        case 5:
+            return  "&ldquo;Good for you!&rdquo;";
+        case 4:
+            return  "&ldquo;That's fine.&rdquo;";
+        case 3:
+            return  "&ldquo;Hope you feel better soon...&rdquo;";
+        case 2:
+            return  "&ldquo;I feel your pain. Time heals everything.&rdquo;";
+        case 1:
+            return "&ldquo;Breathe deeply.&rdquo;";
+    }
 }

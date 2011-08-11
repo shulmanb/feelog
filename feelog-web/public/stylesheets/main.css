@@ -249,7 +249,7 @@ img{
 .content{
 	position: relative;
 	background-color: #fff;
-	min-height: 600px;
+	min-height: 700px;
 }
 
 .left-side{
@@ -1022,7 +1022,7 @@ ul.fb-staff{
 }
 
 .settings-section{
-    margin-top:20px;
+    margin-top:40px;
 }
 
 .image{
@@ -1283,4 +1283,41 @@ ul.fb-staff{
     right: 50px;
     bottom: 9px;
     cursor:pointer;
+}
+
+.invite{
+    cursor:pointer;
+}
+
+#feelogood-widget{
+    background-color: #EEE;
+    height:70px;
+    margin-top:15px;
+}
+
+.feelogood-content{
+    padding:5px;
+}
+.dr-image{
+    background-image: url("/images/DrFsmall.gif");
+    height: 60px;
+    width: 68px;
+    float: left;
+    margin-right: 10px;
+}
+
+
+.dr-title{
+    font-weight: bold;
+    color: #604A7B;
+    font-size:13px;
+}
+
+.dr-recommendation{
+     color: #604A7B;
+    font-size:13px;
+           padding-left:3px;
+   padding-right:3px;
+   font-style: italic;
+
 }

@@ -441,6 +441,7 @@ function move_to_range(zoom,range){
             var norm = $('body').data('norm');
             var zoom_f = getZoomFunctions(zoom);
             chart.destroy();
+            chart = null;
             drawChart(moods_arr,norm,zoom_f.onClick,zoom_f.format_label,zoom_f.format_tooltip,zoom);
             if(zoom != $('body').data('zoom')){
                 $('body').data('zoom',zoom);

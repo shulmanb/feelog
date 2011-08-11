@@ -181,8 +181,8 @@ class LoginController < ApplicationController
         auth = Authorization.create_from_hash(hash, current_user)
         Resque.enqueue(FBOwnReader,token,auth.user.id)
         session[:initializing]=true
+        session[:first_session]=true
         @initializing = true
-        puts "INITIALIZING NEW USER"
       end
     end
     self.current_user = auth.user

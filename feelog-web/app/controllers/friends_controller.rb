@@ -11,24 +11,47 @@ class FriendsController < ApplicationController
         #array of {key=>{'m'=>mood,'p'=>post,'t'=>msg['time']}} structures
         @friends = @@redis.hgetall(user_id+":friends")
     else
+
+      if session[:first_session]
+        partials = @@redis.hgetall(user_id+":friends:partial")
+
+        if session[:partial_cnt]==nil ||
+           session[:partial_cnt] = '' ||
+           partials.size < session[:partial_cnt].to_i
+          @friends =  partials
+          session[:partial_cnt] = partials.size
+        else
+          @friends = nil
+        end
+      end
+
       retry_cnt = session[:friends_retry]
       if retry_cnt == nil
         #not refreshed, send old cache back
-        @friends = @@redis.hgetall(user_id+":friends")
+        if @friends == nil
+          @friends = @@redis.hgetall(user_id+":friends")
+         end
         retry_cnt = 0
         session[:friends_retry] = 1
       else
         retry_cnt = retry_cnt +1
         session[:friends_retry] = retry_cnt
       end
-      if retry_cnt.to_i < 10
-        if retry_cnt.to_i > 2
+      if retry_cnt.to_i < 50
+        if retry_cnt.to_i > 40
+          @resp.update({'retry'=>40000})
+        elsif retry_cnt.to_i > 30
           @resp.update({'retry'=>30000})
+        elsif retry_cnt.to_i > 20
+            @resp.update({'retry'=>20000})
+        elsif retry_cnt.to_i > 10
+          @resp.update({'retry'=>10000})
         else
-          @resp.update({'retry'=>20000})
+          @resp.update({'retry'=>5000})
         end
         puts "SENDING RETRY in #{@resp['retry']}"
       else
+        puts "RETRY TIMEDOUT..."
         session.delete(:friends_retry)
       end
       @resp.update({'retry_cnt'=>retry_cnt})

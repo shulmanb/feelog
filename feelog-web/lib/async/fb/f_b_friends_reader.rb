@@ -18,7 +18,7 @@ class FBFriendsReader < FBReader
     batch = []
     i = 1
     result={}
-    puts "CHECKING FRIENDS #{p['data']}"
+#    puts "CHECKING FRIENDS #{p['data']}"
     for friend in p['data'] do
        url = friend['id']+'/statuses?since='+since
        batch.push({'method'=>'GET','relative_url'=>url})
@@ -29,7 +29,12 @@ class FBFriendsReader < FBReader
         response = RestClient.post("https://graph.facebook.com",
           :access_token=>accesskey,
           :batch=>json_batch)
-        result.update(parse_response(response))
+        tmp_res = parse_response(response)
+        moody_friends = prepare_moods(tmp_res[0])
+        unless moody_friends.empty?
+          update_cache(userid,moody_friends,true)
+        end
+        result.update(moody_friends)
        end
        i+=1
     end
@@ -37,24 +42,34 @@ class FBFriendsReader < FBReader
     response = RestClient.post("https://graph.facebook.com",
       :access_token=>accesskey,
       :batch=>json_batch)
-    result.update(parse_response(response))
-    puts "RESULT"+result.to_xml
-    moody_friends = prepare_moods(result)
-    update_cache(userid,moody_friends)
+    tmp_res = parse_response(response)
+    moody_friends = prepare_moods(tmp_res[0])
+    result.update(moody_friends)
+    update_cache(userid,result,false)
   end
 
-  def self.update_cache(userid, moody_friends)
-    puts "UPDATING CACHE"
-    puts "MOODS "+moody_friends.to_xml
+  def self.update_cache(userid, moody_friends,partial)
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
     #remove old entities
-    @@redis.del(userid.to_s+':friends')
-    moody_friends.each() { |id,mood_obj|
-      puts "ADDING TO REDIS for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
-      @@redis.hset(userid.to_s+':friends', id, JSON.generate(mood_obj))
-    }
-    @@redis.hset(userid, 'fr_updated', true)
-    @@redis.hset(userid, 'fr_update_ts', Time.now.to_i)
-#    @@redis.expire(userid.to_s+'friends', 60*60*24)
+    if partial
+      puts moody_friends.to_xml
+      if !@@redis.exists(userid.to_s+':friends')
+        #use partial only if no cache exists
+        moody_friends.each() { |id,mood_obj|
+          puts "ADDING #{mood_obj}"
+          puts "ADDING TO REDIS PARTIAL for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
+          @@redis.hset(userid.to_s+':friends:partial', id, JSON.generate(mood_obj))
+        }
+      end
+    else
+      @@redis.del(userid.to_s+':friends')
+      moody_friends.each() { |id,mood_obj|
+        puts "ADDING TO REDIS for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
+        @@redis.hset(userid.to_s+':friends', id, JSON.generate(mood_obj))
+      }
+      @@redis.del(userid.to_s+':friends:partial')
+      @@redis.hset(userid, 'fr_updated', true)
+      @@redis.hset(userid, 'fr_update_ts', Time.now.to_i)
+    end
   end
 end

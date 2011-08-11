@@ -29,18 +29,29 @@ class FBOwnReader < FBReader
     batch = []
     t = (Time.now - 3600*24*30)
     since = t.strftime('%Y-%m-%d')
-    url = 'me/statuses?limit=1000&since='+since
+    url = 'me/posts?fields=id,message,type,from,updated_time&limit=1000&since='+since
     batch.push({'method'=>'GET','relative_url'=>url})
     json_batch =  JSON.generate(batch)
 
     response = RestClient.post("https://graph.facebook.com",
           :access_token=>accesskey,
           :batch=>json_batch)
-    result = parse_response(response)
-    moods = prepare_moods(result,true)
-    store_moods(userid, moods)
+    done = false
+    while(!done)
+      result = parse_response(response)
+      moods = prepare_moods(result[0],true)
+      store_moods(userid, moods)
+      if result[1] == nil
+         done = true
+      else
+        arr = result[1].split('&')
+        uri = arr[0]+'&'+arr[1]+'&'+arr[2]+'&'+URI.escape(arr[3])+'&'+arr[4]+'&'+arr[5]
+        response = RestClient.get(uri)
+      end
+    end
     #now retrieve statuses for the last year (365 )(without last 30 days)in a different queue
     Resque.enqueue(FBOwnLongReader,accesskey,userid)
+
   end
 
 end
