@@ -11,10 +11,8 @@ class FriendsController < ApplicationController
         #array of {key=>{'m'=>mood,'p'=>post,'t'=>msg['time']}} structures
         @friends = @@redis.hgetall(user_id+":friends")
     else
-
       if session[:first_session]
         partials = @@redis.hgetall(user_id+":friends:partial")
-
         if session[:partial_cnt]==nil ||
            session[:partial_cnt] = '' ||
            partials.size < session[:partial_cnt].to_i

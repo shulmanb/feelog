@@ -52,11 +52,9 @@ class FBFriendsReader < FBReader
     #for the id put map of json objects {friend_id=>mood_obj}, one for a friend
     #remove old entities
     if partial
-      puts moody_friends.to_xml
       if !@@redis.exists(userid.to_s+':friends')
         #use partial only if no cache exists
         moody_friends.each() { |id,mood_obj|
-          puts "ADDING #{mood_obj}"
           puts "ADDING TO REDIS PARTIAL for key #{userid.to_s+':friends'} JSON #{JSON.generate(mood_obj)}"
           @@redis.hset(userid.to_s+':friends:partial', id, JSON.generate(mood_obj))
         }

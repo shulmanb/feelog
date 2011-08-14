@@ -62,7 +62,7 @@ class FBReader < ResqueClient
           mood = @@parser.pars_post(post)
           if mood > 0
             post_obj = {:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id'],:lc=>msg['likes_count'],:cc=>msg['comments_count']}
-            puts "Adding to posts cache key #{key+"_"+post_id} #{JSON.generate(post_obj)}"
+#            puts "Adding to posts cache key #{key+"_"+post_id} #{JSON.generate(post_obj)}"
             if own == false
               @@redis.set(key+"_"+post_id,JSON.generate(post_obj))
               #hold in cache for 7 days, later on add exact time calculation
@@ -70,20 +70,20 @@ class FBReader < ResqueClient
             end
           else
             if own == false
-              puts "Adding to posts cache empty key #{key+"_"+post_id}"
+#              puts "Adding to posts cache empty key #{key+"_"+post_id}"
               @@redis.set(key+"_"+post_id,0)
               #hold in cache for 7 days, later on add exact time calculation
               @@redis.expire(key+"_"+post_id, 60*60*24*7)
             end
           end
         else
-          puts "Found in posts cache key #{key+"_"+post_id} #{post_obj}"
+#          puts "Found in posts cache key #{key+"_"+post_id} #{post_obj}"
           if post_obj != '0'
             post_obj = JSON.parse(post_obj)
           end
         end
         if post_obj != nil && post_obj != '0'
-          puts "adding post for key #{key+"_"+post_id} #{post_obj}"
+#          puts "adding post for key #{key+"_"+post_id} #{post_obj}"
           if !own
             moods.update({key=>post_obj})
             break

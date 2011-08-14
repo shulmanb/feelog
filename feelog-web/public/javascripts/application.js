@@ -362,10 +362,16 @@ function renderMoods(path){
                 sum+=mood.val;
                 if(i==0){
                     //latest mood
-                    var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
-                    var status = name +' is '+moodStr+' : ';
-                    $("#usr-status").html(status);
-                    $("#usr-report").text(mood.desc);
+                    var diff = (new Date() - (new Date(mood.date)))/1000/60/60;
+                    if(diff < 24 ){
+                        var moodStr = '<b>'+getMoodStr(mood.val)+'</b>';
+                        var status = name +' is '+moodStr+' : ';
+                        $("#usr-status").html(status);
+                        $("#usr-report").text(mood.desc);
+                    }else{
+                        var status = name;
+                        $("#usr-status").html(status);
+                    }
                 }
                 i++;
             }

@@ -27,7 +27,7 @@ class FBOwnLongReader < FBReader
       t1 = (Time.now - 3600*24*365)
       until_t = t.strftime('%Y-%m-%d')
       since_t = t1.strftime('%Y-%m-%d')
-      url = 'me/posts?fields=id,message,type,from,updated_time&limit=1000&since='+since+'&until='+until_t
+      url = 'me/posts?fields=id,message,type,from,updated_time&limit=1000&since='+since_t+'&until='+until_t
       batch.push({'method'=>'GET','relative_url'=>url})
       json_batch =  JSON.generate(batch)
 
@@ -39,7 +39,7 @@ class FBOwnLongReader < FBReader
         result = parse_response(response)
         moods = prepare_moods(result[0],true)
         store_moods(userid, moods)
-        if result[1] = nil
+        if result[1] == nil
            done = true
         else
           arr = result[1].split('&')
