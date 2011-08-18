@@ -37,7 +37,7 @@ class FBOwnLongReader < FBReader
       done = false
       while(!done)
         result = parse_response(response)
-        moods = prepare_moods(result[0],true)
+        moods = prepare_moods(result[0],false,true)
         store_moods(userid, moods)
         if result[1] == nil
            done = true

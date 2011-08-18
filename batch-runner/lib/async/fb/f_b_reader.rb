@@ -45,35 +45,40 @@ class FBReader < ResqueClient
     end
   end
 
-  def self.prepare_moods(messages_hash, own=false)
+  def self.prepare_moods(messages_hash,usecache=true,own=false)
     if own
       moods = []
     else
       moods={} #array of moods for own hash for firnds
     end
     messages_hash.each {|key, val|
+      if val == nil || val['msgs'] == nil
+        next
+      end
       for msg in val['msgs'] do
         #check cache if post was already parsed in the past
         post = msg['msg']
         next if post == nil
         post_id = msg['post_id']
-        post_obj = @@redis.get(key+"_"+post_id)
+        post_obj = nil
+        if usecache
+          post_obj = @@redis.get(post_id)
+        end
+
         if post_obj == nil
           mood = @@parser.pars_post(post)
           if mood > 0
             post_obj = {:m=>mood,:p=>@@coder.encode(post),:t=>msg['time'],:n=>val['name'],:i=>msg['post_id'],:lc=>msg['likes_count'],:cc=>msg['comments_count']}
-      #      puts "Adding to posts cache key #{key+"_"+post_id} #{JSON.generate(post_obj)}"
             if own == false
-              @@redis.set(key+"_"+post_id,JSON.generate(post_obj))
+              @@redis.set(post_id,JSON.generate(post_obj))
               #hold in cache for 7 days, later on add exact time calculation
-              @@redis.expire(key+"_"+post_id, 60*60*24*7)
+              @@redis.expire(post_id, 60*60*24*7)
             end
           else
             if own == false
-    #          puts "Adding to posts cache empty key #{key+"_"+post_id}"
-              @@redis.set(key+"_"+post_id,0)
+              @@redis.set(post_id,0)
               #hold in cache for 7 days, later on add exact time calculation
-              @@redis.expire(key+"_"+post_id, 60*60*24*7)
+              @@redis.expire(post_id, 60*60*24*7)
             end
           end
         else
@@ -83,7 +88,7 @@ class FBReader < ResqueClient
           end
         end
         if post_obj != nil && post_obj != '0'
-          puts "adding post for key #{key+"_"+post_id} #{post_obj}"
+          puts "adding post for key #{post_id} #{post_obj}"
           if !own
             moods.update({key=>post_obj})
             break

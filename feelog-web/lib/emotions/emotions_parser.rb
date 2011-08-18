@@ -77,7 +77,7 @@ class EmotionsParser
       num+=local_num
 #      puts "SENTENCE PARSED IN #{Time.now.usec-sen_start.usec}"
     end
-    puts "POST PARSED IN #{Time.now.usec-start.usec}"
+    puts "POST PARSED IN #{Time.now.usec-start.usec} usec"
     return 0 if num == 0
     return sum/num
   end

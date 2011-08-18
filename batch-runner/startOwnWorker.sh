@@ -1,1 +1,1 @@
-COUNT=4 QUEUE=own,own_long jruby -S rake environment resque:work
+COUNT=4 QUEUE=own,own_long jruby -J-Djruby.thread.pooling=true --fast -S rake environment resque:work
