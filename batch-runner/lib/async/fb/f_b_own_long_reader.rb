@@ -11,19 +11,21 @@ class FBOwnLongReader < FBReader
       mood.report_time = mood_obj[:t]
       mood.fb_id = mood_obj[:i]
       mood.save()
-      puts "STORED LONG MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
+      puts "#{userid.to_s} STORED LONG MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
       Resque.enqueue(WordCounter,mood.desc, mood.mood, mood.user_id)
     };
   end
 
   def self.perform(accesskey, userid)
+    puts "userid #{userid.to_s} OWN LONG PROCESSING STARTED"
+    start = Time.now
       if @@redis.client.connected? != true
         @@redis.client.connect
       end
      #query: select%20status_id,uid,time,message%20from%20status%20where%20uid=me()%20and%20time>1300000000%20%20and%20time<1300000000%20limit%201000
     #retrieve statuses for the last 30 days
       batch = []
-      t = (Time.now - 3600*24*30)
+      t = (Time.now - 3600*24*31)
       t1 = (Time.now - 3600*24*365)
       until_t = t.strftime('%Y-%m-%d')
       since_t = t1.strftime('%Y-%m-%d')
@@ -36,7 +38,7 @@ class FBOwnLongReader < FBReader
             :batch=>json_batch)
       done = false
       while(!done)
-        result = parse_response(response)
+        result = parse_response(response,true)
         moods = prepare_moods(result[0],false,true)
         store_moods(userid, moods)
         if result[1] == nil
@@ -47,6 +49,7 @@ class FBOwnLongReader < FBReader
           response = RestClient.get(uri)
         end
       end
+      puts "userid #{userid.to_s} OWN LONG PROCESSING DONE #{Time.now - start}"
   end
 
 end

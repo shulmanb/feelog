@@ -14,7 +14,7 @@ class FBOwnReader < FBReader
       mood.report_time = mood_obj[:t]
       mood.fb_id = mood_obj[:i]
       mood.save()
-      puts "STORED MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
+      puts "#{userid.to_s} STORED MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
       Resque.enqueue(WordCounter,mood.desc, mood.mood, mood.user_id)
     };
     @@redis.hset(userid,"initialized",true)
@@ -24,8 +24,8 @@ class FBOwnReader < FBReader
   def self.perform(accesskey, userid)
     #retrieve statuses for the last 30 days
    #query:  select%20status_id,uid,time,message%20from%20status%20where%20uid=me()%20and%20time>1300000000%20limit%201000
-
-
+    puts "userid #{userid.to_s} OWN PROCESSING STARTED"
+    start = Time.now
     batch = []
     t = (Time.now - 3600*24*30)
     since = t.strftime('%Y-%m-%d')
@@ -38,20 +38,20 @@ class FBOwnReader < FBReader
           :batch=>json_batch)
     done = false
     while(!done)
-      result = parse_response(response)
+      result = parse_response(response,false)
       moods = prepare_moods(result[0],false,true)
       store_moods(userid, moods)
       if result[1] == nil
          done = true
       else
         arr = result[1].split('&')
-        uri = arr[0]+'&'+arr[1]+'&'+arr[2]+'&'+URI.escape(arr[3])+'&'+arr[4]+'&'+arr[5]
+        uri = arr[0]+'&'+arr[1]+'&'+arr[2]+'&'+arr[3]+'&'+URI.escape(arr[4])+'&'+arr[5]
         response = RestClient.get(uri)
       end
     end
     #now retrieve statuses for the last year (365 )(without last 30 days)in a different queue
     Resque.enqueue(FBOwnLongReader,accesskey,userid)
-
+    puts "userid #{userid.to_s} OWN PROCESSING DONE #{Time.now - start}"
   end
 
 end

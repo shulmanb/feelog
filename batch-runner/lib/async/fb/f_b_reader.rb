@@ -2,7 +2,7 @@ require 'async/fb/resque_client'
 require 'json'
 class FBReader < ResqueClient
   @@coder = HTMLEntities.new
-  def self.parse_body(body)
+  def self.parse_body(body,gonext)
     hash={}
     data = body['data']
     for d in data
@@ -19,29 +19,33 @@ class FBReader < ResqueClient
       hash[id]=curr
     end
     if body['paging']!= nil
-      return [hash,body['paging']['next']]
+      if gonext == true
+        return [hash,body['paging']['next']]
+      else
+        return [hash,body['paging']['previous']]
+      end
     end
     return [hash,nil]
   end
 
 
-  def self.parse_response(response)
+  def self.parse_response(response,gonext=true)
     parsed = JSON.parse(response)
     if parsed[0] != nil
       if parsed.size > 1
         hash={}
         parsed.each{|p|
           body = JSON.parse(p['body'])
-          hash.update(parse_body(body)[0])
+          hash.update(parse_body(body,gonext)[0])
         }
         return [hash,nil]
       else
         body = JSON.parse(parsed[0]['body'])
-        return parse_body(body)
+        return parse_body(body,gonext)
       end
     else
       body = parsed
-      return parse_body(body)
+      return parse_body(body,gonext)
     end
   end
 
