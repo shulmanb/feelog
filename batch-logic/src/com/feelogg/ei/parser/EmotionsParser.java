@@ -25,7 +25,7 @@ public class EmotionsParser {
     private TokenizerModel tokenModel;
     private HashMap<String, HashMap<String, Integer>> dictionary;
     public EmotionsParser(HashMap<String,HashMap<String,Integer>> dictionary){
-        System.out.println("parser initializing");
+//        System.out.println("parser initializing");
         try {
             InputStream modelIn = this.getClass().getResourceAsStream("en-sent.bin");
             model = new SentenceModel(modelIn);
@@ -51,7 +51,8 @@ public class EmotionsParser {
   public int pars_post(String post){
     post = post.toLowerCase();
     SentenceDetectorME sentenceDetector = new SentenceDetectorME(model);
-    long start = System.currentTimeMillis();
+    Tokenizer tokenizer = new TokenizerME(tokenModel);
+//    long start = System.currentTimeMillis();
     String[] sentences = sentenceDetector.sentDetect(post);
     int sum = 0;
     int num = 0;
@@ -60,7 +61,7 @@ public class EmotionsParser {
       if (tagged == null){
           continue;
       }
-      String[] arr = tagged.split(" ");
+      String[] arr = tokenizer.tokenize(tagged);//tagged.split(" ");
 
 //      This rule removed bacause specifiying someone elses mood reflects yours
 //      next if arr[0].end_with?('/NNP')
@@ -85,7 +86,7 @@ public class EmotionsParser {
       sum+=local_sum;
       num+=local_num;
     }
-    System.out.println("POST PARSED IN "+ (System.currentTimeMillis()-start));
+//    System.out.println("POST PARSED IN "+ (System.currentTimeMillis()-start));
     if(num == 0){
         return 0;
     }
