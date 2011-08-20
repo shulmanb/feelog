@@ -431,12 +431,13 @@ function renderFriends(path){
                         gloomy.push([u_id,rendered[1],rendered[2]]);
                     }
                 })
+                //hide when friends received
+                $("#intro-wait").hide();
             }
         });
         if(render_needed == true){
             redraw_friends_widgets(happy, gloomy);
         }
-        $("#intro-wait").hide();
     });
 }
 
@@ -473,6 +474,7 @@ function redraw_friends_widgets(happy, gloomy){
         applyFriendsWysdgetStyle("#happy-friends",happy);
         $('body').data('happy-page',0);
         $('body').data('happy-page-max',Math.floor(happy.length/10));
+        $("#happy-friends-widget").show();
     }else{
         set_no_data("#happy-friends-widget");
     }
@@ -481,6 +483,7 @@ function redraw_friends_widgets(happy, gloomy){
         $("#gloomy-friends").show();
         $('body').data('gloomy-page',0);
         $('body').data('gloomy-page-max',Math.floor(gloomy.length/10));
+        $("#gloomy-friends-widget").show();
     }else{
         set_no_data("#gloomy-friends-widget");
     }

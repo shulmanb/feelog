@@ -5,7 +5,6 @@ class WordsController < ApplicationController
     mood = params[:mood]
     userid = params[:user_id]
     @words = @@redis.hgetall(userid+":words:"+mood+":max")
-    puts @words.to_s
     respond_to do |format|
       format.json  { render :json => @words}
     end
@@ -32,7 +31,6 @@ class WordsController < ApplicationController
     userid = params[:user_id]
     word = params[:word]
     @word = @@redis.hget(userid+":words:"+mood+":max",word)
-    puts @word.to_s
     respond_to do |format|
       format.json  { render :json => @word}
     end

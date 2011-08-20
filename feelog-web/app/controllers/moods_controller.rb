@@ -16,17 +16,32 @@ class MoodsController < ApplicationController
         retry_cnt = 0
         session[:init_retry] = 1
       else
-        retry_cnt = retry_cnt +1
+        retry_cnt +=1
         session[:init_retry] = retry_cnt
       end
+
       init = @@redis.hget(user_id,"initialized")
       if init != nil
         session.delete(:initializing)
       end
-      #stop trying after 10 retries
-      if init == nil and retry_cnt.to_i < 10
+      #stop trying after 50 retries
+      if init == nil and retry_cnt.to_i < 50
+        if retry_cnt.to_i < 50
+          if retry_cnt.to_i > 40
+            retry_time=40000
+          elsif retry_cnt.to_i > 30
+            retry_time=30000
+          elsif retry_cnt.to_i > 20
+            retry_time=20000
+          elsif retry_cnt.to_i > 10
+            retry_time=10000
+          else
+            retry_time=5000
+          end
+        else
+        end
         respond_to do |format|
-          format.json  { render :json => {:retry=>30000,:retry_cnt=>retry_cnt} }
+          format.json  { render :json => {:retry=>retry_time,:retry_cnt=>retry_cnt} }
         end
         return
       end
@@ -116,8 +131,8 @@ class MoodsController < ApplicationController
     if params[:fb_id] != nil
       @mood.fb_id = params[:fb_id]
     end
-    #Resque.enqueue(WordCounter,@mood.desc, @mood.mood, @mood.user_id)
-    perform(@mood.desc, @mood.mood, @mood.user_id)
+    updateMoodCounters(@mood.mood,@mood.user_id)
+    Resque.enqueue(WordCounter,@mood.desc, @mood.mood, @mood.user_id)
     respond_to do |format|
       if @mood.save
         format.json  { render :json => {:report_time=>@mood.report_time,:val=>@mood.mood,:desc=>@mood.desc,:id=>@mood.id}, :status => :created}
@@ -267,7 +282,7 @@ class MoodsController < ApplicationController
             else
                 e_date = (DateTime.new(b.year, b.month+1, 1)-1).to_time
             end
-            puts "3: s #{s_date} e #{e_date}"
+#            puts "3: s #{s_date} e #{e_date}"
             {:res=>(aTime == bTime),:period=>b.month,:s=>s_date.to_i,:e=>e_date.to_i}
           }
       end
@@ -329,69 +344,6 @@ class MoodsController < ApplicationController
     return res
   end
 
-
-  #we will store counter for every word for a mood in a hash {word=>count}
-  #we will store top 20 words in a hash {count=>word}
-  def perform(post, mood, userid)
-     puts "RECEIVED POST "+post
-     countable_words = @@parser.extracts_countable_words(post)
-     puts "COUNTABLE WORDS "+countable_words.to_s
-     unless countable_words.length == 0
-       #retreiving max_counts hash for mood
-       max_counts_hash = @@redis.hgetall(userid.to_s+":words:"+mood.to_s+":max")
-       max_counts = []
-       if max_counts_hash == nil
-         max_counts_hash = {}
-       else
-         max_counts_hash.each_pair{|k,v|max_counts.push([k,v.to_i])}
-       end
-       puts "MAX_COUNTS ARR #{max_counts.to_s}"
-       if max_counts.length > 1
-         max_counts = max_counts.sort{|x,y| x[1]<=>y[1]}
-       end
-       for word in countable_words do
-         puts "increasing count for "+word
-         val = @@redis.hincrby(userid.to_s+":words:"+mood.to_s, word,1)
-         puts "value for #{word} is #{val}"
-         #get max hash {1=>word}
-
-         if max_counts_hash[word] != nil
-            max_counts_hash[word]= max_counts_hash[word].to_i + 1
-            @@redis.hincrby(userid.to_s+":words:"+mood.to_s+":max",word,1)
-            max_counts.each{|k,v|
-              if k == word
-                 v+=1
-              end
-            }
-            max_counts.sort{|x,y|
-              x[1]<=>y[1]
-            }
-         else
-           if max_counts.length < 20
-              @@redis.hset(userid.to_s+":words:"+mood.to_s+":max",word,val)
-              puts "adding word #{word} for max count for count #{val} as empty place"
-              max_counts.push([word,val.to_i])
-              max_counts_hash[word] = val.to_i
-              max_counts.sort{|x,y|
-                x[1]<=>y[1]
-              }
-              puts "max counts after sort #{max_counts.to_s}"
-           elsif val > max_counts[0][1]
-             max_counts.push([word,val.to_i])
-             puts "adding word #{word} for max count for count #{val} as bigger value"
-              @@redis.hset(userid.to_s+":words:"+mood.to_s+":max",word,val)
-              max_counts.push([word,val])
-              max_counts.sort{|x,y| x[1]<=>y[1]}
-              toDel = max_counts.shift
-              puts "removing from max count value #{toDel[0]}"
-              @@redis.hdel(userid.to_s+":words:"+mood.to_s+":max",toDel[0])
-           end
-
-         end
-       end
-     end
-  end
-
   def updateMoodCounters(val,userid)
       date = Time.now
       weekday = date.wday
@@ -401,10 +353,10 @@ class MoodsController < ApplicationController
 
 
       #updating mood counters
-      @@redis.hincrby(userid.to_s+":weekday:"+weekday,val,1)
-      @@redis.hincrby(userid.to_s+":month:"+month,val,1)
-      @@redis.hincrby(userid.to_s+":dom:"+dom,val,1)
-      @@redis.hincrby(userid.to_s+":pom:"+part_of_month,val,1)
+      @@redis.hincrby(userid.to_s+":weekday:"+weekday.to_s,val,1)
+      @@redis.hincrby(userid.to_s+":month:"+month.to_s,val,1)
+      @@redis.hincrby(userid.to_s+":dom:"+dom.to_s,val,1)
+      @@redis.hincrby(userid.to_s+":pom:"+part_of_month.to_s,val,1)
   end
 
 

@@ -40,7 +40,6 @@ class LoginController < ApplicationController
   def auth_base64
       b64_token = params[:token]
       token = Base64.decode64(b64_token)
-      puts "token=#{token}"
       fb_user = FbGraph::User.me(token).fetch
       if fb_user == nil
         respond_to do |format|
@@ -160,7 +159,7 @@ class LoginController < ApplicationController
         return
       end
     end
-    puts "INVALIDATING FRIENDS CACH"
+    puts "INVALIDATING FRIENDS CACH userid #{user_id}"
     @@redis.hdel(user_id, 'fr_updated')
     Resque.enqueue(FBFriendsReader,token,user_id)
 

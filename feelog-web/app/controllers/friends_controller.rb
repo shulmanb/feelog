@@ -47,9 +47,9 @@ class FriendsController < ApplicationController
         else
           @resp.update({'retry'=>5000})
         end
-        puts "SENDING RETRY in #{@resp['retry']}"
+        puts "SENDING RETRY in #{@resp['retry']} userid #{user_id}"
       else
-        puts "RETRY TIMEDOUT..."
+        puts "RETRY TIMEDOUT... userid #{user_id}"
         session.delete(:friends_retry)
       end
       @resp.update({'retry_cnt'=>retry_cnt})
