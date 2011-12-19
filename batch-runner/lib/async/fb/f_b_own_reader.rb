@@ -2,6 +2,10 @@ require 'async/fb/f_b_reader'
 
 class FBOwnReader < FBReader
   @queue = :own
+  def self.initialize
+    @@redis.hset(userid,"initialized",true)
+    @@redis.expire(userid, 60*60*24)
+  end
   def self.store_moods(userid,moods)
     if @@redis.client.connected? != true
       @@redis.client.connect
@@ -17,8 +21,6 @@ class FBOwnReader < FBReader
       puts "#{userid.to_s} STORED MOOD "+mood.mood.to_s+" "+mood.desc.to_s+" "+mood.report_time.to_s+" "+mood.user_id.to_s
       Resque.enqueue(WordCounter,mood.desc, mood.mood, mood.user_id)
     };
-    @@redis.hset(userid,"initialized",true)
-    @@redis.expire(userid, 60*60*24)
 
   end
   def self.perform(accesskey, userid)
@@ -37,9 +39,11 @@ class FBOwnReader < FBReader
           :access_token=>accesskey,
           :batch=>json_batch)
     done = false
+    count = 0
     while(!done)
       result = parse_response(response,false)
       moods = prepare_moods(result[0],false,true)
+      count+=moods.size
       store_moods(userid, moods)
       if result[1] == nil
          done = true
@@ -49,8 +53,11 @@ class FBOwnReader < FBReader
         response = RestClient.get(uri)
       end
     end
+    if count >=10
+      initialize()
+    end
     #now retrieve statuses for the last year (365 )(without last 30 days)in a different queue
-    Resque.enqueue(FBOwnLongReader,accesskey,userid)
+    Resque.enqueue(FBOwnLongReader,accesskey,userid,count)
     puts "userid #{userid.to_s} OWN PROCESSING DONE #{Time.now - start}"
   end
 

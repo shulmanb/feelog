@@ -2,6 +2,11 @@ require 'async/fb/f_b_reader'
 
 class FBOwnLongReader < FBReader
   @queue = :own_long
+  def self.initialize
+    @@redis.hset(userid,"initialized",true)
+    @@redis.expire(userid, 60*60*24)
+  end
+
   def self.store_moods(userid,moods)
     moods.each(){|mood_obj|
       mood = Mood.new
@@ -16,7 +21,11 @@ class FBOwnLongReader < FBReader
     };
   end
 
-  def self.perform(accesskey, userid)
+  def self.perform(accesskey, userid,count)
+    initialized = false
+    if count >= 10
+      initialized = true
+    end
     puts "userid #{userid.to_s} OWN LONG PROCESSING STARTED"
     start = Time.now
       if @@redis.client.connected? != true
@@ -40,7 +49,12 @@ class FBOwnLongReader < FBReader
       while(!done)
         result = parse_response(response,true)
         moods = prepare_moods(result[0],false,true)
+        count+=moods.size()
         store_moods(userid, moods)
+        if initialized==false && count >=10
+          initialized = true
+          initialize()
+        end
         if result[1] == nil
            done = true
         else
