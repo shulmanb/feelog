@@ -61,7 +61,7 @@ function submitMood(){
             $("#feel-submit").hide();
             $("#ajax-busy").show();
             if(fbshare){
-                FB.api('/me/feed', 'post', { message: how }, function(response) {
+                FB.api('/me/feed', 'post', { message: how,icon: 'www.feelogg.com/images/mood-ok.png' }, function(response) {
                     var id = response.id;
                     payload['fb_id'] = id;
                     $.ajax({
@@ -1238,19 +1238,19 @@ function fb_complete_login(token){
 
 function fb_login(){
   FB.getLoginStatus(function(response) {
-      if (response.session) {
-        fb_complete_login(response.session.access_token);
+      if (response.status=== 'connected') {
+        fb_complete_login(response.authResponse.accessToken);
       } else {
         FB.login(function(response) {
-            if (response.session) {
+            if (response.authResponse) {
                 fb_complete_login(response.session.access_token);
             } else {
                 // user cancelled login
             }
-        },{perms:'publish_stream,email,offline_access,read_stream,friends_status'});
+        },{scope:'publish_stream,email,offline_access,read_stream,friends_status'});
       }
-  });
-}
+ });
+}  
 
 function switchView(newView){
     //views: 0-home, 1-diary, 2-settings 3-Dr. feelgood
